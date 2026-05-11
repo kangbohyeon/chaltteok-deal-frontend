@@ -5,7 +5,7 @@ import { useAuthStore } from "@chaltteok/shared-store";
 export function useParticipatedStocks() {
   const role = useAuthStore((s) => s.role);
   return useQuery<number[], Error>({
-    queryKey: ["participatedStocks"],
+    queryKey: ["participatedStocks", role],
     queryFn: getParticipatedStockIds,
     enabled: role === "ROLE_USER",
     staleTime: 30 * 1000,
