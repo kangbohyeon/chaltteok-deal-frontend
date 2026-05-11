@@ -1,5 +1,21 @@
 import api from "@chaltteok/shared-api";
 
+export interface LoginRequest {
+  email: string;
+  password: string;
+}
+
+export interface LoginResponse {
+  accessToken: string;
+  refreshToken: string;
+  userId: number;
+}
+
+export async function loginOwner(body: LoginRequest): Promise<LoginResponse> {
+  const res = await api.post<{ data: LoginResponse }>("/api/v1/owner/auth/login", body);
+  return res.data.data;
+}
+
 export interface ProductRegisterRequest {
   name: string;
   price: number;
