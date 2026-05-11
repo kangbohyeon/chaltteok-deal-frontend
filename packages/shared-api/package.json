@@ -1,0 +1,16 @@
+{
+  "name": "@chaltteok/shared-api",
+  "version": "0.1.0",
+  "private": true,
+  "main": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "axios": "^1.16.0",
+    "@chaltteok/shared-store": "*"
+  },
+  "devDependencies": {
+    "typescript": "^5"
+  }
+}
