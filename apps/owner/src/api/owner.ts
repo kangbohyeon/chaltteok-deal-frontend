@@ -1,42 +1,123 @@
 import api from "@chaltteok/shared-api";
 
+// ── Auth ──────────────────────────────────────────────────────────────────────
+
+export interface LoginRequest {
+  username: string;
+  password: string;
+}
+
+export interface LoginResponse {
+  accessToken: string;
+  refreshToken: string;
+  userId: number;
+}
+
+export async function loginOwner(body: LoginRequest): Promise<LoginResponse> {
+  const res = await api.post<{ data: LoginResponse }>("/api/v1/owner/auth/login", body);
+  return res.data.data;
+}
+
+// ── Product ───────────────────────────────────────────────────────────────────
+
 export interface ProductRegisterRequest {
   name: string;
   price: number;
-  description?: string;
+  descp?: string;
 }
 
-export interface DailyStockRegisterRequest {
-  productId: number;
-  saleDate: string;
-  totalStock: number;
-  maxPurchaseCount: number;
-}
-
-export interface ProductResponse {
-  id: number;
+export interface ProductUpdateRequest {
   name: string;
   price: number;
-  description: string;
-  thumbnailUrl: string | null;
+  descp?: string;
+}
+
+export interface ProductListResponse {
+  id: number;
+  uuid: string;
+  optionUuid: string;
+  name: string;
+  price: number;
+  descp: string | null;
+  imageUrl: string | null;
   isRecommended: boolean;
 }
 
-export async function registerProduct(body: ProductRegisterRequest): Promise<number> {
-  const res = await api.post<{ data: number }>("/api/v1/owner/products", body);
+export async function getProducts(): Promise<ProductListResponse[]> {
+  const res = await api.get<{ data: ProductListResponse[] }>("/api/v1/owner/products");
   return res.data.data;
 }
 
-export async function registerDailyStock(body: DailyStockRegisterRequest): Promise<number> {
-  const res = await api.post<{ data: number }>("/api/v1/owner/daily-stocks", body);
+export async function registerProduct(body: ProductRegisterRequest, image?: File): Promise<void> {
+  const formData = new FormData();
+  formData.append("data", new Blob([JSON.stringify(body)], { type: "application/json" }));
+  if (image) formData.append("image", image);
+  await api.post("/api/v1/owner/products", formData, {
+    headers: { "Content-Type": undefined },
+  });
+}
+
+export async function updateProduct(
+  productUuid: string,
+  body: ProductUpdateRequest,
+  image?: File
+): Promise<void> {
+  const formData = new FormData();
+  formData.append("data", new Blob([JSON.stringify(body)], { type: "application/json" }));
+  if (image) formData.append("image", image);
+  await api.put(`/api/v1/owner/products/${productUuid}`, formData, {
+    headers: { "Content-Type": undefined },
+  });
+}
+
+export async function deleteProduct(productUuid: string): Promise<void> {
+  await api.delete(`/api/v1/owner/products/${productUuid}`);
+}
+
+export async function toggleRecommend(productUuid: string): Promise<void> {
+  await api.patch(`/api/v1/owner/products/${productUuid}/recommend`);
+}
+
+// ── Daily Stock ───────────────────────────────────────────────────────────────
+
+export interface DailyStockRegisterRequest {
+  optionId: string;
+  saleDate: string;
+  stockType?: "NORMAL" | "EVENT";
+  salePrice?: number;
+  totalQty: number;
+}
+
+export interface DailyStockListResponse {
+  id: number;
+  uuid: string;
+  productUuid: string;
+  productName: string;
+  optionUuid: string;
+  saleDate: string;
+  stockType: string;
+  salePrice: number;
+  totalQty: number;
+  remainStock: number;
+  status: string;
+}
+
+export async function getDailyStocks(): Promise<DailyStockListResponse[]> {
+  const res = await api.get<{ data: DailyStockListResponse[] }>("/api/v1/owner/daily-stocks");
   return res.data.data;
 }
 
-export async function getProducts(): Promise<ProductResponse[]> {
-  const res = await api.get<{ data: ProductResponse[] }>("/api/v1/owner/products");
-  return res.data.data;
+export async function registerDailyStock(body: DailyStockRegisterRequest): Promise<void> {
+  await api.post("/api/v1/owner/daily-stocks", body);
 }
 
-export async function toggleRecommend(productId: number): Promise<void> {
-  await api.patch(`/api/v1/owner/products/${productId}/recommend`);
+export async function updateDailyStock(
+  stockUuid: string,
+  body: DailyStockRegisterRequest
+): Promise<void> {
+  await api.put(`/api/v1/owner/daily-stocks/${stockUuid}`, body);
+}
+
+export async function deleteDailyStock(stockUuid: string): Promise<void> {
+  await api.delete(`/api/v1/owner/daily-stocks/${stockUuid}`);
 }
