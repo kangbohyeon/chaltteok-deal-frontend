@@ -2,8 +2,8 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import api from "@chaltteok/shared-api";
 import { useAuthStore } from "@chaltteok/shared-store";
+import { loginOwner } from "@/api/owner";
 
 export default function OwnerLoginPage() {
   const [username, setUsername] = useState("");
@@ -18,10 +18,7 @@ export default function OwnerLoginPage() {
     setError(null);
     setLoading(true);
     try {
-      const res = await api.post<{
-        data: { accessToken: string; refreshToken: string; userId: number };
-      }>("/api/v1/owner/auth/login", { username, password });
-      const { accessToken, refreshToken, userId } = res.data.data;
+      const { accessToken, refreshToken, userId } = await loginOwner({ username, password });
       setAuth(accessToken, refreshToken, "ROLE_OWNER", userId);
       router.push("/product");
     } catch {
