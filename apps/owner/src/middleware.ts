@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-export function proxy(request: NextRequest) {
+export default function middleware(request: NextRequest) {
   const role = request.cookies.get("chaltteok-role")?.value;
   const { pathname } = request.nextUrl;
 
@@ -12,5 +12,5 @@ export function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/((?!_next|favicon.ico).*)"],
+  matcher: ["/((?!_next|favicon.ico|api/).*)"],
 };

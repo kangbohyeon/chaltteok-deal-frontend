@@ -20,7 +20,7 @@ export default function OwnerLoginPage() {
     try {
       const { accessToken, refreshToken, userId } = await loginOwner({ username, password });
       setAuth(accessToken, refreshToken, "ROLE_OWNER", userId);
-      router.push("/product");
+      router.push("/dashboard");
     } catch {
       setError("아이디 또는 비밀번호가 올바르지 않습니다.");
     } finally {
