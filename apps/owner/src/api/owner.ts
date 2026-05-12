@@ -1,7 +1,7 @@
 import api from "@chaltteok/shared-api";
 
 export interface LoginRequest {
-  email: string;
+  username: string;
   password: string;
 }
 
