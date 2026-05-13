@@ -6,7 +6,9 @@ import {
   deleteProduct,
   getProducts,
   registerProduct,
+  toggleActive,
   toggleRecommend,
+  toggleSoldOut,
   updateProduct,
   type ProductListResponse,
   type ProductRegisterRequest,
@@ -159,7 +161,7 @@ export default function ProductListPage() {
   const [modalError, setModalError] = useState<string | null>(null);
 
   const [deleteTarget, setDeleteTarget] = useState<ProductListResponse | null>(null);
-  const [togglingId, setTogglingId] = useState<number | null>(null);
+  const [toggling, setToggling] = useState<string | null>(null);
 
   const load = () => {
     getProducts()
@@ -233,15 +235,39 @@ export default function ProductListPage() {
     }
   };
 
-  const handleToggle = async (p: ProductListResponse) => {
-    setTogglingId(p.id);
+  const handleToggleActive = async (p: ProductListResponse) => {
+    setToggling(`${p.id}:active`);
+    try {
+      await toggleActive(p.uuid);
+      setProducts((prev) => prev.map((x) => x.id === p.id ? { ...x, isActive: !x.isActive } : x));
+    } catch {
+      alert("노출 상태 변경에 실패했습니다.");
+    } finally {
+      setToggling(null);
+    }
+  };
+
+  const handleToggleSoldOut = async (p: ProductListResponse) => {
+    setToggling(`${p.id}:soldout`);
+    try {
+      await toggleSoldOut(p.uuid);
+      setProducts((prev) => prev.map((x) => x.id === p.id ? { ...x, isSoldOut: !x.isSoldOut } : x));
+    } catch {
+      alert("품절 상태 변경에 실패했습니다.");
+    } finally {
+      setToggling(null);
+    }
+  };
+
+  const handleToggleRecommend = async (p: ProductListResponse) => {
+    setToggling(`${p.id}:recommend`);
     try {
       await toggleRecommend(p.uuid);
       setProducts((prev) => prev.map((x) => x.id === p.id ? { ...x, isRecommended: !x.isRecommended } : x));
     } catch {
       alert("추천 상태 변경에 실패했습니다.");
     } finally {
-      setTogglingId(null);
+      setToggling(null);
     }
   };
 
@@ -276,11 +302,33 @@ export default function ProductListPage() {
                 </div>
               )}
               <div className="flex-1 min-w-0">
-                <p className="font-semibold text-gray-900 truncate">{p.name}</p>
+                <div className="flex items-center gap-2 mb-0.5">
+                  <p className="font-semibold text-gray-900 truncate">{p.name}</p>
+                  {!p.isActive && (
+                    <span className="shrink-0 rounded px-1.5 py-0.5 text-xs font-medium bg-gray-100 text-gray-500">비노출</span>
+                  )}
+                  {p.isSoldOut && (
+                    <span className="shrink-0 rounded px-1.5 py-0.5 text-xs font-medium bg-red-100 text-red-500">품절</span>
+                  )}
+                </div>
                 <p className="text-sm text-gray-500">{p.price.toLocaleString()}원</p>
               </div>
               <div className="flex items-center gap-2 shrink-0">
-                <button onClick={() => handleToggle(p)} disabled={togglingId === p.id}
+                <button onClick={() => handleToggleActive(p)} disabled={toggling === `${p.id}:active`}
+                  className={`rounded-lg px-3 py-1 text-xs font-semibold transition-colors disabled:opacity-50 ${
+                    p.isActive
+                      ? "bg-blue-500 text-white hover:bg-blue-600"
+                      : "border border-gray-300 text-gray-500 hover:border-blue-400 hover:text-blue-500"
+                  }`}
+                >{p.isActive ? "노출 중" : "숨김"}</button>
+                <button onClick={() => handleToggleSoldOut(p)} disabled={toggling === `${p.id}:soldout`}
+                  className={`rounded-lg px-3 py-1 text-xs font-semibold transition-colors disabled:opacity-50 ${
+                    p.isSoldOut
+                      ? "bg-red-500 text-white hover:bg-red-600"
+                      : "border border-gray-300 text-gray-500 hover:border-red-400 hover:text-red-500"
+                  }`}
+                >{p.isSoldOut ? "품절" : "재고있음"}</button>
+                <button onClick={() => handleToggleRecommend(p)} disabled={toggling === `${p.id}:recommend`}
                   className={`rounded-lg px-3 py-1 text-xs font-semibold transition-colors disabled:opacity-50 ${
                     p.isRecommended
                       ? "bg-amber-500 text-white hover:bg-amber-600"

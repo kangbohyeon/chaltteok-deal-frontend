@@ -40,6 +40,8 @@ export interface ProductListResponse {
   price: number;
   descp: string | null;
   imageUrl: string | null;
+  isActive: boolean;
+  isSoldOut: boolean;
   isRecommended: boolean;
 }
 
@@ -72,6 +74,14 @@ export async function updateProduct(
 
 export async function deleteProduct(productUuid: string): Promise<void> {
   await api.delete(`/api/v1/owner/products/${productUuid}`);
+}
+
+export async function toggleActive(productUuid: string): Promise<void> {
+  await api.patch(`/api/v1/owner/products/${productUuid}/active`);
+}
+
+export async function toggleSoldOut(productUuid: string): Promise<void> {
+  await api.patch(`/api/v1/owner/products/${productUuid}/soldout`);
 }
 
 export async function toggleRecommend(productUuid: string): Promise<void> {
