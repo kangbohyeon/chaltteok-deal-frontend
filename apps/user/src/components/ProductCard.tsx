@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useCartStore } from "@chaltteok/shared-store";
 import { type ProductResponse } from "@/api/user";
 
@@ -23,20 +24,17 @@ export default function ProductCard({ product }: ProductCardProps) {
 
   return (
     <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm flex flex-col gap-3">
-      {product.thumbnailUrl && (
-        <div className="relative w-full h-40 rounded-xl overflow-hidden bg-gray-100">
-          <img
-            src={product.thumbnailUrl}
-            alt={product.name}
-            className="w-full h-full object-cover"
-          />
+      {
+        <div className="relative w-full h-40 rounded-xl overflow-hidden">
+          {product.thumbnailUrl && <Image src={product.thumbnailUrl} alt={product.name} fill unoptimized className="object-cover" />}
           {product.soldOut && (
             <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
               <span className="text-white text-sm font-bold tracking-wide">품절</span>
             </div>
           )}
+
         </div>
-      )}
+      }
 
       <div className="flex items-center gap-2">
         <h3 className="text-lg font-semibold text-gray-900 leading-tight">{product.name}</h3>

@@ -388,11 +388,11 @@ export default function ProductListPage() {
               key={p.id}
               className="flex items-center gap-4 rounded-xl border border-gray-200 bg-white px-5 py-4 shadow-sm"
             >
-              {p.imageUrl && (
+              
                 <div className="relative h-14 w-14 shrink-0 rounded-lg overflow-hidden border border-gray-100">
-                  <Image src={p.imageUrl} alt={p.name} fill unoptimized className="object-cover" />
+                  {p.imageUrl&& <Image src={p.imageUrl} alt={p.name} fill unoptimized className="object-cover" />}
                 </div>
-              )}
+              
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-0.5">
                   <p className="font-semibold text-gray-900 truncate">{p.name}</p>
