@@ -45,7 +45,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
                   <li>
                     <Link href="/cart" className="relative inline-flex items-center hover:text-rose-500 transition-colors">
-                      <span className="text-lg">🛒</span>
+                      <span className="text">장바구니</span>
                       {cartCount > 0 && (
                         <span className="absolute -top-2 -right-2.5 flex h-4 w-4 items-center justify-center rounded-full bg-rose-500 text-[10px] font-bold text-white">
                           {cartCount > 99 ? "99+" : cartCount}
