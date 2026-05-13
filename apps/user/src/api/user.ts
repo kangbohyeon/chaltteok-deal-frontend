@@ -98,3 +98,41 @@ export async function getParticipatedStockIds(): Promise<number[]> {
   const res = await api.get<{ data: number[] }>("/api/v1/user/daily-stocks/participated");
   return res.data.data;
 }
+
+export interface OrderHistoryItemResponse {
+  productName: string;
+  quantity: number;
+  price: number;
+}
+
+export interface OrderHistoryResponse {
+  orderUuid: string;
+  totalPrice: number;
+  status: string;
+  orderedAt: string;
+  items: OrderHistoryItemResponse[];
+}
+
+export async function getOrderHistory(): Promise<OrderHistoryResponse[]> {
+  const res = await api.get<{ data: OrderHistoryResponse[] }>("/api/v1/user/orders");
+  return res.data.data;
+}
+
+export interface UserProfileResponse {
+  email: string;
+  nickname: string;
+}
+
+export interface UpdateNicknameRequest {
+  nickname: string;
+}
+
+export async function getMyProfile(): Promise<UserProfileResponse> {
+  const res = await api.get<{ data: UserProfileResponse }>("/api/v1/user/me");
+  return res.data.data;
+}
+
+export async function updateMyProfile(body: UpdateNicknameRequest): Promise<UserProfileResponse> {
+  const res = await api.patch<{ data: UserProfileResponse }>("/api/v1/user/me", body);
+  return res.data.data;
+}

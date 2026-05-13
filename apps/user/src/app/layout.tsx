@@ -67,6 +67,21 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                     </>
                   )}
 
+                  {role === "ROLE_USER" && (
+                    <>
+                      <li>
+                        <Link href="/history" className="hover:text-rose-500 transition-colors">
+                          주문내역
+                        </Link>
+                      </li>
+                      <li>
+                        <Link href="/profile" className="hover:text-rose-500 transition-colors">
+                          내 정보
+                        </Link>
+                      </li>
+                    </>
+                  )}
+
                   {role && (
                     <li>
                       <button
