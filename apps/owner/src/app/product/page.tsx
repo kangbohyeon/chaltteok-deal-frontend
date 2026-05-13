@@ -34,7 +34,6 @@ const EMPTY_FORM: FormState = {
 };
 
 function toFormState(p: ProductListResponse): FormState {
-      console.log(`p2 : ${JSON.stringify(p)}`)
   return {
     name: p.name,
     price: p.price,
@@ -104,7 +103,6 @@ function ProductModal({
   onClose,
 }: ModalProps) {
   const fileRef = useRef<HTMLInputElement>(null);
-  console.log(`form :${JSON.stringify(form)}`)
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
       <div className="w-full max-w-md rounded-2xl bg-white shadow-xl p-8 mx-4 max-h-[90vh] overflow-y-auto">
@@ -294,7 +292,6 @@ export default function ProductListPage() {
   };
 
   const openEdit = (p: ProductListResponse) => {
-    console.log(`p : ${JSON.stringify(p)}`)
     setForm(toFormState(p));
     clearImage();
     setModalError(null);

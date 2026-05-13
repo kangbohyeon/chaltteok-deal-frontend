@@ -58,6 +58,7 @@ export interface ProductResponse {
   price: number;
   description: string | null;
   thumbnailUrl: string | null;
+  soldOut: boolean;
 }
 
 export async function getProducts(): Promise<ProductResponse[]> {
