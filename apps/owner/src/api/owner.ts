@@ -46,9 +46,9 @@ export interface ProductListResponse {
   price: number;
   descp: string | null;
   imageUrl: string | null;
-  isActive: boolean;
-  isSoldOut: boolean;
-  isRecommended: boolean;
+  active: boolean;
+  soldOut: boolean;
+  recommended: boolean;
 }
 
 export async function getProducts(): Promise<ProductListResponse[]> {

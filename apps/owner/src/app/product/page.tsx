@@ -19,28 +19,29 @@ interface FormState {
   name: string;
   price: number;
   descp: string;
-  isActive: boolean;
-  isSoldOut: boolean;
-  isRecommended: boolean;
+  active: boolean;
+  soldOut: boolean;
+  recommended: boolean;
 }
 
 const EMPTY_FORM: FormState = {
   name: "",
   price: 0,
   descp: "",
-  isActive: true,
-  isSoldOut: false,
-  isRecommended: false,
+  active: true,
+  soldOut: false,
+  recommended: false,
 };
 
 function toFormState(p: ProductListResponse): FormState {
+      console.log(`p2 : ${JSON.stringify(p)}`)
   return {
     name: p.name,
     price: p.price,
     descp: p.descp ?? "",
-    isActive: p.isActive,
-    isSoldOut: p.isSoldOut,
-    isRecommended: p.isRecommended,
+    active: p.active,
+    soldOut: p.soldOut,
+    recommended: p.recommended,
   };
 }
 
@@ -53,7 +54,7 @@ interface ModalProps {
   loading: boolean;
   error: string | null;
   onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
-  onToggleField: (field: "isActive" | "isSoldOut" | "isRecommended") => void;
+  onToggleField: (field: "active" | "soldOut" | "recommended") => void;
   onImageChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onRemoveImage: () => void;
   onSubmit: () => void;
@@ -103,7 +104,7 @@ function ProductModal({
   onClose,
 }: ModalProps) {
   const fileRef = useRef<HTMLInputElement>(null);
-
+  console.log(`form :${JSON.stringify(form)}`)
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
       <div className="w-full max-w-md rounded-2xl bg-white shadow-xl p-8 mx-4 max-h-[90vh] overflow-y-auto">
@@ -122,7 +123,7 @@ function ProductModal({
               value={form.name}
               onChange={onChange}
               required
-              placeholder="ex. 한우 등심 200g"
+              placeholder="꿀떡"
               className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-black focus:outline-none focus:ring-2 focus:ring-rose-400"
             />
           </div>
@@ -153,6 +154,25 @@ function ProductModal({
             />
           </div>
 
+          <div className="space-y-2">
+            <label className="block text-sm font-medium text-gray-700">상품 설정</label>
+            <ToggleRow
+              label="상품 노출"
+              active={form.active}
+              onToggle={() => onToggleField("active")}
+            />
+            <ToggleRow
+              label="품절 여부"
+              active={form.soldOut}
+              onToggle={() => onToggleField("soldOut")}
+            />
+            <ToggleRow
+              label="추천 상품"
+              active={form.recommended}
+              onToggle={() => onToggleField("recommended")}
+            />
+          </div>
+
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">상품 이미지</label>
             {preview ? (
@@ -178,24 +198,6 @@ function ProductModal({
             <input ref={fileRef} type="file" accept="image/*" onChange={onImageChange} className="hidden" />
           </div>
 
-          <div className="space-y-2">
-            <label className="block text-sm font-medium text-gray-700">상품 설정</label>
-            <ToggleRow
-              label="상품 노출"
-              active={form.isActive}
-              onToggle={() => onToggleField("isActive")}
-            />
-            <ToggleRow
-              label="품절 여부"
-              active={form.isSoldOut}
-              onToggle={() => onToggleField("isSoldOut")}
-            />
-            <ToggleRow
-              label="추천 상품"
-              active={form.isRecommended}
-              onToggle={() => onToggleField("isRecommended")}
-            />
-          </div>
 
           {error && <p className="text-sm text-red-500">{error}</p>}
 
@@ -272,7 +274,6 @@ export default function ProductListPage() {
   const [modalError, setModalError] = useState<string | null>(null);
 
   const [deleteTarget, setDeleteTarget] = useState<ProductListResponse | null>(null);
-  const [toggling, setToggling] = useState<string | null>(null);
 
   const load = () => {
     getProducts()
@@ -293,6 +294,7 @@ export default function ProductListPage() {
   };
 
   const openEdit = (p: ProductListResponse) => {
+    console.log(`p : ${JSON.stringify(p)}`)
     setForm(toFormState(p));
     clearImage();
     setModalError(null);
@@ -310,7 +312,7 @@ export default function ProductListPage() {
     setForm((prev) => ({ ...prev, [name]: name === "price" ? Number(value) : value }));
   };
 
-  const handleToggleField = (field: "isActive" | "isSoldOut" | "isRecommended") => {
+  const handleToggleField = (field: "active" | "soldOut" | "recommended") => {
     setForm((prev) => ({ ...prev, [field]: !prev[field] }));
   };
 
@@ -328,9 +330,9 @@ export default function ProductListPage() {
       name: form.name,
       price: form.price,
       descp: form.descp || undefined,
-      isActive: form.isActive,
-      isSoldOut: form.isSoldOut,
-      isRecommended: form.isRecommended,
+      isActive: form.active,
+      isSoldOut: form.soldOut,
+      isRecommended: form.recommended,
     };
     try {
       if (modal?.type === "create") {
@@ -359,31 +361,6 @@ export default function ProductListPage() {
     }
   };
 
-  const handleToggleActive = async (p: ProductListResponse) => {
-    setToggling(`${p.id}:active`);
-    try {
-      await toggleActive(p.uuid);
-      setProducts((prev) => prev.map((x) => (x.id === p.id ? { ...x, isActive: !x.isActive } : x)));
-    } catch {
-      alert("노출 상태 변경에 실패했습니다.");
-    } finally {
-      setToggling(null);
-    }
-  };
-
-  const handleToggleSoldOut = async (p: ProductListResponse) => {
-    setToggling(`${p.id}:soldout`);
-    try {
-      await toggleSoldOut(p.uuid);
-      setProducts((prev) =>
-        prev.map((x) => (x.id === p.id ? { ...x, isSoldOut: !x.isSoldOut } : x)),
-      );
-    } catch {
-      alert("품절 상태 변경에 실패했습니다.");
-    } finally {
-      setToggling(null);
-    }
-  };
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-12">
@@ -422,12 +399,12 @@ export default function ProductListPage() {
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-0.5">
                   <p className="font-semibold text-gray-900 truncate">{p.name}</p>
-                  {!p.isActive && (
+                  {!p.active && (
                     <span className="shrink-0 rounded px-1.5 py-0.5 text-xs font-medium bg-gray-100 text-gray-500">
                       비노출
                     </span>
                   )}
-                  {p.isSoldOut && (
+                  {p.soldOut && (
                     <span className="shrink-0 rounded px-1.5 py-0.5 text-xs font-medium bg-red-100 text-red-500">
                       품절
                     </span>
@@ -436,28 +413,6 @@ export default function ProductListPage() {
                 <p className="text-sm text-gray-500">{p.price.toLocaleString()}원</p>
               </div>
               <div className="flex items-center gap-2 shrink-0">
-                <button
-                  onClick={() => handleToggleActive(p)}
-                  disabled={toggling === `${p.id}:active`}
-                  className={`rounded-lg px-3 py-1 text-xs font-semibold transition-colors disabled:opacity-50 ${
-                    p.isActive
-                      ? "bg-blue-500 text-white hover:bg-blue-600"
-                      : "border border-gray-300 text-gray-500 hover:border-blue-400 hover:text-blue-500"
-                  }`}
-                >
-                  {p.isActive ? "노출 중" : "숨김"}
-                </button>
-                <button
-                  onClick={() => handleToggleSoldOut(p)}
-                  disabled={toggling === `${p.id}:soldout`}
-                  className={`rounded-lg px-3 py-1 text-xs font-semibold transition-colors disabled:opacity-50 ${
-                    p.isSoldOut
-                      ? "bg-red-500 text-white hover:bg-red-600"
-                      : "border border-gray-300 text-gray-500 hover:border-red-400 hover:text-red-500"
-                  }`}
-                >
-                  {p.isSoldOut ? "품절" : "재고있음"}
-                </button>
                 <button
                   onClick={() => openEdit(p)}
                   className="rounded-lg border border-gray-300 px-3 py-1 text-xs font-medium text-gray-600 hover:bg-gray-50"
