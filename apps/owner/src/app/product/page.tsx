@@ -177,7 +177,7 @@ function ProductModal({
             <label className="block text-sm font-medium text-gray-700 mb-1">상품 이미지</label>
             {preview ? (
               <div className="relative w-full aspect-video rounded-lg overflow-hidden border border-gray-200 bg-gray-50">
-                <Image src={preview} alt="미리보기" fill className="object-contain" />
+                <Image src={preview} alt="미리보기" fill unoptimized className="object-contain" />
                 <button
                   type="button"
                   onClick={onRemoveImage}
@@ -393,7 +393,7 @@ export default function ProductListPage() {
             >
               {p.imageUrl && (
                 <div className="relative h-14 w-14 shrink-0 rounded-lg overflow-hidden border border-gray-100">
-                  <Image src={p.imageUrl} alt={p.name} fill className="object-cover" />
+                  <Image src={p.imageUrl} alt={p.name} fill unoptimized className="object-cover" />
                 </div>
               )}
               <div className="flex-1 min-w-0">
