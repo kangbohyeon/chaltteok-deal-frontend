@@ -7,7 +7,6 @@ import {
   getProducts,
   registerProduct,
   toggleActive,
-  toggleRecommend,
   toggleSoldOut,
   updateProduct,
   type ProductListResponse,
@@ -20,12 +19,29 @@ interface FormState {
   name: string;
   price: number;
   descp: string;
+  isActive: boolean;
+  isSoldOut: boolean;
+  isRecommended: boolean;
 }
 
-const EMPTY_FORM: FormState = { name: "", price: 0, descp: "" };
+const EMPTY_FORM: FormState = {
+  name: "",
+  price: 0,
+  descp: "",
+  isActive: true,
+  isSoldOut: false,
+  isRecommended: false,
+};
 
 function toFormState(p: ProductListResponse): FormState {
-  return { name: p.name, price: p.price, descp: p.descp ?? "" };
+  return {
+    name: p.name,
+    price: p.price,
+    descp: p.descp ?? "",
+    isActive: p.isActive,
+    isSoldOut: p.isSoldOut,
+    isRecommended: p.isRecommended,
+  };
 }
 
 // ── 모달 컴포넌트 ─────────────────────────────────────────────────────────────
@@ -37,31 +53,75 @@ interface ModalProps {
   loading: boolean;
   error: string | null;
   onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
+  onToggleField: (field: "isActive" | "isSoldOut" | "isRecommended") => void;
   onImageChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onRemoveImage: () => void;
   onSubmit: () => void;
   onClose: () => void;
 }
 
+function ToggleRow({
+  label,
+  active,
+  onToggle,
+}: {
+  label: string;
+  active: boolean;
+  onToggle: () => void;
+}) {
+  return (
+    <div className="flex items-center justify-between rounded-lg border border-gray-200 px-3 py-2.5">
+      <span className="text-sm font-medium text-gray-700">{label}</span>
+      <button
+        type="button"
+        onClick={onToggle}
+        className={`relative inline-flex h-5 w-9 shrink-0 items-center rounded-full transition-colors focus:outline-none ${
+          active ? "bg-rose-500" : "bg-gray-200"
+        }`}
+      >
+        <span
+          className={`inline-block h-3.5 w-3.5 transform rounded-full bg-white shadow transition-transform ${
+            active ? "translate-x-[18px]" : "translate-x-[3px]"
+          }`}
+        />
+      </button>
+    </div>
+  );
+}
+
 function ProductModal({
-  title, form, preview, loading, error,
-  onChange, onImageChange, onRemoveImage, onSubmit, onClose,
+  title,
+  form,
+  preview,
+  loading,
+  error,
+  onChange,
+  onToggleField,
+  onImageChange,
+  onRemoveImage,
+  onSubmit,
+  onClose,
 }: ModalProps) {
   const fileRef = useRef<HTMLInputElement>(null);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-      <div className="w-full max-w-md rounded-2xl bg-white shadow-xl p-8 mx-4">
+      <div className="w-full max-w-md rounded-2xl bg-white shadow-xl p-8 mx-4 max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-lg font-bold text-gray-900">{title}</h2>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-xl font-bold">×</button>
+          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-xl font-bold">
+            ×
+          </button>
         </div>
 
         <form onSubmit={(e) => { e.preventDefault(); onSubmit(); }} className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">상품명 *</label>
             <input
-              name="name" value={form.name} onChange={onChange} required
+              name="name"
+              value={form.name}
+              onChange={onChange}
+              required
               placeholder="ex. 한우 등심 200g"
               className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-black focus:outline-none focus:ring-2 focus:ring-rose-400"
             />
@@ -70,7 +130,12 @@ function ProductModal({
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">가격 (원) *</label>
             <input
-              name="price" type="number" min={100} value={form.price} onChange={onChange} required
+              name="price"
+              type="number"
+              min={100}
+              value={form.price}
+              onChange={onChange}
+              required
               placeholder="ex. 29000"
               className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-black focus:outline-none focus:ring-2 focus:ring-rose-400"
             />
@@ -79,7 +144,10 @@ function ProductModal({
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">상품 설명</label>
             <textarea
-              name="descp" value={form.descp} onChange={onChange} rows={3}
+              name="descp"
+              value={form.descp}
+              onChange={onChange}
+              rows={3}
               placeholder="상품에 대한 간단한 설명을 입력해주세요."
               className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-black focus:outline-none focus:ring-2 focus:ring-rose-400 resize-none"
             />
@@ -91,28 +159,61 @@ function ProductModal({
               <div className="relative w-full aspect-video rounded-lg overflow-hidden border border-gray-200 bg-gray-50">
                 <Image src={preview} alt="미리보기" fill className="object-contain" />
                 <button
-                  type="button" onClick={onRemoveImage}
+                  type="button"
+                  onClick={onRemoveImage}
                   className="absolute top-2 right-2 rounded-full bg-black/50 text-white text-xs px-2 py-1 hover:bg-black/70"
-                >삭제</button>
+                >
+                  삭제
+                </button>
               </div>
             ) : (
               <button
-                type="button" onClick={() => fileRef.current?.click()}
+                type="button"
+                onClick={() => fileRef.current?.click()}
                 className="w-full rounded-lg border-2 border-dashed border-gray-300 py-6 text-sm text-gray-400 hover:border-rose-400 hover:text-rose-400 transition-colors"
-              >클릭하여 이미지 첨부</button>
+              >
+                클릭하여 이미지 첨부
+              </button>
             )}
             <input ref={fileRef} type="file" accept="image/*" onChange={onImageChange} className="hidden" />
+          </div>
+
+          <div className="space-y-2">
+            <label className="block text-sm font-medium text-gray-700">상품 설정</label>
+            <ToggleRow
+              label="상품 노출"
+              active={form.isActive}
+              onToggle={() => onToggleField("isActive")}
+            />
+            <ToggleRow
+              label="품절 여부"
+              active={form.isSoldOut}
+              onToggle={() => onToggleField("isSoldOut")}
+            />
+            <ToggleRow
+              label="추천 상품"
+              active={form.isRecommended}
+              onToggle={() => onToggleField("isRecommended")}
+            />
           </div>
 
           {error && <p className="text-sm text-red-500">{error}</p>}
 
           <div className="flex gap-3 pt-2">
-            <button type="button" onClick={onClose}
+            <button
+              type="button"
+              onClick={onClose}
               className="flex-1 rounded-lg border border-gray-300 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50"
-            >취소</button>
-            <button type="submit" disabled={loading}
+            >
+              취소
+            </button>
+            <button
+              type="submit"
+              disabled={loading}
               className="flex-1 rounded-lg bg-rose-500 py-2 text-sm font-semibold text-white hover:bg-rose-600 disabled:opacity-50"
-            >{loading ? "처리 중..." : "저장"}</button>
+            >
+              {loading ? "처리 중..." : "저장"}
+            </button>
           </div>
         </form>
       </div>
@@ -122,7 +223,11 @@ function ProductModal({
 
 // ── 삭제 확인 모달 ─────────────────────────────────────────────────────────────
 
-function ConfirmModal({ message, onConfirm, onCancel }: {
+function ConfirmModal({
+  message,
+  onConfirm,
+  onCancel,
+}: {
   message: string;
   onConfirm: () => void;
   onCancel: () => void;
@@ -132,12 +237,18 @@ function ConfirmModal({ message, onConfirm, onCancel }: {
       <div className="w-full max-w-sm rounded-2xl bg-white shadow-xl p-6 mx-4">
         <p className="text-sm text-gray-700 mb-6">{message}</p>
         <div className="flex gap-3">
-          <button onClick={onCancel}
+          <button
+            onClick={onCancel}
             className="flex-1 rounded-lg border border-gray-300 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50"
-          >취소</button>
-          <button onClick={onConfirm}
+          >
+            취소
+          </button>
+          <button
+            onClick={onConfirm}
             className="flex-1 rounded-lg bg-red-500 py-2 text-sm font-semibold text-white hover:bg-red-600"
-          >삭제</button>
+          >
+            삭제
+          </button>
         </div>
       </div>
     </div>
@@ -170,7 +281,9 @@ export default function ProductListPage() {
       .finally(() => setPageLoading(false));
   };
 
-  useEffect(() => { load(); }, []);
+  useEffect(() => {
+    load();
+  }, []);
 
   const openCreate = () => {
     setForm(EMPTY_FORM);
@@ -197,6 +310,10 @@ export default function ProductListPage() {
     setForm((prev) => ({ ...prev, [name]: name === "price" ? Number(value) : value }));
   };
 
+  const handleToggleField = (field: "isActive" | "isSoldOut" | "isRecommended") => {
+    setForm((prev) => ({ ...prev, [field]: !prev[field] }));
+  };
+
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0] ?? null;
     setImage(file);
@@ -207,7 +324,14 @@ export default function ProductListPage() {
   const handleSubmit = async () => {
     setModalError(null);
     setModalLoading(true);
-    const body: ProductRegisterRequest = { name: form.name, price: form.price, descp: form.descp || undefined };
+    const body: ProductRegisterRequest = {
+      name: form.name,
+      price: form.price,
+      descp: form.descp || undefined,
+      isActive: form.isActive,
+      isSoldOut: form.isSoldOut,
+      isRecommended: form.isRecommended,
+    };
     try {
       if (modal?.type === "create") {
         await registerProduct(body, image ?? undefined);
@@ -239,7 +363,7 @@ export default function ProductListPage() {
     setToggling(`${p.id}:active`);
     try {
       await toggleActive(p.uuid);
-      setProducts((prev) => prev.map((x) => x.id === p.id ? { ...x, isActive: !x.isActive } : x));
+      setProducts((prev) => prev.map((x) => (x.id === p.id ? { ...x, isActive: !x.isActive } : x)));
     } catch {
       alert("노출 상태 변경에 실패했습니다.");
     } finally {
@@ -251,21 +375,11 @@ export default function ProductListPage() {
     setToggling(`${p.id}:soldout`);
     try {
       await toggleSoldOut(p.uuid);
-      setProducts((prev) => prev.map((x) => x.id === p.id ? { ...x, isSoldOut: !x.isSoldOut } : x));
+      setProducts((prev) =>
+        prev.map((x) => (x.id === p.id ? { ...x, isSoldOut: !x.isSoldOut } : x)),
+      );
     } catch {
       alert("품절 상태 변경에 실패했습니다.");
-    } finally {
-      setToggling(null);
-    }
-  };
-
-  const handleToggleRecommend = async (p: ProductListResponse) => {
-    setToggling(`${p.id}:recommend`);
-    try {
-      await toggleRecommend(p.uuid);
-      setProducts((prev) => prev.map((x) => x.id === p.id ? { ...x, isRecommended: !x.isRecommended } : x));
-    } catch {
-      alert("추천 상태 변경에 실패했습니다.");
     } finally {
       setToggling(null);
     }
@@ -275,9 +389,12 @@ export default function ProductListPage() {
     <div className="mx-auto max-w-3xl px-4 py-12">
       <div className="flex items-center justify-between mb-8">
         <h1 className="text-2xl font-bold text-gray-900">상품 관리</h1>
-        <button onClick={openCreate}
+        <button
+          onClick={openCreate}
           className="rounded-lg bg-rose-500 px-4 py-2 text-sm font-semibold text-white hover:bg-rose-600 transition-colors"
-        >+ 상품 등록</button>
+        >
+          + 상품 등록
+        </button>
       </div>
 
       {pageError && <p className="text-sm text-red-500 mb-4">{pageError}</p>}
@@ -293,7 +410,8 @@ export default function ProductListPage() {
       ) : (
         <ul className="space-y-3">
           {products.map((p) => (
-            <li key={p.id}
+            <li
+              key={p.id}
               className="flex items-center gap-4 rounded-xl border border-gray-200 bg-white px-5 py-4 shadow-sm"
             >
               {p.imageUrl && (
@@ -305,42 +423,53 @@ export default function ProductListPage() {
                 <div className="flex items-center gap-2 mb-0.5">
                   <p className="font-semibold text-gray-900 truncate">{p.name}</p>
                   {!p.isActive && (
-                    <span className="shrink-0 rounded px-1.5 py-0.5 text-xs font-medium bg-gray-100 text-gray-500">비노출</span>
+                    <span className="shrink-0 rounded px-1.5 py-0.5 text-xs font-medium bg-gray-100 text-gray-500">
+                      비노출
+                    </span>
                   )}
                   {p.isSoldOut && (
-                    <span className="shrink-0 rounded px-1.5 py-0.5 text-xs font-medium bg-red-100 text-red-500">품절</span>
+                    <span className="shrink-0 rounded px-1.5 py-0.5 text-xs font-medium bg-red-100 text-red-500">
+                      품절
+                    </span>
                   )}
                 </div>
                 <p className="text-sm text-gray-500">{p.price.toLocaleString()}원</p>
               </div>
               <div className="flex items-center gap-2 shrink-0">
-                <button onClick={() => handleToggleActive(p)} disabled={toggling === `${p.id}:active`}
+                <button
+                  onClick={() => handleToggleActive(p)}
+                  disabled={toggling === `${p.id}:active`}
                   className={`rounded-lg px-3 py-1 text-xs font-semibold transition-colors disabled:opacity-50 ${
                     p.isActive
                       ? "bg-blue-500 text-white hover:bg-blue-600"
                       : "border border-gray-300 text-gray-500 hover:border-blue-400 hover:text-blue-500"
                   }`}
-                >{p.isActive ? "노출 중" : "숨김"}</button>
-                <button onClick={() => handleToggleSoldOut(p)} disabled={toggling === `${p.id}:soldout`}
+                >
+                  {p.isActive ? "노출 중" : "숨김"}
+                </button>
+                <button
+                  onClick={() => handleToggleSoldOut(p)}
+                  disabled={toggling === `${p.id}:soldout`}
                   className={`rounded-lg px-3 py-1 text-xs font-semibold transition-colors disabled:opacity-50 ${
                     p.isSoldOut
                       ? "bg-red-500 text-white hover:bg-red-600"
                       : "border border-gray-300 text-gray-500 hover:border-red-400 hover:text-red-500"
                   }`}
-                >{p.isSoldOut ? "품절" : "재고있음"}</button>
-                <button onClick={() => handleToggleRecommend(p)} disabled={toggling === `${p.id}:recommend`}
-                  className={`rounded-lg px-3 py-1 text-xs font-semibold transition-colors disabled:opacity-50 ${
-                    p.isRecommended
-                      ? "bg-amber-500 text-white hover:bg-amber-600"
-                      : "border border-gray-300 text-gray-500 hover:border-amber-400 hover:text-amber-500"
-                  }`}
-                >{p.isRecommended ? "추천 중" : "추천"}</button>
-                <button onClick={() => openEdit(p)}
+                >
+                  {p.isSoldOut ? "품절" : "재고있음"}
+                </button>
+                <button
+                  onClick={() => openEdit(p)}
                   className="rounded-lg border border-gray-300 px-3 py-1 text-xs font-medium text-gray-600 hover:bg-gray-50"
-                >수정</button>
-                <button onClick={() => setDeleteTarget(p)}
+                >
+                  수정
+                </button>
+                <button
+                  onClick={() => setDeleteTarget(p)}
                   className="rounded-lg border border-red-200 px-3 py-1 text-xs font-medium text-red-500 hover:bg-red-50"
-                >삭제</button>
+                >
+                  삭제
+                </button>
               </div>
             </li>
           ))}
@@ -350,10 +479,19 @@ export default function ProductListPage() {
       {modal && (
         <ProductModal
           title={modal.type === "create" ? "상품 등록" : "상품 수정"}
-          form={form} preview={preview}
-          loading={modalLoading} error={modalError}
-          onChange={handleChange} onImageChange={handleImageChange} onRemoveImage={clearImage}
-          onSubmit={handleSubmit} onClose={() => { setModal(null); clearImage(); }}
+          form={form}
+          preview={preview}
+          loading={modalLoading}
+          error={modalError}
+          onChange={handleChange}
+          onToggleField={handleToggleField}
+          onImageChange={handleImageChange}
+          onRemoveImage={clearImage}
+          onSubmit={handleSubmit}
+          onClose={() => {
+            setModal(null);
+            clearImage();
+          }}
         />
       )}
 

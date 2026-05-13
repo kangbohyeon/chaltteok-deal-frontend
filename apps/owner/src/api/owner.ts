@@ -24,12 +24,18 @@ export interface ProductRegisterRequest {
   name: string;
   price: number;
   descp?: string;
+  isActive?: boolean;
+  isSoldOut?: boolean;
+  isRecommended?: boolean;
 }
 
 export interface ProductUpdateRequest {
   name: string;
   price: number;
   descp?: string;
+  isActive?: boolean;
+  isSoldOut?: boolean;
+  isRecommended?: boolean;
 }
 
 export interface ProductListResponse {
