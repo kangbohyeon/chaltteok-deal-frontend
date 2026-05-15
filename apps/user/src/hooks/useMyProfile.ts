@@ -1,7 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { getMyProfile, updateMyProfile, type UserProfileResponse } from "@/api/user";
+import {
+  getMyProfile,
+  updateMyProfile,
+  changePassword as changePasswordApi,
+  type UserProfileResponse,
+  type ChangePasswordRequest,
+} from "@/api/user";
 
 export function useMyProfile() {
   const [profile, setProfile] = useState<UserProfileResponse | null>(null);
@@ -9,6 +15,9 @@ export function useMyProfile() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+  const [passwordSaving, setPasswordSaving] = useState(false);
+  const [passwordError, setPasswordError] = useState<string | null>(null);
+  const [passwordSuccess, setPasswordSuccess] = useState(false);
 
   useEffect(() => {
     getMyProfile()
@@ -32,5 +41,22 @@ export function useMyProfile() {
     }
   };
 
-  return { profile, loading, saving, error, success, updateNickname };
+  const changePassword = async (req: ChangePasswordRequest) => {
+    setPasswordSaving(true);
+    setPasswordSuccess(false);
+    setPasswordError(null);
+    try {
+      await changePasswordApi(req);
+      setPasswordSuccess(true);
+    } catch {
+      setPasswordError("비밀번호 변경에 실패했습니다. 현재 비밀번호를 확인해 주세요.");
+    } finally {
+      setPasswordSaving(false);
+    }
+  };
+
+  return {
+    profile, loading, saving, error, success, updateNickname,
+    passwordSaving, passwordError, passwordSuccess, changePassword,
+  };
 }

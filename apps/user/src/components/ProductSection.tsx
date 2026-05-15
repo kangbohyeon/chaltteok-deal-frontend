@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useState } from "react";
 import Image from "next/image";
 import { type ProductResponse } from "@/api/user";
 import { useCartStore } from "@chaltteok/shared-store";
@@ -13,30 +13,12 @@ interface ProductSectionProps {
   products: ProductResponse[] | undefined;
   isLoading: boolean;
   isError: boolean;
+  query: string;
 }
 
-export default function ProductSection({ products, isLoading, isError }: ProductSectionProps) {
+export default function ProductSection({ products, isLoading, isError, query }: ProductSectionProps) {
   const [page, setPage] = useState(0);
-  const [query, setQuery] = useState("");
-  const [open, setOpen] = useState(false);
-  const wrapperRef = useRef<HTMLDivElement>(null);
   const addItem = useCartStore((s) => s.addItem);
-
-  useEffect(() => {
-    function handleClickOutside(e: MouseEvent) {
-      if (wrapperRef.current && !wrapperRef.current.contains(e.target as Node)) {
-        setOpen(false);
-      }
-    }
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
-
-  const handleQueryChange = (value: string) => {
-    setQuery(value);
-    setOpen(value.trim().length > 0);
-    setPage(0);
-  };
 
   const filtered = query.trim()
     ? (products ?? [])
@@ -82,38 +64,15 @@ export default function ProductSection({ products, isLoading, isError }: Product
     );
   }
 
-  const totalPages = Math.ceil((products?.length ?? 0) / ITEMS_PER_PAGE);
-  const paginated = (products ?? []).slice(page * ITEMS_PER_PAGE, (page + 1) * ITEMS_PER_PAGE);
+  const totalPages = Math.ceil(products.length / ITEMS_PER_PAGE);
+  const paginated = products.slice(page * ITEMS_PER_PAGE, (page + 1) * ITEMS_PER_PAGE);
 
   return (
     <div className="space-y-6">
-      <div ref={wrapperRef} className="relative">
-        <div className="relative">
-          <input
-            type="text"
-            value={query}
-            onChange={(e) => handleQueryChange(e.target.value)}
-            onFocus={() => query.trim() && setOpen(true)}
-            placeholder="상품명으로 검색..."
-            className="w-full rounded-xl border border-gray-200 bg-white px-4 py-2.5 pr-10 text-sm text-gray-800 placeholder-gray-400 shadow-sm focus:outline-none focus:ring-2 focus:ring-rose-300"
-          />
-          {query && (
-            <button
-              onClick={() => {
-                setQuery("");
-                setOpen(false);
-              }}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-              aria-label="검색 초기화"
-            >
-              ×
-            </button>
-          )}
-        </div>
-
-        {open && filtered.length > 0 && (
-          <div className="absolute left-0 right-0 top-full z-50 mt-1 rounded-xl border border-gray-200 bg-white shadow-lg overflow-hidden">
-            {filtered.map((product) => (
+      {query.trim() && (
+        <div className="rounded-xl border border-gray-200 bg-white shadow-sm overflow-hidden">
+          {filtered.length > 0 ? (
+            filtered.map((product) => (
               <div
                 key={product.id}
                 className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-b-0"
@@ -149,6 +108,7 @@ export default function ProductSection({ products, isLoading, isError }: Product
                 <button
                   onClick={() => handleAddToCart(product)}
                   disabled={product.soldOut}
+                  aria-label={`${product.name} 장바구니 담기`}
                   className={`shrink-0 rounded-lg px-3 py-1.5 text-xs font-semibold text-white transition-colors ${
                     product.soldOut ? "bg-gray-300 cursor-not-allowed" : "bg-rose-500 hover:bg-rose-600"
                   }`}
@@ -156,16 +116,14 @@ export default function ProductSection({ products, isLoading, isError }: Product
                   담기
                 </button>
               </div>
-            ))}
-          </div>
-        )}
-
-        {open && query.trim() && filtered.length === 0 && (
-          <div className="absolute left-0 right-0 top-full z-50 mt-1 rounded-xl border border-gray-200 bg-white shadow-lg px-4 py-6 text-center text-sm text-gray-400">
-            &quot;{query}&quot;에 해당하는 상품이 없습니다.
-          </div>
-        )}
-      </div>
+            ))
+          ) : (
+            <div className="px-4 py-6 text-center text-sm text-gray-400">
+              &quot;{query}&quot;에 해당하는 상품이 없습니다.
+            </div>
+          )}
+        </div>
+      )}
 
       {!query.trim() && (
         <>
