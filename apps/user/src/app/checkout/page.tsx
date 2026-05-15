@@ -5,11 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useCartStore } from "@chaltteok/shared-store";
 import { checkout } from "@/api/user";
-
-const PAYMENT_METHODS = [
-  { value: "CARD", label: "신용카드 / 체크카드" },
-  { value: "TRANSFER", label: "계좌이체" },
-];
+import { PAYMENT_METHODS } from "@/constants/payment";
 
 export default function CheckoutPage() {
   const router = useRouter();

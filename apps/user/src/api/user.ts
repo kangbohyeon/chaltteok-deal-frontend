@@ -108,9 +108,9 @@ export interface OrderHistoryItemResponse {
 export interface PaymentInfoResponse {
   amount: number;
   pgProvider: string | null;
-  paymentMethod: string | null;
+  paymentMethod: string;
   status: string;
-  paidAt: string | null;
+  paidAt: string;
 }
 
 export interface OrderHistoryResponse {

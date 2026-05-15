@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { useOrderHistory } from "@/hooks/useOrderHistory";
 import { type PaymentInfoResponse } from "@/api/user";
+import { PAYMENT_METHOD_LABEL } from "@/constants/payment";
 
 const STATUS_LABEL: Record<string, string> = {
   PENDING: "결제 대기",
@@ -38,24 +39,14 @@ function PaymentInfo({ payment }: { payment: PaymentInfoResponse }) {
         <span>결제 금액</span>
         <span className="font-medium">{payment.amount.toLocaleString()}원</span>
       </div>
-      {payment.pgProvider && (
-        <div className="flex justify-between text-xs text-gray-600">
-          <span>결제 수단</span>
-          <span className="font-medium">{payment.pgProvider}</span>
-        </div>
-      )}
-      {payment.paymentMethod && (
-        <div className="flex justify-between text-xs text-gray-600">
-          <span>결제 방식</span>
-          <span className="font-medium">{payment.paymentMethod}</span>
-        </div>
-      )}
-      {payment.paidAt && (
-        <div className="flex justify-between text-xs text-gray-600">
-          <span>결제 일시</span>
-          <span className="font-medium">{new Date(payment.paidAt).toLocaleString("ko-KR")}</span>
-        </div>
-      )}
+      <div className="flex justify-between text-xs text-gray-600">
+        <span>결제 방식</span>
+        <span className="font-medium">{PAYMENT_METHOD_LABEL[payment.paymentMethod] ?? payment.paymentMethod}</span>
+      </div>
+      <div className="flex justify-between text-xs text-gray-600">
+        <span>결제 일시</span>
+        <span className="font-medium">{new Date(payment.paidAt).toLocaleString("ko-KR")}</span>
+      </div>
     </div>
   );
 }
