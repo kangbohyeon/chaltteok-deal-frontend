@@ -38,6 +38,11 @@ api.interceptors.response.use(
       return Promise.reject(error);
     }
 
+    // 로그인 엔드포인트의 401은 재발급 없이 그대로 전파 (로그인 실패 메시지 표시용)
+    if (originalRequest.url?.includes("/auth/login")) {
+      return Promise.reject(error);
+    }
+
     if (isRefreshing) {
       return new Promise<string>((resolve, reject) => {
         failedQueue.push({ resolve, reject });
