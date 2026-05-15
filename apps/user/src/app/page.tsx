@@ -87,7 +87,7 @@ export default function Home() {
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="상품명으로 검색..."
                 autoFocus
-                className="w-full rounded-xl border border-gray-200 bg-white px-4 py-2.5 pr-10 text-sm text-gray-800 placeholder-gray-400 shadow-sm focus:outline-none focus:ring-2 focus:ring-rose-300"
+                className="w-full rounded-xl border border-gray-200 bg-white px-4 py-2.5 pr-10 text-sm text-gray-800 placeholder:text-gray-400 shadow-sm focus:outline-none focus:ring-2 focus:ring-rose-300"
               />
               {query && (
                 <button

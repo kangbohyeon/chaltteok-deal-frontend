@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Image from "next/image";
 import { type ProductResponse } from "@/api/user";
 import { useCartStore } from "@chaltteok/shared-store";
@@ -19,6 +19,10 @@ interface ProductSectionProps {
 export default function ProductSection({ products, isLoading, isError, query }: ProductSectionProps) {
   const [page, setPage] = useState(0);
   const addItem = useCartStore((s) => s.addItem);
+
+  useEffect(() => {
+    setPage(0);
+  }, [query]);
 
   const filtered = query.trim()
     ? (products ?? [])
