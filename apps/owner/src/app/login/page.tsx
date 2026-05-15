@@ -4,12 +4,14 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@chaltteok/shared-store";
 import { loginOwner } from "@/api/owner";
+import PasswordChangePopup from "./_components/PasswordChangePopup";
 
 export default function OwnerLoginPage() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showPasswordChangePopup, setShowPasswordChangePopup] = useState(false);
   const router = useRouter();
   const setAuth = useAuthStore((s) => s.setAuth);
 
@@ -18,9 +20,13 @@ export default function OwnerLoginPage() {
     setError(null);
     setLoading(true);
     try {
-      const { accessToken, refreshToken, userId } = await loginOwner({ username, password });
+      const { accessToken, refreshToken, userId, requirePasswordChange } = await loginOwner({ username, password });
       setAuth(accessToken, refreshToken, "ROLE_OWNER", userId);
-      router.push("/dashboard");
+      if (requirePasswordChange) {
+        setShowPasswordChangePopup(true);
+      } else {
+        router.push("/dashboard");
+      }
     } catch {
       setError("아이디 또는 비밀번호가 올바르지 않습니다.");
     } finally {
@@ -30,6 +36,14 @@ export default function OwnerLoginPage() {
 
   return (
     <div className="mx-auto max-w-sm px-4 py-20">
+      {showPasswordChangePopup && (
+        <PasswordChangePopup
+          onClose={() => {
+            setShowPasswordChangePopup(false);
+            router.push("/dashboard");
+          }}
+        />
+      )}
       <div className="mb-8 text-center">
         <h1 className="text-2xl font-bold text-gray-900">점주 로그인</h1>
         <p className="mt-1 text-sm text-gray-500">상품 및 재고 관리 페이지입니다.</p>
