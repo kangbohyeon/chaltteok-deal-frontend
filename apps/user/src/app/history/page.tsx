@@ -68,11 +68,19 @@ export default function OrderHistoryPage() {
   const [keyword, setKeyword] = useState("");
   const [cancellingOrder, setCancellingOrder] = useState<string | null>(null);
   const [cancelError, setCancelError] = useState<string | null>(null);
+  const [statusFilter, setStatusFilter] = useState("");
+  const [fromDate, setFromDate] = useState("");
+  const [toDate, setToDate] = useState("");
+  const [paymentStatusFilter, setPaymentStatusFilter] = useState("");
 
   const { orders, totalPages, loading, error, cancelOrder } = useOrderHistory({
     page,
     size: PAGE_SIZE,
     keyword: keyword || undefined,
+    status: statusFilter || undefined,
+    fromDate: fromDate || undefined,
+    toDate: toDate || undefined,
+    paymentStatus: paymentStatusFilter || undefined,
   });
 
   const handleSearch = (e: React.FormEvent<HTMLFormElement>) => {
@@ -93,6 +101,8 @@ export default function OrderHistoryPage() {
       setCancellingOrder(null);
     }
   };
+
+  const hasActiveFilters = Boolean(statusFilter || fromDate || toDate || paymentStatusFilter);
 
   return (
     <div className="mx-auto max-w-2xl px-4 py-12">
@@ -128,6 +138,74 @@ export default function OrderHistoryPage() {
         )}
       </form>
 
+      {/* 필터 */}
+      <div className="flex flex-wrap gap-3 mb-6">
+        <select
+          value={statusFilter}
+          onChange={(e) => {
+            setStatusFilter(e.target.value);
+            setPage(0);
+          }}
+          className="rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-700 bg-white focus:outline-none focus:ring-2 focus:ring-rose-300"
+        >
+          <option value="">주문상태 전체</option>
+          <option value="PENDING">결제 대기</option>
+          <option value="COMPLETED">결제 완료</option>
+          <option value="CANCELLED">취소됨</option>
+          <option value="FAILED">실패</option>
+        </select>
+
+        <input
+          type="date"
+          value={fromDate}
+          onChange={(e) => {
+            setFromDate(e.target.value);
+            setPage(0);
+          }}
+          className="rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-700 bg-white focus:outline-none focus:ring-2 focus:ring-rose-300"
+        />
+        <span className="flex items-center text-sm text-gray-400">~</span>
+        <input
+          type="date"
+          value={toDate}
+          onChange={(e) => {
+            setToDate(e.target.value);
+            setPage(0);
+          }}
+          className="rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-700 bg-white focus:outline-none focus:ring-2 focus:ring-rose-300"
+        />
+
+        <select
+          value={paymentStatusFilter}
+          onChange={(e) => {
+            setPaymentStatusFilter(e.target.value);
+            setPage(0);
+          }}
+          className="rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-700 bg-white focus:outline-none focus:ring-2 focus:ring-rose-300"
+        >
+          <option value="">결제상태 전체</option>
+          <option value="READY">결제 준비</option>
+          <option value="SUCCESS">결제 완료</option>
+          <option value="FAILED">결제 실패</option>
+          <option value="CANCELLED">결제 취소</option>
+        </select>
+
+        {hasActiveFilters && (
+          <button
+            onClick={() => {
+              setStatusFilter("");
+              setFromDate("");
+              setToDate("");
+              setPaymentStatusFilter("");
+              setPage(0);
+            }}
+            className="rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-500 hover:bg-gray-50 transition-colors"
+          >
+            필터 초기화
+          </button>
+        )}
+      </div>
+
       {cancelError && (
         <div className="rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-600 mb-4">
           {cancelError}
@@ -148,7 +226,9 @@ export default function OrderHistoryPage() {
         <div className="text-center py-20">
           <p className="text-4xl mb-4">📦</p>
           <p className="text-gray-500 mb-6">
-            {keyword ? `"${keyword}"에 해당하는 주문이 없습니다.` : "주문 내역이 없습니다."}
+            {keyword || statusFilter || fromDate || toDate || paymentStatusFilter
+              ? "조건에 해당하는 주문이 없습니다."
+              : "주문 내역이 없습니다."}
           </p>
           <Link
             href="/"

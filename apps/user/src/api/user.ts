@@ -135,12 +135,24 @@ export interface OrderHistoryParams {
   page?: number;
   size?: number;
   keyword?: string;
+  status?: string;
+  fromDate?: string;
+  toDate?: string;
+  paymentStatus?: string;
 }
 
 export async function getOrderHistory(params: OrderHistoryParams = {}): Promise<OrderHistoryPageResponse> {
-  const { page = 0, size = 10, keyword } = params;
+  const { page = 0, size = 10, keyword, status, fromDate, toDate, paymentStatus } = params;
   const res = await api.get<{ data: OrderHistoryPageResponse }>("/api/v1/user/orders", {
-    params: { page, size, ...(keyword ? { keyword } : {}) },
+    params: {
+      page,
+      size,
+      ...(keyword ? { keyword } : {}),
+      ...(status ? { status } : {}),
+      ...(fromDate ? { fromDate } : {}),
+      ...(toDate ? { toDate } : {}),
+      ...(paymentStatus ? { paymentStatus } : {}),
+    },
   });
   return res.data.data;
 }

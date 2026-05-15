@@ -11,9 +11,21 @@ interface UseOrderHistoryOptions {
   page?: number;
   size?: number;
   keyword?: string;
+  status?: string;
+  fromDate?: string;
+  toDate?: string;
+  paymentStatus?: string;
 }
 
-export function useOrderHistory({ page = 0, size = 10, keyword }: UseOrderHistoryOptions = {}) {
+export function useOrderHistory({
+  page = 0,
+  size = 10,
+  keyword,
+  status,
+  fromDate,
+  toDate,
+  paymentStatus,
+}: UseOrderHistoryOptions = {}) {
   const [data, setData] = useState<OrderHistoryPageResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -21,11 +33,11 @@ export function useOrderHistory({ page = 0, size = 10, keyword }: UseOrderHistor
   const fetch = useCallback(() => {
     setLoading(true);
     setError(null);
-    getOrderHistory({ page, size, keyword })
+    getOrderHistory({ page, size, keyword, status, fromDate, toDate, paymentStatus })
       .then(setData)
       .catch(() => setError("주문 내역을 불러오지 못했습니다."))
       .finally(() => setLoading(false));
-  }, [page, size, keyword]);
+  }, [page, size, keyword, status, fromDate, toDate, paymentStatus]);
 
   useEffect(() => {
     fetch();
