@@ -30,7 +30,7 @@ export function useOrderHistory({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const fetch = useCallback(() => {
+  const fetchOrders = useCallback(() => {
     setLoading(true);
     setError(null);
     getOrderHistory({ page, size, keyword, status, fromDate, toDate, paymentStatus })
@@ -40,15 +40,15 @@ export function useOrderHistory({
   }, [page, size, keyword, status, fromDate, toDate, paymentStatus]);
 
   useEffect(() => {
-    fetch();
-  }, [fetch]);
+    fetchOrders();
+  }, [fetchOrders]);
 
   const cancelOrder = useCallback(
     async (orderNumber: string) => {
       await cancelOrderApi(orderNumber);
-      fetch();
+      fetchOrders();
     },
-    [fetch],
+    [fetchOrders],
   );
 
   return {
