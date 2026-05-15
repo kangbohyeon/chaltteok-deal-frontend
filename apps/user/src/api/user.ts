@@ -184,3 +184,12 @@ export async function updateMyProfile(body: UpdateNicknameRequest): Promise<User
   const res = await api.patch<{ data: UserProfileResponse }>("/api/v1/user/me", body);
   return res.data.data;
 }
+
+export interface ChangePasswordRequest {
+  currentPassword?: string;
+  newPassword: string;
+}
+
+export async function changePassword(body: ChangePasswordRequest): Promise<void> {
+  await api.patch("/api/v1/user/me/password", body);
+}
