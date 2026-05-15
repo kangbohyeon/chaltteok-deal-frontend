@@ -383,41 +383,46 @@ export default function ProductListPage() {
         <p className="text-sm text-gray-400">등록된 상품이 없습니다.</p>
       ) : (
         <ul className="space-y-3">
-          {products.map((p) => (
+          {products.map((product) => (
             <li
-              key={p.id}
+              key={product.id}
               className="flex items-center gap-4 rounded-xl border border-gray-200 bg-white px-5 py-4 shadow-sm"
             >
               
                 <div className="relative h-14 w-14 shrink-0 rounded-lg overflow-hidden border border-gray-100">
-                  {p.imageUrl&& <Image src={p.imageUrl} alt={p.name} fill unoptimized className="object-cover" />}
+                  {product.imageUrl&& <Image src={product.imageUrl} alt={product.name} fill unoptimized className="object-cover" />}
                 </div>
               
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-0.5">
-                  <p className="font-semibold text-gray-900 truncate">{p.name}</p>
-                  {!p.active && (
+                  <p className="font-semibold text-gray-900 truncate">{product.name}</p>
+                  
                     <span className="shrink-0 rounded px-1.5 py-0.5 text-xs font-medium bg-gray-100 text-gray-500">
-                      비노출
+                      {!product.active?`비노출`:`노출`}
                     </span>
-                  )}
-                  {p.soldOut && (
+                  
+                  {product.soldOut && (
                     <span className="shrink-0 rounded px-1.5 py-0.5 text-xs font-medium bg-red-100 text-red-500">
                       품절
                     </span>
                   )}
+                  {product.recommended && (
+                    <span className="shrink-0 rounded px-1.5 py-0.5 text-xs font-medium bg-red-100 text-orange-500">
+                      추천
+                    </span>
+                  )}
                 </div>
-                <p className="text-sm text-gray-500">{p.price.toLocaleString()}원</p>
+                <p className="text-sm text-gray-500">{product.price.toLocaleString()}원</p>
               </div>
               <div className="flex items-center gap-2 shrink-0">
                 <button
-                  onClick={() => openEdit(p)}
+                  onClick={() => openEdit(product)}
                   className="rounded-lg border border-gray-300 px-3 py-1 text-xs font-medium text-gray-600 hover:bg-gray-50"
                 >
                   수정
                 </button>
                 <button
-                  onClick={() => setDeleteTarget(p)}
+                  onClick={() => setDeleteTarget(product)}
                   className="rounded-lg border border-red-200 px-3 py-1 text-xs font-medium text-red-500 hover:bg-red-50"
                 >
                   삭제

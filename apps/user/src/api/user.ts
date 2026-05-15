@@ -105,17 +105,65 @@ export interface OrderHistoryItemResponse {
   price: number;
 }
 
+export interface PaymentInfoResponse {
+  amount: number;
+  pgProvider: string | null;
+  paymentMethod: string | null;
+  status: string;
+  paidAt: string | null;
+}
+
 export interface OrderHistoryResponse {
-  orderUuid: string;
+  orderNumber: string;
   totalPrice: number;
   status: string;
   orderedAt: string;
   items: OrderHistoryItemResponse[];
+  payment: PaymentInfoResponse | null;
+  canCancel: boolean;
 }
 
-export async function getOrderHistory(): Promise<OrderHistoryResponse[]> {
-  const res = await api.get<{ data: OrderHistoryResponse[] }>("/api/v1/user/orders");
+export interface OrderHistoryPageResponse {
+  content: OrderHistoryResponse[];
+  totalElements: number;
+  totalPages: number;
+  currentPage: number;
+  pageSize: number;
+}
+
+export interface OrderHistoryParams {
+  page?: number;
+  size?: number;
+  keyword?: string;
+  status?: string;
+  fromDate?: string;
+  toDate?: string;
+  paymentStatus?: string;
+}
+
+export async function getOrderHistory(params: OrderHistoryParams = {}): Promise<OrderHistoryPageResponse> {
+  const { page = 0, size = 10, keyword, status, fromDate, toDate, paymentStatus } = params;
+  const res = await api.get<{ data: OrderHistoryPageResponse }>("/api/v1/user/orders", {
+    params: {
+      page,
+      size,
+      ...(keyword ? { keyword } : {}),
+      ...(status ? { status } : {}),
+      ...(fromDate ? { fromDate } : {}),
+      ...(toDate ? { toDate } : {}),
+      ...(paymentStatus ? { paymentStatus } : {}),
+    },
+  });
   return res.data.data;
+}
+
+export async function getOrderDetail(orderNumber: string): Promise<OrderHistoryResponse> {
+  const res = await api.get<{ data: OrderHistoryResponse }>(`/api/v1/user/orders/${orderNumber}`);
+  return res.data.data;
+}
+
+export async function cancelOrder(orderNumber: string): Promise<void> {
+  await api.post(`/api/v1/user/orders/${orderNumber}/cancel`);
 }
 
 export interface UserProfileResponse {

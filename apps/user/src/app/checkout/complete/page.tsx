@@ -31,7 +31,7 @@ function CompleteContent() {
           {orderId && (
             <div className="flex justify-between text-sm">
               <span className="text-gray-500">주문번호</span>
-              <span className="font-semibold text-gray-900">#{orderId}</span>
+              <span className="font-semibold text-gray-900">{orderId}</span>
             </div>
           )}
           {amount && (

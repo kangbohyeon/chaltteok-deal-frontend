@@ -31,7 +31,7 @@ export default function Home() {
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-16 space-y-16">
-      <section>
+      {stocks?.length!==0&&(<section>
         <div className="mb-6">
           <span className="inline-block rounded-full bg-rose-100 px-3 py-1 text-xs font-semibold text-rose-600 mb-2">
             오늘만
@@ -45,7 +45,7 @@ export default function Home() {
           isError={isErrorStocks}
           participatedIds={participatedIds}
         />
-      </section>
+      </section>)}
 
       <section>
         <div className="mb-6">
