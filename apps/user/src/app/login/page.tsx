@@ -5,12 +5,14 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@chaltteok/shared-store";
 import { loginUser } from "@/api/user";
+import PasswordChangePopup from "@/components/PasswordChangePopup";
 
 export default function UserLoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showPasswordChangePopup, setShowPasswordChangePopup] = useState(false);
   const router = useRouter();
   const setAuth = useAuthStore((s) => s.setAuth);
 
@@ -19,9 +21,13 @@ export default function UserLoginPage() {
     setError(null);
     setLoading(true);
     try {
-      const { accessToken, refreshToken, userId } = await loginUser({ email, password });
+      const { accessToken, refreshToken, userId, requirePasswordChange } = await loginUser({ email, password });
       setAuth(accessToken, refreshToken, "ROLE_USER", userId);
-      router.push("/");
+      if (requirePasswordChange) {
+        setShowPasswordChangePopup(true);
+      } else {
+        router.push("/");
+      }
     } catch {
       setError("이메일 또는 비밀번호가 올바르지 않습니다.");
     } finally {
@@ -31,6 +37,14 @@ export default function UserLoginPage() {
 
   return (
     <div className="mx-auto max-w-sm px-4 py-20">
+      {showPasswordChangePopup && (
+        <PasswordChangePopup
+          onClose={() => {
+            setShowPasswordChangePopup(false);
+            router.push("/");
+          }}
+        />
+      )}
       <div className="mb-8 text-center">
         <span className="inline-block rounded-full bg-rose-100 px-3 py-1 text-xs font-semibold text-rose-600 mb-3">
           한정 이벤트

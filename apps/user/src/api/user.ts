@@ -9,6 +9,7 @@ export interface LoginResponse {
   accessToken: string;
   refreshToken: string;
   userId: number;
+  requirePasswordChange: boolean;
 }
 
 export interface RegisterRequest {
@@ -192,4 +193,18 @@ export interface ChangePasswordRequest {
 
 export async function changePassword(body: ChangePasswordRequest): Promise<void> {
   await api.patch("/api/v1/user/me/password", body);
+}
+
+export interface PopupResponse {
+  popupUuid: string;
+  title: string;
+  content: string;
+  location: string | null;
+  startDate: string | null;
+  endDate: string | null;
+}
+
+export async function getPopups(): Promise<PopupResponse[]> {
+  const res = await api.get<{ data: PopupResponse[] }>("/api/v1/user/popups");
+  return res.data.data;
 }

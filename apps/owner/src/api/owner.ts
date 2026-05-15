@@ -11,6 +11,7 @@ export interface LoginResponse {
   accessToken: string;
   refreshToken: string;
   userId: number;
+  requirePasswordChange: boolean;
 }
 
 export async function loginOwner(body: LoginRequest): Promise<LoginResponse> {
@@ -92,6 +93,56 @@ export async function toggleSoldOut(productUuid: string): Promise<void> {
 
 export async function toggleRecommend(productUuid: string): Promise<void> {
   await api.patch(`/api/v1/owner/products/${productUuid}/recommend`);
+}
+
+// ── Password Change ───────────────────────────────────────────────────────────
+
+export interface ChangePasswordRequest {
+  currentPassword?: string;
+  newPassword: string;
+}
+
+export async function changeOwnerPassword(body: ChangePasswordRequest): Promise<void> {
+  await api.patch("/api/v1/owner/me/password", body);
+}
+
+// ── Popup ─────────────────────────────────────────────────────────────────────
+
+export interface PopupRequest {
+  title: string;
+  content: string;
+  isVisible: boolean;
+  location: string | null;
+  startDate: string | null;
+  endDate: string | null;
+}
+
+export interface PopupResponse {
+  popupUuid: string;
+  title: string;
+  content: string;
+  isVisible: boolean;
+  location: string | null;
+  startDate: string | null;
+  endDate: string | null;
+  createdAt: string;
+}
+
+export async function getPopups(): Promise<PopupResponse[]> {
+  const res = await api.get<{ data: PopupResponse[] }>("/api/v1/owner/popups");
+  return res.data.data;
+}
+
+export async function createPopup(body: PopupRequest): Promise<void> {
+  await api.post("/api/v1/owner/popups", body);
+}
+
+export async function updatePopup(uuid: string, body: PopupRequest): Promise<void> {
+  await api.put(`/api/v1/owner/popups/${uuid}`, body);
+}
+
+export async function deletePopup(uuid: string): Promise<void> {
+  await api.delete(`/api/v1/owner/popups/${uuid}`);
 }
 
 // ── Daily Stock ───────────────────────────────────────────────────────────────
