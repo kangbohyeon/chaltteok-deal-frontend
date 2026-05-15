@@ -241,9 +241,6 @@ export default function OrderHistoryPage() {
                 <p className="text-sm font-semibold text-gray-800 font-mono tracking-wide">
                   {`주문번호 : ${order.orderNumber}`}
                 </p>
-                <p className="text-xs text-gray-400 mt-0.5">
-                  {new Date(order.orderedAt).toLocaleString("ko-KR")}
-                </p>
               </div>
               <div className="flex items-center gap-2 shrink-0">
                 <span
