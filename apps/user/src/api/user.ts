@@ -208,3 +208,49 @@ export async function getPopups(): Promise<PopupResponse[]> {
   const res = await api.get<{ data: PopupResponse[] }>("/api/v1/user/popups");
   return res.data.data;
 }
+
+// ── Comment ───────────────────────────────────────────────────────────────────
+
+export interface CommentResponse {
+  commentUuid: string;
+  userId: number;
+  content: string;
+  rating: number | null;
+  isSecret: boolean;
+  isOwnerReply: boolean;
+  replies: CommentResponse[];
+  createdAt: string;
+  isMine: boolean;
+}
+
+export interface CommentRequest {
+  content: string;
+  rating?: number | null;
+  isSecret?: boolean;
+}
+
+export async function getComments(productUuid: string, userId?: number): Promise<CommentResponse[]> {
+  const res = await api.get<{ data: CommentResponse[] }>(`/api/v1/user/products/${productUuid}/comments`, {
+    headers: userId ? { "X-User-Id": userId } : {},
+  });
+  return res.data.data;
+}
+
+export async function createComment(productUuid: string, body: CommentRequest): Promise<CommentResponse> {
+  const res = await api.post<{ data: CommentResponse }>(`/api/v1/user/products/${productUuid}/comments`, body);
+  return res.data.data;
+}
+
+export async function replyComment(commentUuid: string, content: string): Promise<CommentResponse> {
+  const res = await api.post<{ data: CommentResponse }>(`/api/v1/user/comments/${commentUuid}/reply`, { content });
+  return res.data.data;
+}
+
+export async function updateComment(commentUuid: string, body: CommentRequest): Promise<CommentResponse> {
+  const res = await api.put<{ data: CommentResponse }>(`/api/v1/user/comments/${commentUuid}`, body);
+  return res.data.data;
+}
+
+export async function deleteComment(commentUuid: string): Promise<void> {
+  await api.delete(`/api/v1/user/comments/${commentUuid}`);
+}

@@ -21,6 +21,8 @@ export default function PopupModal({ initial, onSave, onClose }: Props) {
   const [location, setLocation] = useState(initial?.location ?? "POPUP");
   const [startDate, setStartDate] = useState(initial?.startDate ?? "");
   const [endDate, setEndDate] = useState(initial?.endDate ?? "");
+  const [startTime, setStartTime] = useState(initial?.startTime ?? "");
+  const [endTime, setEndTime] = useState(initial?.endTime ?? "");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -36,6 +38,8 @@ export default function PopupModal({ initial, onSave, onClose }: Props) {
         location: location || null,
         startDate: startDate || null,
         endDate: endDate || null,
+        startTime: startTime || null,
+        endTime: endTime || null,
       });
       onClose();
     } catch {
@@ -119,6 +123,27 @@ export default function PopupModal({ initial, onSave, onClose }: Props) {
                 type="date"
                 value={endDate ?? ""}
                 onChange={(e) => setEndDate(e.target.value)}
+                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-700 bg-white focus:outline-none focus:ring-2 focus:ring-rose-400"
+              />
+            </div>
+          </div>
+          <div className="flex gap-3 items-center">
+            <div className="flex-1">
+              <label className="block text-sm font-medium text-gray-700 mb-1">노출 시작시간</label>
+              <input
+                type="time"
+                value={startTime ?? ""}
+                onChange={(e) => setStartTime(e.target.value)}
+                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-700 bg-white focus:outline-none focus:ring-2 focus:ring-rose-400"
+              />
+            </div>
+            <span className="flex items-center text-sm text-gray-400 mt-5">~</span>
+            <div className="flex-1">
+              <label className="block text-sm font-medium text-gray-700 mb-1">노출 종료시간</label>
+              <input
+                type="time"
+                value={endTime ?? ""}
+                onChange={(e) => setEndTime(e.target.value)}
                 className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-700 bg-white focus:outline-none focus:ring-2 focus:ring-rose-400"
               />
             </div>
