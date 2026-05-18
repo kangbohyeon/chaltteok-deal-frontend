@@ -48,6 +48,16 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                     </Link>
                   </li>
                   <li>
+                    <Link href="/notice" className="hover:text-rose-500 transition-colors">
+                      공지사항
+                    </Link>
+                  </li>
+                  <li>
+                    <Link href="/inquiry" className="hover:text-rose-500 transition-colors">
+                      문의 관리
+                    </Link>
+                  </li>
+                  <li>
                     <button
                       onClick={handleLogout}
                       className="text-gray-400 hover:text-rose-500 transition-colors"

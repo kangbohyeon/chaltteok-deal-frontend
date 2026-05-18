@@ -68,11 +68,22 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                     </>
                   )}
 
+                  <li>
+                    <Link href="/notice" className="hover:text-rose-500 transition-colors">
+                      공지사항
+                    </Link>
+                  </li>
+
                   {role === "ROLE_USER" && (
                     <>
                       <li>
                         <Link href="/history" className="hover:text-rose-500 transition-colors">
                           주문내역
+                        </Link>
+                      </li>
+                      <li>
+                        <Link href="/inquiry" className="hover:text-rose-500 transition-colors">
+                          1:1 문의
                         </Link>
                       </li>
                       <li>

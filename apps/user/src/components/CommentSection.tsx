@@ -253,6 +253,7 @@ export default function CommentSection({ productUuid, commentCount }: Props) {
   const [comments, setComments] = useState<CommentResponse[]>([]);
   const [loading, setLoading] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
+  const [liveCount, setLiveCount] = useState(commentCount);
 
   const refresh = useCallback(() => {
     setRefreshKey((k) => k + 1);
@@ -262,7 +263,10 @@ export default function CommentSection({ productUuid, commentCount }: Props) {
     if (!open) return;
     setLoading(true);
     getComments(productUuid, userId ?? undefined)
-      .then(setComments)
+      .then((data) => {
+        setComments(data);
+        setLiveCount(data.length);
+      })
       .catch(() => setComments([]))
       .finally(() => setLoading(false));
   }, [open, refreshKey, productUuid, userId]);
@@ -281,7 +285,7 @@ export default function CommentSection({ productUuid, commentCount }: Props) {
         <svg xmlns="http://www.w3.org/2000/svg" className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
           <path strokeLinecap="round" strokeLinejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
         </svg>
-        댓글 {open ? "접기" : `${commentCount > 0 ? `${commentCount}개 ` : ""}보기`}
+        댓글 {open ? "접기" : `${liveCount > 0 ? `${liveCount}개 ` : ""}보기`}
       </button>
 
       {open && (

@@ -222,3 +222,58 @@ export async function updateDailyStock(
 export async function deleteDailyStock(stockUuid: string): Promise<void> {
   await api.delete(`/api/v1/owner/daily-stocks/${stockUuid}`);
 }
+
+// ── Notice ────────────────────────────────────────────────────────────────────
+
+export interface NoticeRequest {
+  title: string;
+  content: string;
+  isVisible: boolean;
+}
+
+export interface OwnerNoticeResponse {
+  noticeUuid: string;
+  title: string;
+  content: string;
+  isVisible: boolean;
+  createdAt: string;
+}
+
+export async function getOwnerNotices(): Promise<OwnerNoticeResponse[]> {
+  const res = await api.get<{ data: OwnerNoticeResponse[] }>("/api/v1/owner/notices");
+  return res.data.data;
+}
+
+export async function createNotice(body: NoticeRequest): Promise<void> {
+  await api.post("/api/v1/owner/notices", body);
+}
+
+export async function updateNotice(uuid: string, body: NoticeRequest): Promise<void> {
+  await api.put(`/api/v1/owner/notices/${uuid}`, body);
+}
+
+export async function deleteNotice(uuid: string): Promise<void> {
+  await api.delete(`/api/v1/owner/notices/${uuid}`);
+}
+
+// ── Inquiry ───────────────────────────────────────────────────────────────────
+
+export interface OwnerInquiryResponse {
+  inquiryUuid: string;
+  userId: number;
+  title: string;
+  content: string;
+  status: string;
+  answer: string | null;
+  answeredAt: string | null;
+  createdAt: string;
+}
+
+export async function getOwnerInquiries(): Promise<OwnerInquiryResponse[]> {
+  const res = await api.get<{ data: OwnerInquiryResponse[] }>("/api/v1/owner/inquiries");
+  return res.data.data;
+}
+
+export async function answerInquiry(uuid: string, answer: string): Promise<void> {
+  await api.put(`/api/v1/owner/inquiries/${uuid}/answer`, { answer });
+}
