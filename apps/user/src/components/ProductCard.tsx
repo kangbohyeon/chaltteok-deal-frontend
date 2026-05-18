@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useCartStore } from "@chaltteok/shared-store";
 import { type ProductResponse } from "@/api/user";
+import CommentSection from "./CommentSection";
 
 interface ProductCardProps {
   product: ProductResponse;
@@ -66,6 +67,7 @@ export default function ProductCard({ product }: ProductCardProps) {
           {product.soldOut ? "품절" : "담기"}
         </button>
       </div>
+      <CommentSection productUuid={product.productUuid} />
     </div>
   );
 }

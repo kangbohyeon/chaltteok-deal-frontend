@@ -115,6 +115,8 @@ export interface PopupRequest {
   location: string | null;
   startDate: string | null;
   endDate: string | null;
+  startTime: string | null;
+  endTime: string | null;
 }
 
 export interface PopupResponse {
@@ -125,6 +127,8 @@ export interface PopupResponse {
   location: string | null;
   startDate: string | null;
   endDate: string | null;
+  startTime: string | null;
+  endTime: string | null;
   createdAt: string;
 }
 
@@ -143,6 +147,36 @@ export async function updatePopup(uuid: string, body: PopupRequest): Promise<voi
 
 export async function deletePopup(uuid: string): Promise<void> {
   await api.delete(`/api/v1/owner/popups/${uuid}`);
+}
+
+// ── Comment ───────────────────────────────────────────────────────────────────
+
+export interface OwnerCommentResponse {
+  commentId: number;
+  commentUuid: string;
+  productUuid: string;
+  productName: string;
+  userId: number;
+  content: string;
+  rating: number | null;
+  isSecret: boolean;
+  isOwnerReply: boolean;
+  parentId: number | null;
+  createdAt: string;
+}
+
+export async function getOwnerComments(): Promise<OwnerCommentResponse[]> {
+  const res = await api.get<{ data: OwnerCommentResponse[] }>("/api/v1/owner/comments");
+  return res.data.data;
+}
+
+export async function deleteOwnerComment(commentUuid: string): Promise<void> {
+  await api.delete(`/api/v1/owner/comments/${commentUuid}`);
+}
+
+export async function replyOwnerComment(commentUuid: string, content: string): Promise<OwnerCommentResponse> {
+  const res = await api.post<{ data: OwnerCommentResponse }>(`/api/v1/owner/comments/${commentUuid}/reply`, { content });
+  return res.data.data;
 }
 
 // ── Daily Stock ───────────────────────────────────────────────────────────────

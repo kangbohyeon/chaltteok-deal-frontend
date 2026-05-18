@@ -160,6 +160,8 @@ export default function PopupPage() {
                   location: editTarget.location,
                   startDate: editTarget.startDate,
                   endDate: editTarget.endDate,
+                  startTime: editTarget.startTime,
+                  endTime: editTarget.endTime,
                 }
               : undefined
           }
