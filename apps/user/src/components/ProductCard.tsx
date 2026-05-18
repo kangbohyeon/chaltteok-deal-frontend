@@ -67,7 +67,7 @@ export default function ProductCard({ product }: ProductCardProps) {
           {product.soldOut ? "품절" : "담기"}
         </button>
       </div>
-      <CommentSection productUuid={product.productUuid} />
+      <CommentSection productUuid={product.productUuid} commentCount={product.commentCount} />
     </div>
   );
 }

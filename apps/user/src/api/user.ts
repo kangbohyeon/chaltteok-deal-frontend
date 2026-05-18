@@ -60,6 +60,7 @@ export interface ProductResponse {
   description: string | null;
   thumbnailUrl: string | null;
   soldOut: boolean;
+  commentCount: number;
 }
 
 export async function getProducts(): Promise<ProductResponse[]> {
