@@ -8,7 +8,7 @@ import { loginUser } from "@/api/user";
 import PasswordChangePopup from "@/components/PasswordChangePopup";
 
 export default function UserLoginPage() {
-  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -21,7 +21,7 @@ export default function UserLoginPage() {
     setError(null);
     setLoading(true);
     try {
-      const { accessToken, refreshToken, userId, requirePasswordChange } = await loginUser({ email, password });
+      const { accessToken, refreshToken, userId, requirePasswordChange } = await loginUser({ username, password });
       setAuth(accessToken, refreshToken, "ROLE_USER", userId);
       if (requirePasswordChange) {
         setShowPasswordChangePopup(true);
@@ -61,8 +61,8 @@ export default function UserLoginPage() {
           <label className="block text-sm font-medium text-gray-700 mb-1">이메일</label>
           <input
             type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
             required
             placeholder="example@email.com"
             className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-black focus:outline-none focus:ring-2 focus:ring-rose-400"
@@ -85,7 +85,7 @@ export default function UserLoginPage() {
 
         <button
           type="submit"
-          disabled={loading || !email || !password}
+          disabled={loading || !username || !password}
           className="w-full rounded-lg bg-rose-500 py-2.5 text-sm font-semibold text-white hover:bg-rose-600 disabled:opacity-50 transition-colors"
         >
           {loading ? "로그인 중..." : "로그인"}

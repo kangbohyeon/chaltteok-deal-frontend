@@ -1,7 +1,7 @@
 import api from "@chaltteok/shared-api";
 
 export interface LoginRequest {
-  email: string;
+  username: string;
   password: string;
 }
 
@@ -207,6 +207,47 @@ export interface PopupResponse {
 
 export async function getPopups(): Promise<PopupResponse[]> {
   const res = await api.get<{ data: PopupResponse[] }>("/api/v1/user/popups");
+  return res.data.data;
+}
+
+// ── Notice ────────────────────────────────────────────────────────────────────
+
+export interface NoticeResponse {
+  noticeUuid: string;
+  title: string;
+  content: string;
+  createdAt: string;
+}
+
+export async function getNotices(): Promise<NoticeResponse[]> {
+  const res = await api.get<{ data: NoticeResponse[] }>("/api/v1/user/notices");
+  return res.data.data;
+}
+
+// ── Inquiry ───────────────────────────────────────────────────────────────────
+
+export interface InquiryRequest {
+  title: string;
+  content: string;
+}
+
+export interface InquiryResponse {
+  inquiryUuid: string;
+  title: string;
+  content: string;
+  status: string;
+  answer: string | null;
+  answeredAt: string | null;
+  createdAt: string;
+}
+
+export async function getMyInquiries(): Promise<InquiryResponse[]> {
+  const res = await api.get<{ data: InquiryResponse[] }>("/api/v1/user/inquiries");
+  return res.data.data;
+}
+
+export async function createInquiry(body: InquiryRequest): Promise<InquiryResponse> {
+  const res = await api.post<{ data: InquiryResponse }>("/api/v1/user/inquiries", body);
   return res.data.data;
 }
 
