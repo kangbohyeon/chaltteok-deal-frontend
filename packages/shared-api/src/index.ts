@@ -43,6 +43,11 @@ api.interceptors.response.use(
       return Promise.reject(error);
     }
 
+    // 인증 헤더 없이 보낸 요청(비로그인 상태)의 401은 리다이렉트 없이 조용히 거부
+    if (!originalRequest.headers?.["Authorization"]) {
+      return Promise.reject(error);
+    }
+
     if (isRefreshing) {
       return new Promise<string>((resolve, reject) => {
         failedQueue.push({ resolve, reject });
