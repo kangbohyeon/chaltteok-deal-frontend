@@ -53,7 +53,7 @@ interface CommentFormProps {
   isReply?: boolean;
 }
 
-function CommentForm({ productUuid, parentUuid, initial, onSubmit, onCancel, isReply }: CommentFormProps) {
+function CommentForm({ initial, onSubmit, onCancel, isReply }: CommentFormProps) {
   const [content, setContent] = useState(initial?.content ?? "");
   const [rating, setRating] = useState<number | null>(initial?.rating ?? null);
   const [isSecret, setIsSecret] = useState(initial?.isSecret ?? false);
@@ -134,9 +134,10 @@ interface CommentItemProps {
   currentUserId: number | null;
   onDeleted: () => void;
   onReplied: () => void;
+  isNested?: boolean;
 }
 
-function CommentItem({ comment, currentUserId, onDeleted, onReplied }: CommentItemProps) {
+function CommentItem({ comment, currentUserId, onDeleted, onReplied, isNested }: CommentItemProps) {
   const [showReplyForm, setShowReplyForm] = useState(false);
   const [showEditForm, setShowEditForm] = useState(false);
 
@@ -208,7 +209,7 @@ function CommentItem({ comment, currentUserId, onDeleted, onReplied }: CommentIt
                 </button>
               </>
             )}
-            {!comment.isOwnerReply && currentUserId != null && (
+            {!comment.isOwnerReply && !isNested && currentUserId != null && (
               <button
                 onClick={() => setShowReplyForm((v) => !v)}
                 className="text-[10px] text-gray-400 hover:text-rose-500 transition-colors"
@@ -239,6 +240,7 @@ function CommentItem({ comment, currentUserId, onDeleted, onReplied }: CommentIt
               currentUserId={currentUserId}
               onDeleted={onDeleted}
               onReplied={onReplied}
+              isNested
             />
           ))}
         </div>
