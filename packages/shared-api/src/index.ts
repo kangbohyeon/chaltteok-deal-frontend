@@ -43,8 +43,10 @@ api.interceptors.response.use(
       return Promise.reject(error);
     }
 
-    // 인증 헤더 없이 보낸 요청(비로그인 상태)의 401은 리다이렉트 없이 조용히 거부
-    if (!originalRequest.headers?.["Authorization"]) {
+    // 비로그인 상태(refreshToken 없음)의 401은 리다이렉트 없이 조용히 거부
+    // refreshToken이 있으면(새로고침 후 accessToken 소실 시나리오) 재발급 진행
+    const { refreshToken: existingRefresh } = useAuthStore.getState();
+    if (!originalRequest.headers?.["Authorization"] && !existingRefresh) {
       return Promise.reject(error);
     }
 
