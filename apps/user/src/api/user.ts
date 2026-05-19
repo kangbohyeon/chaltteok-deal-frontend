@@ -271,11 +271,32 @@ export interface CommentRequest {
   isSecret?: boolean;
 }
 
-export async function getComments(productUuid: string, userId?: number): Promise<CommentResponse[]> {
-  const res = await api.get<{ data: CommentResponse[] }>(`/api/v1/user/products/${productUuid}/comments`, {
+export interface CommentPageResponse {
+  content: CommentResponse[];
+  totalElements: number;
+  totalPages: number;
+  currentPage: number;
+  pageSize: number;
+}
+
+export async function getComments(
+  productUuid: string,
+  userId?: number,
+  page = 0,
+  size = 10,
+): Promise<CommentPageResponse> {
+  const res = await api.get<{ data: CommentPageResponse }>(`/api/v1/user/products/${productUuid}/comments`, {
     headers: userId ? { "X-User-Id": userId } : {},
+    params: { page, size },
   });
   return res.data.data;
+}
+
+export async function checkEmailDuplicate(email: string): Promise<boolean> {
+  const res = await api.get<{ data: { duplicate: boolean } }>("/api/v1/user/auth/check-email", {
+    params: { email },
+  });
+  return res.data.data.duplicate;
 }
 
 export async function createComment(productUuid: string, body: CommentRequest): Promise<CommentResponse> {
