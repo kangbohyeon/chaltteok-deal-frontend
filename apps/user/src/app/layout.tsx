@@ -55,24 +55,22 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                     </Link>
                   </li>
 
-                  {!role && (
-                    <>
-                      <li>
-                        <Link
-                          href="/login"
-                          className="rounded-full bg-rose-500 px-4 py-1.5 text-white hover:bg-rose-600 transition-colors"
-                        >
-                          로그인
-                        </Link>
-                      </li>
-                    </>
-                  )}
-
                   <li>
                     <Link href="/notice" className="hover:text-rose-500 transition-colors">
                       공지사항
                     </Link>
                   </li>
+
+                  {!role && (
+                    <li>
+                      <Link
+                        href="/login"
+                        className="rounded-full bg-rose-500 px-4 py-1.5 text-white hover:bg-rose-600 transition-colors"
+                      >
+                        로그인
+                      </Link>
+                    </li>
+                  )}
 
                   {role === "ROLE_USER" && (
                     <>

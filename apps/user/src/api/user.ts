@@ -255,7 +255,7 @@ export async function createInquiry(body: InquiryRequest): Promise<InquiryRespon
 
 export interface CommentResponse {
   commentUuid: string;
-  userId: number;
+  nickname: string | null;
   content: string;
   rating: number | null;
   isSecret: boolean;

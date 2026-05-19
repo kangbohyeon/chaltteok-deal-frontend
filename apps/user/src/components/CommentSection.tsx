@@ -169,7 +169,7 @@ function CommentItem({ comment, currentUserId, onDeleted, onReplied, isNested }:
         <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-2">
             <span className={`text-xs font-semibold ${comment.isOwnerReply ? "text-rose-600" : "text-gray-700"}`}>
-              {comment.isOwnerReply ? "점주" : `사용자 ${comment.userId}`}
+              {comment.isOwnerReply ? "점주" : (comment.nickname ?? "사용자")}
             </span>
             {comment.isSecret && (
               <span className="rounded-full bg-gray-200 px-1.5 py-0.5 text-[10px] text-gray-500">비밀</span>
@@ -188,6 +188,8 @@ function CommentItem({ comment, currentUserId, onDeleted, onReplied, isNested }:
             onSubmit={handleEdit}
             onCancel={() => setShowEditForm(false)}
           />
+        ) : comment.isSecret && !comment.isMine ? (
+          <p className="text-sm text-gray-400 italic">비밀댓글입니다.</p>
         ) : (
           <p className="text-sm text-gray-700">{comment.content}</p>
         )}
