@@ -60,7 +60,7 @@ function CommentForm({ initial, onSubmit, onCancel, isReply }: CommentFormProps)
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!content.trim()) return;
     setLoading(true);
@@ -135,11 +135,14 @@ interface CommentItemProps {
   onDeleted: () => void;
   onReplied: () => void;
   isNested?: boolean;
+  parentIsSecret?: boolean;
 }
 
-function CommentItem({ comment, currentUserId, onDeleted, onReplied, isNested }: CommentItemProps) {
+function CommentItem({ comment, currentUserId, onDeleted, onReplied, isNested, parentIsSecret }: CommentItemProps) {
   const [showReplyForm, setShowReplyForm] = useState(false);
   const [showEditForm, setShowEditForm] = useState(false);
+
+  const isContentMasked = (comment.isSecret && !comment.isMine) || (parentIsSecret ?? false);
 
   const handleDelete = async () => {
     if (!confirm("댓글을 삭제하시겠습니까?")) return;
@@ -188,7 +191,7 @@ function CommentItem({ comment, currentUserId, onDeleted, onReplied, isNested }:
             onSubmit={handleEdit}
             onCancel={() => setShowEditForm(false)}
           />
-        ) : comment.isSecret && !comment.isMine ? (
+        ) : isContentMasked ? (
           <p className="text-sm text-gray-400 italic">비밀댓글입니다.</p>
         ) : (
           <p className="text-sm text-gray-700">{comment.content}</p>
@@ -243,6 +246,7 @@ function CommentItem({ comment, currentUserId, onDeleted, onReplied, isNested }:
               onDeleted={onDeleted}
               onReplied={onReplied}
               isNested
+              parentIsSecret={comment.isSecret && !comment.isMine}
             />
           ))}
         </div>
@@ -256,24 +260,28 @@ export default function CommentSection({ productUuid, commentCount }: Props) {
   const [open, setOpen] = useState(false);
   const [comments, setComments] = useState<CommentResponse[]>([]);
   const [loading, setLoading] = useState(false);
+  const [page, setPage] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
+  const [totalElements, setTotalElements] = useState(commentCount);
   const [refreshKey, setRefreshKey] = useState(0);
-  const [liveCount, setLiveCount] = useState(commentCount);
 
   const refresh = useCallback(() => {
+    setPage(0);
     setRefreshKey((k) => k + 1);
   }, []);
 
   useEffect(() => {
     if (!open) return;
     setLoading(true);
-    getComments(productUuid, userId ?? undefined)
+    getComments(productUuid, userId ?? undefined, page, 10)
       .then((data) => {
-        setComments(data);
-        setLiveCount(data.length);
+        setComments(data.content);
+        setTotalPages(data.totalPages);
+        setTotalElements(data.totalElements);
       })
       .catch(() => setComments([]))
       .finally(() => setLoading(false));
-  }, [open, refreshKey, productUuid, userId]);
+  }, [open, refreshKey, page, productUuid, userId]);
 
   const handleCreate = async (content: string, rating: number | null, isSecret: boolean) => {
     await createComment(productUuid, { content, rating, isSecret });
@@ -289,14 +297,14 @@ export default function CommentSection({ productUuid, commentCount }: Props) {
         <svg xmlns="http://www.w3.org/2000/svg" className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
           <path strokeLinecap="round" strokeLinejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
         </svg>
-        댓글 {open ? "접기" : `${liveCount > 0 ? `${liveCount}개 ` : ""}보기`}
+        댓글 {open ? "접기" : `${totalElements > 0 ? `${totalElements}개 ` : ""}보기`}
       </button>
 
       {open && (
         <div className="mt-3 space-y-3">
           {loading && <p className="text-xs text-gray-400">불러오는 중...</p>}
 
-          {!loading && comments.length === 0 && (
+          {!loading && comments.length === 0 && page === 0 && (
             <p className="text-xs text-gray-400">첫 번째 댓글을 남겨보세요.</p>
           )}
 
@@ -309,6 +317,24 @@ export default function CommentSection({ productUuid, commentCount }: Props) {
               onReplied={refresh}
             />
           ))}
+
+          {!loading && totalPages > 1 && (
+            <div className="flex items-center justify-center gap-1 pt-1">
+              {Array.from({ length: totalPages }, (_, i) => (
+                <button
+                  key={i}
+                  onClick={() => setPage(i)}
+                  className={`w-6 h-6 rounded text-xs font-medium transition-colors ${
+                    page === i
+                      ? "bg-rose-500 text-white"
+                      : "text-gray-500 hover:bg-gray-100"
+                  }`}
+                >
+                  {i + 1}
+                </button>
+              ))}
+            </div>
+          )}
 
           {role === "ROLE_USER" && userId != null && (
             <div className="pt-2 border-t border-gray-100">

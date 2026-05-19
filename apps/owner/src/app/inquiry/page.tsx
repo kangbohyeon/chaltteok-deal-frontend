@@ -13,6 +13,8 @@ const STATUS_COLOR: Record<string, string> = {
   ANSWERED: "bg-green-100 text-green-700",
 };
 
+const PAGE_SIZE = 10;
+
 export default function InquiryPage() {
   const [inquiries, setInquiries] = useState<OwnerInquiryResponse[]>([]);
   const [loading, setLoading] = useState(true);
@@ -20,15 +22,22 @@ export default function InquiryPage() {
   const [expanded, setExpanded] = useState<string | null>(null);
   const [answerForms, setAnswerForms] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState<string | null>(null);
+  const [page, setPage] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
+  const [totalElements, setTotalElements] = useState(0);
   const [refreshKey, setRefreshKey] = useState(0);
 
   useEffect(() => {
     setLoading(true);
-    getOwnerInquiries()
-      .then(setInquiries)
+    getOwnerInquiries(page, PAGE_SIZE)
+      .then((data) => {
+        setInquiries(data.content);
+        setTotalPages(data.totalPages);
+        setTotalElements(data.totalElements);
+      })
       .catch(() => setError("문의 목록을 불러오지 못했습니다."))
       .finally(() => setLoading(false));
-  }, [refreshKey]);
+  }, [page, refreshKey]);
 
   const handleAnswer = async (uuid: string) => {
     const answer = answerForms[uuid]?.trim();
@@ -47,7 +56,12 @@ export default function InquiryPage() {
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-10">
-      <h1 className="text-2xl font-bold text-gray-900 mb-6">1:1 문의 관리</h1>
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-2xl font-bold text-gray-900">1:1 문의 관리</h1>
+        {totalElements > 0 && (
+          <span className="text-sm text-gray-500">총 {totalElements}개</span>
+        )}
+      </div>
 
       {loading && <div className="text-center py-20 text-gray-400">불러오는 중...</div>}
       {error && (
@@ -143,6 +157,38 @@ export default function InquiryPage() {
           </li>
         ))}
       </ul>
+
+      {!loading && totalPages > 1 && (
+        <div className="flex items-center justify-center gap-1 mt-8">
+          <button
+            onClick={() => setPage((p) => Math.max(0, p - 1))}
+            disabled={page === 0}
+            className="rounded-lg border border-gray-200 px-3 py-1.5 text-xs font-medium text-gray-600 hover:bg-gray-50 disabled:opacity-40 transition-colors"
+          >
+            이전
+          </button>
+          {Array.from({ length: totalPages }, (_, i) => (
+            <button
+              key={i}
+              onClick={() => setPage(i)}
+              className={`w-8 h-8 rounded-lg text-xs font-medium transition-colors ${
+                page === i
+                  ? "bg-rose-500 text-white"
+                  : "border border-gray-200 text-gray-600 hover:bg-gray-50"
+              }`}
+            >
+              {i + 1}
+            </button>
+          ))}
+          <button
+            onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
+            disabled={page === totalPages - 1}
+            className="rounded-lg border border-gray-200 px-3 py-1.5 text-xs font-medium text-gray-600 hover:bg-gray-50 disabled:opacity-40 transition-colors"
+          >
+            다음
+          </button>
+        </div>
+      )}
     </div>
   );
 }

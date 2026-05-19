@@ -162,11 +162,22 @@ export interface OwnerCommentResponse {
   isSecret: boolean;
   isOwnerReply: boolean;
   parentId: number | null;
+  replies: OwnerCommentResponse[];
   createdAt: string;
 }
 
-export async function getOwnerComments(): Promise<OwnerCommentResponse[]> {
-  const res = await api.get<{ data: OwnerCommentResponse[] }>("/api/v1/owner/comments");
+export interface OwnerCommentPageResponse {
+  content: OwnerCommentResponse[];
+  totalElements: number;
+  totalPages: number;
+  currentPage: number;
+  pageSize: number;
+}
+
+export async function getOwnerComments(page = 0, size = 10): Promise<OwnerCommentPageResponse> {
+  const res = await api.get<{ data: OwnerCommentPageResponse }>("/api/v1/owner/comments", {
+    params: { page, size },
+  });
   return res.data.data;
 }
 
@@ -269,8 +280,18 @@ export interface OwnerInquiryResponse {
   createdAt: string;
 }
 
-export async function getOwnerInquiries(): Promise<OwnerInquiryResponse[]> {
-  const res = await api.get<{ data: OwnerInquiryResponse[] }>("/api/v1/owner/inquiries");
+export interface OwnerInquiryPageResponse {
+  content: OwnerInquiryResponse[];
+  totalElements: number;
+  totalPages: number;
+  currentPage: number;
+  pageSize: number;
+}
+
+export async function getOwnerInquiries(page = 0, size = 10): Promise<OwnerInquiryPageResponse> {
+  const res = await api.get<{ data: OwnerInquiryPageResponse }>("/api/v1/owner/inquiries", {
+    params: { page, size },
+  });
   return res.data.data;
 }
 
