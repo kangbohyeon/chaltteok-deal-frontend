@@ -273,7 +273,7 @@ export default function CommentSection({ productUuid, commentCount }: Props) {
   useEffect(() => {
     if (!open) return;
     setLoading(true);
-    getComments(productUuid, userId ?? undefined, page, 10)
+    getComments(productUuid, userId ?? undefined, page, 5)
       .then((data) => {
         setComments(data.content);
         setTotalPages(data.totalPages);
