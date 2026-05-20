@@ -116,6 +116,27 @@ export default function RecommendedSection({ products, isLoading, isError }: Pro
             {product.name}
           </h3>
 
+          {product.averageRating != null && (
+            <div className="flex items-center gap-1.5">
+              <div className="flex gap-0.5">
+                {[1, 2, 3, 4, 5].map((s) => (
+                  <span
+                    key={s}
+                    className={`text-sm leading-none ${product.averageRating! >= s ? "text-amber-400" : "text-gray-200"}`}
+                  >
+                    ★
+                  </span>
+                ))}
+              </div>
+              <span className="text-xs text-gray-500">
+                {product.averageRating.toFixed(1)}
+                {product.commentCount > 0 && (
+                  <span className="ml-1 text-gray-400">({product.commentCount})</span>
+                )}
+              </span>
+            </div>
+          )}
+
           {product.description && (
             <p className="text-sm text-gray-500 line-clamp-2 leading-relaxed">
               {product.description}
