@@ -18,7 +18,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         defaultOptions: { queries: { staleTime: 60 * 1000, retry: 1 } },
       }),
   );
-  const { role, clearAuth } = useAuthStore();
+  const role = useAuthStore((s) => s.role);
+  const nickname = useAuthStore((s) => s.nickname);
+  const clearAuth = useAuthStore((s) => s.clearAuth);
   const cartCount = useCartStore((s) => s.totalCount());
   const router = useRouter();
 
@@ -90,6 +92,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                         </Link>
                       </li>
                     </>
+                  )}
+
+                  {role === "ROLE_USER" && nickname && (
+                    <li>
+                      <span className="text-sm font-medium text-rose-500">{nickname}님</span>
+                    </li>
                   )}
 
                   {role && (

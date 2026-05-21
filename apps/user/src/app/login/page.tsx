@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@chaltteok/shared-store";
-import { loginUser } from "@/api/user";
+import { loginUser, getMyProfile } from "@/api/user";
 import PasswordChangePopup from "@/components/PasswordChangePopup";
 
 export default function UserLoginPage() {
@@ -15,14 +15,16 @@ export default function UserLoginPage() {
   const [showPasswordChangePopup, setShowPasswordChangePopup] = useState(false);
   const router = useRouter();
   const setAuth = useAuthStore((s) => s.setAuth);
+  const setNickname = useAuthStore((s) => s.setNickname);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError(null);
     setLoading(true);
     try {
       const { accessToken, refreshToken, userId, requirePasswordChange } = await loginUser({ username, password });
       setAuth(accessToken, refreshToken, "ROLE_USER", userId);
+      getMyProfile().then((p) => setNickname(p.nickname)).catch(() => {});
       if (requirePasswordChange) {
         setShowPasswordChangePopup(true);
       } else {

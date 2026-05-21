@@ -26,7 +26,7 @@ export function useMyProfile() {
       .finally(() => setLoading(false));
   }, []);
 
-  const updateNickname = async (nickname: string) => {
+  const updateNickname = async (nickname: string): Promise<string | null> => {
     setSaving(true);
     setSuccess(false);
     setError(null);
@@ -34,8 +34,10 @@ export function useMyProfile() {
       const updated = await updateMyProfile({ nickname });
       setProfile(updated);
       setSuccess(true);
+      return updated.nickname;
     } catch {
       setError("닉네임 변경에 실패했습니다.");
+      return null;
     } finally {
       setSaving(false);
     }
