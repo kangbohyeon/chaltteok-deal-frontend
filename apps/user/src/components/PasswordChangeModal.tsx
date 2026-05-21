@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type SyntheticEvent } from "react";
+import { useId, useMemo, useState, type SyntheticEvent } from "react";
 
 const PASSWORD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]).{10,}$/;
 
@@ -26,14 +26,15 @@ export default function PasswordChangeModal({ saving, error, success, onSubmit, 
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [validationError, setValidationError] = useState<string | null>(null);
+  const titleId = useId();
 
-  const pwRules = {
+  const pwRules = useMemo(() => ({
     length: newPassword.length >= 10,
     upper: /[A-Z]/.test(newPassword),
     lower: /[a-z]/.test(newPassword),
     digit: /\d/.test(newPassword),
     special: /[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/.test(newPassword),
-  };
+  }), [newPassword]);
 
   const handleSubmit = (e: SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -56,10 +57,15 @@ export default function PasswordChangeModal({ saving, error, success, onSubmit, 
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/40"
       onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
     >
-      <div className="w-full max-w-sm rounded-2xl bg-white p-8 shadow-xl">
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={titleId}
+        className="w-full max-w-sm rounded-2xl bg-white p-8 shadow-xl"
+      >
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-lg font-bold text-gray-900">비밀번호 변경</h2>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-xl leading-none">✕</button>
+          <h2 id={titleId} className="text-lg font-bold text-gray-900">비밀번호 변경</h2>
+          <button onClick={onClose} aria-label="닫기" className="text-gray-400 hover:text-gray-600 text-xl leading-none">✕</button>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-3">

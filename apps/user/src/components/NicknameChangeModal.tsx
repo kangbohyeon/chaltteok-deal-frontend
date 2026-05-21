@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type SyntheticEvent } from "react";
+import { useEffect, useId, useState, type SyntheticEvent } from "react";
 
 interface Props {
   currentNickname: string;
@@ -13,6 +13,14 @@ interface Props {
 
 export default function NicknameChangeModal({ currentNickname, saving, error, success, onSubmit, onClose }: Props) {
   const [nickname, setNickname] = useState("");
+  const titleId = useId();
+
+  useEffect(() => {
+    if (success) {
+      const timer = setTimeout(onClose, 1200);
+      return () => clearTimeout(timer);
+    }
+  }, [success, onClose]);
 
   const handleSubmit = (e: SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -25,10 +33,15 @@ export default function NicknameChangeModal({ currentNickname, saving, error, su
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/40"
       onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
     >
-      <div className="w-full max-w-sm rounded-2xl bg-white p-8 shadow-xl">
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={titleId}
+        className="w-full max-w-sm rounded-2xl bg-white p-8 shadow-xl"
+      >
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-lg font-bold text-gray-900">닉네임 변경</h2>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-xl leading-none">✕</button>
+          <h2 id={titleId} className="text-lg font-bold text-gray-900">닉네임 변경</h2>
+          <button onClick={onClose} aria-label="닫기" className="text-gray-400 hover:text-gray-600 text-xl leading-none">✕</button>
         </div>
 
         <p className="text-sm text-gray-500 mb-4">
@@ -43,6 +56,7 @@ export default function NicknameChangeModal({ currentNickname, saving, error, su
             placeholder="새 닉네임을 입력하세요"
             required
             autoFocus
+            maxLength={30}
             className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-rose-400"
           />
 

@@ -18,7 +18,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         defaultOptions: { queries: { staleTime: 60 * 1000, retry: 1 } },
       }),
   );
-  const { role, nickname, clearAuth } = useAuthStore();
+  const role = useAuthStore((s) => s.role);
+  const nickname = useAuthStore((s) => s.nickname);
+  const clearAuth = useAuthStore((s) => s.clearAuth);
   const cartCount = useCartStore((s) => s.totalCount());
   const router = useRouter();
 

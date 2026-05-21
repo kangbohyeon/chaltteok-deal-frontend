@@ -25,8 +25,8 @@ export default function ProfilePage() {
   }
 
   const handleNicknameSubmit = async (nickname: string) => {
-    const ok = await updateNickname(nickname);
-    if (ok) setNickname(nickname);
+    const serverNickname = await updateNickname(nickname);
+    if (serverNickname) setNickname(serverNickname);
   };
 
   const handlePasswordSubmit = (currentPassword: string | undefined, newPassword: string) => {
