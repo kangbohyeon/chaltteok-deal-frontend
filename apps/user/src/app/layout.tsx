@@ -35,14 +35,35 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <QueryClientProvider client={queryClient}>
           <div className="flex flex-col min-h-screen">
             <header className="sticky top-0 z-50 border-b border-gray-200 bg-white">
-              <nav className="mx-auto grid max-w-5xl grid-cols-[auto_1fr_auto] items-center gap-4 px-4 py-3">
-                {/* 로고 */}
+              {/* 상단 바: 닉네임 + 로그인/로그아웃 */}
+              <div className="mx-auto flex max-w-5xl items-center justify-end gap-3 px-4 py-1.5 text-xs font-medium text-gray-500 border-b border-gray-100">
+                {role === "ROLE_USER" && nickname && (
+                  <span className="text-rose-500 font-semibold">{nickname}님</span>
+                )}
+                {role ? (
+                  <button
+                    onClick={handleLogout}
+                    className="hover:text-rose-500 transition-colors"
+                  >
+                    로그아웃
+                  </button>
+                ) : (
+                  <Link
+                    href="/login"
+                    className="rounded-full bg-rose-500 px-3 py-1 text-white text-xs hover:bg-rose-600 transition-colors"
+                  >
+                    로그인
+                  </Link>
+                )}
+              </div>
+
+              {/* 하단 바: 로고 + 네비 탭 */}
+              <nav className="mx-auto flex max-w-5xl items-center justify-between px-4 py-3">
                 <Link href="/" className="text-xl font-bold text-rose-500">
                   찰떡
                 </Link>
 
-                {/* 네비 탭 */}
-                <ul className="flex items-center justify-center gap-6 text-sm font-medium text-gray-600">
+                <ul className="flex items-center gap-6 text-sm font-medium text-gray-600">
                   <li>
                     <Link href="/" className="hover:text-rose-500 transition-colors">
                       홈
@@ -76,7 +97,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                         <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
                       </svg>
                     </button>
-                    <ul className="absolute left-1/2 -translate-x-1/2 top-full pt-2 hidden group-hover:block z-50 min-w-[7rem]">
+                    <ul className="absolute left-1/2 -translate-x-1/2 top-full pt-2 hidden group-hover:block z-50 min-w-28">
                       <div className="rounded-xl border border-gray-200 bg-white py-1 shadow-lg">
                         <li>
                           <Link
@@ -108,29 +129,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                     </li>
                   )}
                 </ul>
-
-                {/* 사용자 영역 (닉네임 + 로그인/로그아웃) */}
-                <div className="flex items-center gap-3 text-sm font-medium">
-                  {role === "ROLE_USER" && nickname && (
-                    <span className="text-rose-500 font-semibold">{nickname}님</span>
-                  )}
-
-                  {role ? (
-                    <button
-                      onClick={handleLogout}
-                      className="text-gray-400 hover:text-rose-500 transition-colors"
-                    >
-                      로그아웃
-                    </button>
-                  ) : (
-                    <Link
-                      href="/login"
-                      className="rounded-full bg-rose-500 px-4 py-1.5 text-white hover:bg-rose-600 transition-colors"
-                    >
-                      로그인
-                    </Link>
-                  )}
-                </div>
               </nav>
             </header>
             <main className="flex-1">{children}</main>
