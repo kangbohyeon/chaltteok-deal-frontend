@@ -22,8 +22,8 @@ export default function UserLoginPage() {
     setError(null);
     setLoading(true);
     try {
-      const { accessToken, refreshToken, userId, requirePasswordChange } = await loginUser({ username, password });
-      setAuth(accessToken, refreshToken, "ROLE_USER", userId);
+      const { accessToken, refreshToken, userUuid, requirePasswordChange } = await loginUser({ username, password });
+      setAuth(accessToken, refreshToken, "ROLE_USER", userUuid);
       getMyProfile().then((p) => setNickname(p.nickname)).catch(() => {});
       if (requirePasswordChange) {
         setShowPasswordChangePopup(true);

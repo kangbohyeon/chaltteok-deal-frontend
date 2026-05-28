@@ -7,15 +7,11 @@ const api = axios.create({
   timeout: 10000,
 });
 
-// ── Request: JWT + role 헤더 자동 주입 ────────────────────────────
+// ── Request: JWT 헤더 자동 주입 (userId는 서버에서 JWT로 추출) ───
 api.interceptors.request.use((config) => {
-  const { accessToken, role, userId } = useAuthStore.getState();
+  const { accessToken } = useAuthStore.getState();
   if (accessToken) {
     config.headers["Authorization"] = `Bearer ${accessToken}`;
-  }
-  if (userId) {
-    if (role === "ROLE_OWNER") config.headers["X-Owner-Id"] = String(userId);
-    if (role === "ROLE_USER") config.headers["X-User-Id"] = String(userId);
   }
   return config;
 });

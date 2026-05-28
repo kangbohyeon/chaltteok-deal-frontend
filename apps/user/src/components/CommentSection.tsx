@@ -131,14 +131,14 @@ function CommentForm({ initial, onSubmit, onCancel, isReply }: CommentFormProps)
 
 interface CommentItemProps {
   comment: CommentResponse;
-  currentUserId: number | null;
+  isLoggedIn: boolean;
   onDeleted: () => void;
   onReplied: () => void;
   isNested?: boolean;
   parentIsSecret?: boolean;
 }
 
-function CommentItem({ comment, currentUserId, onDeleted, onReplied, isNested, parentIsSecret }: CommentItemProps) {
+function CommentItem({ comment, isLoggedIn, onDeleted, onReplied, isNested, parentIsSecret }: CommentItemProps) {
   const [showReplyForm, setShowReplyForm] = useState(false);
   const [showEditForm, setShowEditForm] = useState(false);
 
@@ -214,7 +214,7 @@ function CommentItem({ comment, currentUserId, onDeleted, onReplied, isNested, p
                 </button>
               </>
             )}
-            {!comment.isOwnerReply && !isNested && currentUserId != null && (
+            {!comment.isOwnerReply && !isNested && isLoggedIn && (
               <button
                 onClick={() => setShowReplyForm((v) => !v)}
                 className="text-[10px] text-gray-400 hover:text-rose-500 transition-colors"
@@ -242,7 +242,7 @@ function CommentItem({ comment, currentUserId, onDeleted, onReplied, isNested, p
             <CommentItem
               key={reply.commentUuid}
               comment={reply}
-              currentUserId={currentUserId}
+              isLoggedIn={isLoggedIn}
               onDeleted={onDeleted}
               onReplied={onReplied}
               isNested
@@ -256,7 +256,7 @@ function CommentItem({ comment, currentUserId, onDeleted, onReplied, isNested, p
 }
 
 export default function CommentSection({ productUuid, commentCount }: Props) {
-  const { userId, role } = useAuthStore();
+  const { role } = useAuthStore();
   const [open, setOpen] = useState(false);
   const [comments, setComments] = useState<CommentResponse[]>([]);
   const [loading, setLoading] = useState(false);
@@ -273,7 +273,7 @@ export default function CommentSection({ productUuid, commentCount }: Props) {
   useEffect(() => {
     if (!open) return;
     setLoading(true);
-    getComments(productUuid, userId ?? undefined, page, 5)
+    getComments(productUuid, page, 5)
       .then((data) => {
         setComments(data.content);
         setTotalPages(data.totalPages);
@@ -281,7 +281,7 @@ export default function CommentSection({ productUuid, commentCount }: Props) {
       })
       .catch(() => setComments([]))
       .finally(() => setLoading(false));
-  }, [open, refreshKey, page, productUuid, userId]);
+  }, [open, refreshKey, page, productUuid]);
 
   const handleCreate = async (content: string, rating: number | null, isSecret: boolean) => {
     await createComment(productUuid, { content, rating, isSecret });
@@ -312,7 +312,7 @@ export default function CommentSection({ productUuid, commentCount }: Props) {
             <CommentItem
               key={c.commentUuid}
               comment={c}
-              currentUserId={userId}
+              isLoggedIn={role === "ROLE_USER"}
               onDeleted={refresh}
               onReplied={refresh}
             />
@@ -336,7 +336,7 @@ export default function CommentSection({ productUuid, commentCount }: Props) {
             </div>
           )}
 
-          {role === "ROLE_USER" && userId != null && (
+          {role === "ROLE_USER" && (
             <div className="pt-2 border-t border-gray-100">
               <CommentForm productUuid={productUuid} onSubmit={handleCreate} />
             </div>

@@ -8,7 +8,7 @@ export interface LoginRequest {
 export interface LoginResponse {
   accessToken: string;
   refreshToken: string;
-  userId: number;
+  userUuid: string;
   requirePasswordChange: boolean;
 }
 
@@ -287,12 +287,10 @@ export interface CommentPageResponse {
 
 export async function getComments(
   productUuid: string,
-  userId?: number,
   page = 0,
   size = 10,
 ): Promise<CommentPageResponse> {
   const res = await api.get<{ data: CommentPageResponse }>(`/api/v1/user/products/${productUuid}/comments`, {
-    headers: userId ? { "X-User-Id": userId } : {},
     params: { page, size },
   });
   return res.data.data;
