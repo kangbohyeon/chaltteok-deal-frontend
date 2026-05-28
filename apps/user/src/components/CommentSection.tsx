@@ -14,6 +14,7 @@ import {
 interface Props {
   productUuid: string;
   commentCount: number;
+  defaultOpen?: boolean;
 }
 
 function StarRating({
@@ -255,9 +256,9 @@ function CommentItem({ comment, isLoggedIn, onDeleted, onReplied, isNested, pare
   );
 }
 
-export default function CommentSection({ productUuid, commentCount }: Props) {
+export default function CommentSection({ productUuid, commentCount, defaultOpen = false }: Props) {
   const { role } = useAuthStore();
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(defaultOpen);
   const [comments, setComments] = useState<CommentResponse[]>([]);
   const [loading, setLoading] = useState(false);
   const [page, setPage] = useState(0);
