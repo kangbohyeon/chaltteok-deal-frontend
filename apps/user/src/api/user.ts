@@ -69,6 +69,11 @@ export async function getProducts(): Promise<ProductResponse[]> {
   return res.data.data;
 }
 
+export async function getProduct(productUuid: string): Promise<ProductResponse> {
+  const res = await api.get<{ data: ProductResponse }>(`/api/v1/user/products/${productUuid}`);
+  return res.data.data;
+}
+
 export async function getRecommendedProducts(): Promise<ProductResponse[]> {
   const res = await api.get<{ data: ProductResponse[] }>("/api/v1/user/products/recommended");
   return res.data.data;
