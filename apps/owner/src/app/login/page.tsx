@@ -20,8 +20,8 @@ export default function OwnerLoginPage() {
     setError(null);
     setLoading(true);
     try {
-      const { accessToken, refreshToken, userId, requirePasswordChange } = await loginOwner({ username, password });
-      setAuth(accessToken, refreshToken, "ROLE_OWNER", userId);
+      const { accessToken, refreshToken, userUuid, requirePasswordChange } = await loginOwner({ username, password });
+      setAuth(accessToken, refreshToken, "ROLE_OWNER", userUuid);
       if (requirePasswordChange) {
         setShowPasswordChangePopup(true);
       } else {
