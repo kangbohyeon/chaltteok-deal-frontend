@@ -21,6 +21,7 @@ export default function ProductDetailPage() {
   const router = useRouter();
   const { data: product, isLoading, isError } = useProduct(uuid);
   const addItem = useCartStore((s) => s.addItem);
+  const clearCart = useCartStore((s) => s.clearCart);
   const role = useAuthStore((s) => s.role);
 
   const [tab, setTab] = useState<Tab>("description");
@@ -43,6 +44,21 @@ export default function ProductDetailPage() {
         thumbnailUrl: product.thumbnailUrl,
       });
     }
+  };
+
+  const handleBuyNow = () => {
+    if (!product || product.soldOut) return;
+    clearCart();
+    for (let i = 0; i < qty; i++) {
+      addItem({
+        productId: product.id,
+        productUuid: product.productUuid,
+        name: product.name,
+        price: product.price,
+        thumbnailUrl: product.thumbnailUrl,
+      });
+    }
+    router.push("/checkout");
   };
 
   const handleInquirySubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -135,7 +151,6 @@ export default function ProductDetailPage() {
                 </div>
                 <span className="text-sm text-gray-500">
                   {product.averageRating.toFixed(1)}
-                  {product.commentCount > 0 && <span className="ml-1 text-gray-400">({product.commentCount}개 리뷰)</span>}
                 </span>
               </div>
             )}
@@ -176,15 +191,26 @@ export default function ProductDetailPage() {
             </span>
           </div>
 
-          <button
-            onClick={handleAddToCart}
-            disabled={product.soldOut}
-            className={`w-full rounded-xl py-3 text-sm font-bold text-white transition-colors ${
-              product.soldOut ? "bg-gray-300 cursor-not-allowed" : "bg-rose-500 hover:bg-rose-600 active:bg-rose-700"
-            }`}
-          >
-            {product.soldOut ? "품절된 상품입니다" : "장바구니 담기"}
-          </button>
+          {product.soldOut ? (
+            <button disabled className="w-full rounded-xl py-3 text-sm font-bold text-white bg-gray-300 cursor-not-allowed">
+              품절된 상품입니다
+            </button>
+          ) : (
+            <div className="flex gap-2">
+              <button
+                onClick={handleAddToCart}
+                className="flex-1 rounded-xl py-3 text-sm font-bold border border-rose-500 text-rose-500 hover:bg-rose-50 active:bg-rose-100 transition-colors"
+              >
+                장바구니 담기
+              </button>
+              <button
+                onClick={handleBuyNow}
+                className="flex-1 rounded-xl py-3 text-sm font-bold text-white bg-rose-500 hover:bg-rose-600 active:bg-rose-700 transition-colors"
+              >
+                바로구매
+              </button>
+            </div>
+          )}
         </div>
       </div>
 
