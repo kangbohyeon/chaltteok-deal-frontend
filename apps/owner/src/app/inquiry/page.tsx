@@ -93,7 +93,7 @@ export default function InquiryPage() {
                   >
                     {STATUS_LABEL[inquiry.status] ?? inquiry.status}
                   </span>
-                  <span className="text-xs text-gray-400">사용자 {inquiry.userId}</span>
+                  <span className="text-xs text-gray-400">사용자 {inquiry.userUuid.slice(0, 8)}</span>
                 </div>
                 <p className="font-semibold text-gray-800 text-sm truncate">{inquiry.title}</p>
                 <p className="text-xs text-gray-400 mt-1">

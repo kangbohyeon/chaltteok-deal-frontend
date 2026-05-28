@@ -156,7 +156,7 @@ export interface OwnerCommentResponse {
   commentUuid: string;
   productUuid: string;
   productName: string;
-  userId: number;
+  userUuid: string;
   content: string;
   rating: number | null;
   isSecret: boolean;
@@ -271,7 +271,7 @@ export async function deleteNotice(uuid: string): Promise<void> {
 
 export interface OwnerInquiryResponse {
   inquiryUuid: string;
-  userId: number;
+  userUuid: string;
   title: string;
   content: string;
   status: string;
