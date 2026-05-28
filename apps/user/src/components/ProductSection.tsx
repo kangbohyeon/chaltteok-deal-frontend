@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { type ProductResponse } from "@/api/user";
 import { useCartStore } from "@chaltteok/shared-store";
 import ProductCard from "./ProductCard";
@@ -77,8 +78,9 @@ export default function ProductSection({ products, isLoading, isError, query }: 
         <div className="rounded-xl border border-gray-200 bg-white shadow-sm overflow-hidden">
           {filtered.length > 0 ? (
             filtered.map((product) => (
-              <div
+              <Link
                 key={product.id}
+                href={`/products/${product.productUuid}`}
                 className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-b-0"
               >
                 <div className="relative w-12 h-12 rounded-lg overflow-hidden shrink-0 bg-gray-100">
@@ -110,7 +112,7 @@ export default function ProductSection({ products, isLoading, isError, query }: 
                   </p>
                 </div>
                 <button
-                  onClick={() => handleAddToCart(product)}
+                  onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleAddToCart(product); }}
                   disabled={product.soldOut}
                   aria-label={`${product.name} 장바구니 담기`}
                   className={`shrink-0 rounded-lg px-3 py-1.5 text-xs font-semibold text-white transition-colors ${
@@ -119,7 +121,7 @@ export default function ProductSection({ products, isLoading, isError, query }: 
                 >
                   담기
                 </button>
-              </div>
+              </Link>
             ))
           ) : (
             <div className="px-4 py-6 text-center text-sm text-gray-400">

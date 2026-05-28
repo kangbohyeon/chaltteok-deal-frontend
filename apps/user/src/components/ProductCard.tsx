@@ -1,9 +1,9 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { useCartStore } from "@chaltteok/shared-store";
 import { type ProductResponse } from "@/api/user";
-import CommentSection from "./CommentSection";
 
 interface ProductCardProps {
   product: ProductResponse;
@@ -12,7 +12,9 @@ interface ProductCardProps {
 export default function ProductCard({ product }: ProductCardProps) {
   const addItem = useCartStore((s) => s.addItem);
 
-  const handleAddToCart = () => {
+  const handleAddToCart = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
     if (product.soldOut) return;
     addItem({
       productId: product.id,
@@ -24,18 +26,15 @@ export default function ProductCard({ product }: ProductCardProps) {
   };
 
   return (
-    <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm flex flex-col gap-3">
-      {
-        <div className="relative w-full h-40 rounded-xl overflow-hidden">
-          {product.thumbnailUrl && <Image src={product.thumbnailUrl} alt={product.name} fill unoptimized className="object-cover" />}
-          {product.soldOut && (
-            <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
-              <span className="text-white text-sm font-bold tracking-wide">품절</span>
-            </div>
-          )}
-
-        </div>
-      }
+    <Link href={`/products/${product.productUuid}`} className="flex flex-col gap-3 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm hover:shadow-md hover:border-rose-200 transition-all">
+      <div className="relative w-full h-40 rounded-xl overflow-hidden">
+        {product.thumbnailUrl && <Image src={product.thumbnailUrl} alt={product.name} fill unoptimized className="object-cover" />}
+        {product.soldOut && (
+          <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+            <span className="text-white text-sm font-bold tracking-wide">품절</span>
+          </div>
+        )}
+      </div>
 
       <div className="flex items-center gap-2">
         <h3 className="text-lg font-semibold text-gray-900 leading-tight">{product.name}</h3>
@@ -92,7 +91,6 @@ export default function ProductCard({ product }: ProductCardProps) {
           {product.soldOut ? "품절" : "담기"}
         </button>
       </div>
-      <CommentSection productUuid={product.productUuid} commentCount={product.commentCount} />
-    </div>
+    </Link>
   );
 }
