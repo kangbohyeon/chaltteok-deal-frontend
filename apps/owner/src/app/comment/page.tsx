@@ -104,7 +104,7 @@ export default function CommentPage() {
                 </div>
                 <p className="text-sm text-gray-800">{comment.content}</p>
                 <p className="text-xs text-gray-400 mt-1">
-                  사용자 {comment.userId} · {new Date(comment.createdAt).toLocaleDateString("ko-KR")}
+                  사용자 {comment.userUuid.slice(0, 8)} · {new Date(comment.createdAt).toLocaleDateString("ko-KR")}
                 </p>
               </div>
               <div className="flex gap-2 shrink-0">
@@ -154,7 +154,7 @@ export default function CommentPage() {
                     <div className="flex items-start justify-between">
                       <div>
                         <span className="text-xs font-semibold text-rose-600">
-                          {reply.isOwnerReply ? "점주 답글" : `사용자 ${reply.userId}`}
+                          {reply.isOwnerReply ? "점주 답글" : `사용자 ${reply.userUuid.slice(0, 8)}`}
                         </span>
                         <p className="text-sm text-gray-800 mt-0.5">{reply.content}</p>
                         <p className="text-xs text-gray-400 mt-1">
