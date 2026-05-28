@@ -321,3 +321,22 @@ export async function updateComment(commentUuid: string, body: CommentRequest): 
 export async function deleteComment(commentUuid: string): Promise<void> {
   await api.delete(`/api/v1/user/comments/${commentUuid}`);
 }
+
+// ── Banner ────────────────────────────────────────────────────────────────────
+
+export interface BannerResponse {
+  bannerUuid: string;
+  title: string | null;
+  subtitle: string | null;
+  imageUrl: string | null;
+  linkUrl: string | null;
+  backgroundColor: string | null;
+  sortOrder: number;
+  startDate: string | null;
+  endDate: string | null;
+}
+
+export async function getBanners(): Promise<BannerResponse[]> {
+  const res = await api.get<{ data: BannerResponse[] }>("/api/v1/user/banners");
+  return res.data.data;
+}

@@ -3,16 +3,16 @@
 import { useEffect, useRef, useState } from "react";
 import { useOpenStocks } from "@/hooks/useOpenStocks";
 import { useProducts } from "@/hooks/useProducts";
-import { useRecommendedProducts } from "@/hooks/useRecommendedProducts";
+import { useBanners } from "@/hooks/useBanners";
 import { useParticipatedStocks } from "@/hooks/useParticipatedStocks";
 import EventStockSection from "@/components/EventStockSection";
 import ProductSection from "@/components/ProductSection";
-import RecommendedSection from "@/components/RecommendedSection";
+import RollingBanner from "@/components/RollingBanner";
 
 export default function Home() {
   const { data: stocks, isLoading: isLoadingStocks, isError: isErrorStocks } = useOpenStocks();
   const { data: participatedIds = [] } = useParticipatedStocks();
-  const { data: recommended, isLoading: isLoadingRecommended, isError: isErrorRecommended } = useRecommendedProducts();
+  const { data: banners, isLoading: isLoadingBanners, isError: isErrorBanners } = useBanners();
   const { data: products, isLoading: isLoadingProducts, isError: isErrorProducts } = useProducts();
 
   const [searchOpen, setSearchOpen] = useState(false);
@@ -43,20 +43,11 @@ export default function Home() {
         </section>
       )}
 
-      <section>
-        <div className="mb-6">
-          <span className="inline-block rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold text-amber-600 mb-2">
-            점주 추천
-          </span>
-          <h2 className="text-2xl font-bold text-gray-900">추천 상품</h2>
-          <p className="mt-1 text-sm text-gray-500">점주가 직접 추천하는 엄선된 상품입니다.</p>
-        </div>
-        <RecommendedSection
-          products={recommended}
-          isLoading={isLoadingRecommended}
-          isError={isErrorRecommended}
-        />
-      </section>
+      <RollingBanner
+        banners={banners}
+        isLoading={isLoadingBanners}
+        isError={isErrorBanners}
+      />
 
       <section>
         <div className="mb-6">
