@@ -112,7 +112,7 @@ export default function ProductSection({ products, isLoading, isError, query }: 
                   </p>
                 </div>
                 <button
-                  onClick={(e) => { e.preventDefault(); handleAddToCart(product); }}
+                  onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleAddToCart(product); }}
                   disabled={product.soldOut}
                   aria-label={`${product.name} 장바구니 담기`}
                   className={`shrink-0 rounded-lg px-3 py-1.5 text-xs font-semibold text-white transition-colors ${

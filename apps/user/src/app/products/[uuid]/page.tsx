@@ -10,6 +10,12 @@ import CommentSection from "@/components/CommentSection";
 
 type Tab = "description" | "reviews" | "inquiry";
 
+const TABS: { key: Tab; label: string }[] = [
+  { key: "description", label: "상품 설명" },
+  { key: "reviews", label: "구매후기" },
+  { key: "inquiry", label: "상품문의" },
+];
+
 export default function ProductDetailPage() {
   const { uuid } = useParams<{ uuid: string }>();
   const router = useRouter();
@@ -80,12 +86,6 @@ export default function ProductDetailPage() {
       </div>
     );
   }
-
-  const tabs: { key: Tab; label: string }[] = [
-    { key: "description", label: "상품 설명" },
-    { key: "reviews", label: "구매후기" },
-    { key: "inquiry", label: "상품문의" },
-  ];
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-10 space-y-8">
@@ -191,7 +191,7 @@ export default function ProductDetailPage() {
       {/* 탭 영역 */}
       <div>
         <div className="flex border-b border-gray-200">
-          {tabs.map(({ key, label }) => (
+          {TABS.map(({ key, label }) => (
             <button
               key={key}
               onClick={() => setTab(key)}

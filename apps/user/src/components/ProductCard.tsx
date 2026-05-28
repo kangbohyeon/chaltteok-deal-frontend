@@ -14,6 +14,7 @@ export default function ProductCard({ product }: ProductCardProps) {
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
+    e.stopPropagation();
     if (product.soldOut) return;
     addItem({
       productId: product.id,
