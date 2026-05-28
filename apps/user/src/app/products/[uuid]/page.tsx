@@ -244,7 +244,7 @@ export default function ProductDetailPage() {
           )}
 
           {tab === "reviews" && (
-            <CommentSection productUuid={product.productUuid} commentCount={product.commentCount} />
+            <CommentSection productUuid={product.productUuid} commentCount={product.commentCount} defaultOpen />
           )}
 
           {tab === "inquiry" && (
