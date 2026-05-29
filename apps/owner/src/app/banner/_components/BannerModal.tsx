@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { type BannerRequest } from "@/api/owner";
 
 interface Props {
@@ -14,6 +14,7 @@ export default function BannerModal({ initial, onSave, onClose }: Props) {
   const [subtitle, setSubtitle] = useState(initial?.subtitle ?? "");
   const [image, setImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(initial?.initialImageUrl ?? null);
+  const blobUrlRef = useRef<string | null>(null);
   const [linkUrl, setLinkUrl] = useState(initial?.linkUrl ?? "");
   const [backgroundColor, setBackgroundColor] = useState(initial?.backgroundColor ?? "");
   const [sortOrder, setSortOrder] = useState(initial?.sortOrder ?? 0);
@@ -22,6 +23,12 @@ export default function BannerModal({ initial, onSave, onClose }: Props) {
   const [endDate, setEndDate] = useState(initial?.endDate ?? "");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (blobUrlRef.current) URL.revokeObjectURL(blobUrlRef.current);
+    };
+  }, []);
 
   const isValidUrl = (url: string) => !url || /^https?:\/\//i.test(url);
   const isValidHex = (color: string) => !color || /^#[0-9A-Fa-f]{3,6}$/.test(color);
@@ -91,10 +98,17 @@ export default function BannerModal({ initial, onSave, onClose }: Props) {
               type="file"
               accept="image/jpeg,image/png"
               onChange={(e) => {
+                if (blobUrlRef.current) URL.revokeObjectURL(blobUrlRef.current);
                 const file = e.target.files?.[0] ?? null;
                 setImage(file);
-                if (file) setImagePreview(URL.createObjectURL(file));
-                else setImagePreview(null);
+                if (file) {
+                  const url = URL.createObjectURL(file);
+                  blobUrlRef.current = url;
+                  setImagePreview(url);
+                } else {
+                  blobUrlRef.current = null;
+                  setImagePreview(null);
+                }
               }}
               className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-black focus:ring-2 focus:ring-rose-400 focus:outline-none"
             />
