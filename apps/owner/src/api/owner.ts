@@ -149,6 +149,51 @@ export async function deletePopup(uuid: string): Promise<void> {
   await api.delete(`/api/v1/owner/popups/${uuid}`);
 }
 
+// ── Banner ────────────────────────────────────────────────────────────────────
+
+export interface BannerRequest {
+  title: string | null;
+  subtitle: string | null;
+  imageUrl: string | null;
+  linkUrl: string | null;
+  backgroundColor: string | null;
+  sortOrder: number;
+  isVisible: boolean;
+  startDate: string | null;
+  endDate: string | null;
+}
+
+export interface BannerResponse {
+  bannerUuid: string;
+  title: string | null;
+  subtitle: string | null;
+  imageUrl: string | null;
+  linkUrl: string | null;
+  backgroundColor: string | null;
+  sortOrder: number;
+  isVisible: boolean;
+  startDate: string | null;
+  endDate: string | null;
+  createdAt: string;
+}
+
+export async function getBanners(): Promise<BannerResponse[]> {
+  const res = await api.get<{ data: BannerResponse[] }>("/api/v1/owner/banners");
+  return res.data.data;
+}
+
+export async function createBanner(body: BannerRequest): Promise<void> {
+  await api.post("/api/v1/owner/banners", body);
+}
+
+export async function updateBanner(uuid: string, body: BannerRequest): Promise<void> {
+  await api.put(`/api/v1/owner/banners/${uuid}`, body);
+}
+
+export async function deleteBanner(uuid: string): Promise<void> {
+  await api.delete(`/api/v1/owner/banners/${uuid}`);
+}
+
 // ── Comment ───────────────────────────────────────────────────────────────────
 
 export interface OwnerCommentResponse {
@@ -185,8 +230,14 @@ export async function deleteOwnerComment(commentUuid: string): Promise<void> {
   await api.delete(`/api/v1/owner/comments/${commentUuid}`);
 }
 
-export async function replyOwnerComment(commentUuid: string, content: string): Promise<OwnerCommentResponse> {
-  const res = await api.post<{ data: OwnerCommentResponse }>(`/api/v1/owner/comments/${commentUuid}/reply`, { content });
+export async function replyOwnerComment(
+  commentUuid: string,
+  content: string
+): Promise<OwnerCommentResponse> {
+  const res = await api.post<{ data: OwnerCommentResponse }>(
+    `/api/v1/owner/comments/${commentUuid}/reply`,
+    { content }
+  );
   return res.data.data;
 }
 
