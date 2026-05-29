@@ -28,7 +28,6 @@ export default function InquiryPage() {
   const [refreshKey, setRefreshKey] = useState(0);
 
   useEffect(() => {
-    setLoading(true);
     getOwnerInquiries(page, PAGE_SIZE)
       .then((data) => {
         setInquiries(data.content);

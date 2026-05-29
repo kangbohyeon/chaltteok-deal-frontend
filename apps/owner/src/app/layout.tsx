@@ -24,7 +24,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="ko" className={`${geistSans.variable} h-full antialiased`}>
       <body className="min-h-full bg-gray-50">
-        <div className="flex flex-col min-h-screen">
+        <div className="flex min-h-screen flex-col">
           {isLoggedIn && !isLoginPage && (
             <header className="sticky top-0 z-50 border-b border-gray-200 bg-white">
               <nav className="mx-auto flex max-w-5xl items-center justify-between px-4 py-3">
@@ -33,34 +33,39 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 </Link>
                 <ul className="flex items-center gap-6 text-sm font-medium text-gray-600">
                   <li>
-                    <Link href="/product" className="hover:text-rose-500 transition-colors">
+                    <Link href="/product" className="transition-colors hover:text-rose-500">
                       상품 관리
                     </Link>
                   </li>
                   <li>
-                    <Link href="/popup" className="hover:text-rose-500 transition-colors">
+                    <Link href="/popup" className="transition-colors hover:text-rose-500">
                       팝업 관리
                     </Link>
                   </li>
                   <li>
-                    <Link href="/comment" className="hover:text-rose-500 transition-colors">
+                    <Link href="/banner" className="transition-colors hover:text-rose-500">
+                      배너 관리
+                    </Link>
+                  </li>
+                  <li>
+                    <Link href="/comment" className="transition-colors hover:text-rose-500">
                       댓글 관리
                     </Link>
                   </li>
                   <li>
-                    <Link href="/notice" className="hover:text-rose-500 transition-colors">
+                    <Link href="/notice" className="transition-colors hover:text-rose-500">
                       공지사항
                     </Link>
                   </li>
                   <li>
-                    <Link href="/inquiry" className="hover:text-rose-500 transition-colors">
+                    <Link href="/inquiry" className="transition-colors hover:text-rose-500">
                       문의 관리
                     </Link>
                   </li>
                   <li>
                     <button
                       onClick={handleLogout}
-                      className="text-gray-400 hover:text-rose-500 transition-colors"
+                      className="text-gray-400 transition-colors hover:text-rose-500"
                     >
                       로그아웃
                     </button>

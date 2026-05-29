@@ -29,8 +29,6 @@ export default function CommentPage() {
   };
 
   useEffect(() => {
-    setLoading(true);
-    setError(null);
     getOwnerComments(page, PAGE_SIZE)
       .then((data) => {
         setComments(data.content);
