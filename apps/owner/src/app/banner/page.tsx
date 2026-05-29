@@ -32,14 +32,14 @@ export default function BannerPage() {
       .finally(() => setLoading(false));
   }, [refreshKey]);
 
-  const handleCreate = async (data: BannerRequest) => {
-    await createBanner(data);
+  const handleCreate = async (data: BannerRequest, image?: File) => {
+    await createBanner(data, image);
     refresh();
   };
 
-  const handleUpdate = async (data: BannerRequest) => {
+  const handleUpdate = async (data: BannerRequest, image?: File) => {
     if (!editTarget) return;
-    await updateBanner(editTarget.bannerUuid, data);
+    await updateBanner(editTarget.bannerUuid, data, image);
     refresh();
   };
 
@@ -155,13 +155,13 @@ export default function BannerPage() {
               ? {
                   title: editTarget.title,
                   subtitle: editTarget.subtitle,
-                  imageUrl: editTarget.imageUrl,
                   linkUrl: editTarget.linkUrl,
                   backgroundColor: editTarget.backgroundColor,
                   sortOrder: editTarget.sortOrder,
                   isVisible: editTarget.isVisible,
                   startDate: editTarget.startDate,
                   endDate: editTarget.endDate,
+                  initialImageUrl: editTarget.imageUrl,
                 }
               : undefined
           }

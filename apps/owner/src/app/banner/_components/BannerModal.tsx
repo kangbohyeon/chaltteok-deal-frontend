@@ -1,18 +1,20 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { type BannerRequest } from "@/api/owner";
 
 interface Props {
-  initial?: BannerRequest;
-  onSave: (data: BannerRequest) => Promise<void>;
+  initial?: BannerRequest & { initialImageUrl?: string | null };
+  onSave: (data: BannerRequest, image?: File) => Promise<void>;
   onClose: () => void;
 }
 
 export default function BannerModal({ initial, onSave, onClose }: Props) {
   const [title, setTitle] = useState(initial?.title ?? "");
   const [subtitle, setSubtitle] = useState(initial?.subtitle ?? "");
-  const [imageUrl, setImageUrl] = useState(initial?.imageUrl ?? "");
+  const [image, setImage] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(initial?.initialImageUrl ?? null);
+  const blobUrlRef = useRef<string | null>(null);
   const [linkUrl, setLinkUrl] = useState(initial?.linkUrl ?? "");
   const [backgroundColor, setBackgroundColor] = useState(initial?.backgroundColor ?? "");
   const [sortOrder, setSortOrder] = useState(initial?.sortOrder ?? 0);
@@ -22,15 +24,17 @@ export default function BannerModal({ initial, onSave, onClose }: Props) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  useEffect(() => {
+    return () => {
+      if (blobUrlRef.current) URL.revokeObjectURL(blobUrlRef.current);
+    };
+  }, []);
+
   const isValidUrl = (url: string) => !url || /^https?:\/\//i.test(url);
   const isValidHex = (color: string) => !color || /^#[0-9A-Fa-f]{3,6}$/.test(color);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!isValidUrl(imageUrl)) {
-      setError("이미지 URL은 http:// 또는 https://로 시작해야 합니다.");
-      return;
-    }
     if (!isValidUrl(linkUrl)) {
       setError("링크 URL은 http:// 또는 https://로 시작해야 합니다.");
       return;
@@ -42,17 +46,19 @@ export default function BannerModal({ initial, onSave, onClose }: Props) {
     setLoading(true);
     setError(null);
     try {
-      await onSave({
-        title: title || null,
-        subtitle: subtitle || null,
-        imageUrl: imageUrl || null,
-        linkUrl: linkUrl || null,
-        backgroundColor: backgroundColor || null,
-        sortOrder,
-        isVisible,
-        startDate: startDate || null,
-        endDate: endDate || null,
-      });
+      await onSave(
+        {
+          title: title || null,
+          subtitle: subtitle || null,
+          linkUrl: linkUrl || null,
+          backgroundColor: backgroundColor || null,
+          sortOrder,
+          isVisible,
+          startDate: startDate || null,
+          endDate: endDate || null,
+        },
+        image ?? undefined
+      );
       onClose();
     } catch {
       setError("저장에 실패했습니다.");
@@ -87,13 +93,32 @@ export default function BannerModal({ initial, onSave, onClose }: Props) {
             />
           </div>
           <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700">이미지 URL</label>
+            <label className="mb-1 block text-sm font-medium text-gray-700">이미지</label>
             <input
-              type="text"
-              value={imageUrl}
-              onChange={(e) => setImageUrl(e.target.value)}
+              type="file"
+              accept="image/jpeg,image/png"
+              onChange={(e) => {
+                if (blobUrlRef.current) URL.revokeObjectURL(blobUrlRef.current);
+                const file = e.target.files?.[0] ?? null;
+                setImage(file);
+                if (file) {
+                  const url = URL.createObjectURL(file);
+                  blobUrlRef.current = url;
+                  setImagePreview(url);
+                } else {
+                  blobUrlRef.current = null;
+                  setImagePreview(null);
+                }
+              }}
               className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-black focus:ring-2 focus:ring-rose-400 focus:outline-none"
             />
+            {imagePreview && (
+              <img
+                src={imagePreview}
+                alt="미리보기"
+                className="mt-2 h-24 w-full rounded-lg object-cover"
+              />
+            )}
           </div>
           <div>
             <label className="mb-1 block text-sm font-medium text-gray-700">링크 URL</label>

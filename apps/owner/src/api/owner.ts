@@ -154,7 +154,6 @@ export async function deletePopup(uuid: string): Promise<void> {
 export interface BannerRequest {
   title: string | null;
   subtitle: string | null;
-  imageUrl: string | null;
   linkUrl: string | null;
   backgroundColor: string | null;
   sortOrder: number;
@@ -182,12 +181,18 @@ export async function getBanners(): Promise<BannerResponse[]> {
   return res.data.data;
 }
 
-export async function createBanner(body: BannerRequest): Promise<void> {
-  await api.post("/api/v1/owner/banners", body);
+export async function createBanner(body: BannerRequest, image?: File): Promise<void> {
+  const formData = new FormData();
+  if (image) formData.append("image", image);
+  formData.append("data", new Blob([JSON.stringify(body)], { type: "application/json" }));
+  await api.post("/api/v1/owner/banners", formData);
 }
 
-export async function updateBanner(uuid: string, body: BannerRequest): Promise<void> {
-  await api.put(`/api/v1/owner/banners/${uuid}`, body);
+export async function updateBanner(uuid: string, body: BannerRequest, image?: File): Promise<void> {
+  const formData = new FormData();
+  if (image) formData.append("image", image);
+  formData.append("data", new Blob([JSON.stringify(body)], { type: "application/json" }));
+  await api.put(`/api/v1/owner/banners/${uuid}`, formData);
 }
 
 export async function deleteBanner(uuid: string): Promise<void> {
