@@ -22,8 +22,23 @@ export default function BannerModal({ initial, onSave, onClose }: Props) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const isValidUrl = (url: string) => !url || /^https?:\/\//i.test(url);
+  const isValidHex = (color: string) => !color || /^#[0-9A-Fa-f]{3,6}$/.test(color);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!isValidUrl(imageUrl)) {
+      setError("이미지 URL은 http:// 또는 https://로 시작해야 합니다.");
+      return;
+    }
+    if (!isValidUrl(linkUrl)) {
+      setError("링크 URL은 http:// 또는 https://로 시작해야 합니다.");
+      return;
+    }
+    if (!isValidHex(backgroundColor)) {
+      setError("배경색은 HEX 형식(#RRGGBB)으로 입력해주세요.");
+      return;
+    }
     setLoading(true);
     setError(null);
     try {
