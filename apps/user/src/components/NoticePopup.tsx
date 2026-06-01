@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { usePopups } from "@/hooks/usePopups";
 
 function getHideUntilKey(uuid: string) {
@@ -21,14 +21,15 @@ function setHideUntil(uuid: string, days: number) {
 }
 
 export default function NoticePopup() {
-  const { data: allPopups } = usePopups();
+  const { data: popups, isLoading, isError } = usePopups();
   const [dismissed, setDismissed] = useState<Set<string>>(new Set());
 
-  const popups = (allPopups ?? []).filter((p) => p.location === "POPUP" || p.location === null);
+  const visible = useMemo(
+    () => (popups ?? []).filter((p) => !isHidden(p.popupUuid) && !dismissed.has(p.popupUuid)),
+    [popups, dismissed]
+  );
 
-  const visible = popups.filter((p) => !isHidden(p.popupUuid) && !dismissed.has(p.popupUuid));
-
-  if (visible.length === 0) return null;
+  if (isLoading || isError || visible.length === 0) return null;
 
   const popup = visible[0];
 
