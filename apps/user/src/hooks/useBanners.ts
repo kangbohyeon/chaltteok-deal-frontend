@@ -5,5 +5,7 @@ export function useBanners() {
   return useQuery<BannerResponse[], Error>({
     queryKey: ["banners"],
     queryFn: getBanners,
+    enabled: true,
+    staleTime: 60 * 1000,
   });
 }
