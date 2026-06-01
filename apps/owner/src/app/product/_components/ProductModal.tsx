@@ -35,29 +35,35 @@ export function ProductModal({
   const fileRef = useRef<HTMLInputElement>(null);
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-      <div className="w-full max-w-md rounded-2xl bg-white shadow-xl p-8 mx-4 max-h-[90vh] overflow-y-auto">
-        <div className="flex items-center justify-between mb-6">
+      <div className="mx-4 max-h-[90vh] w-full max-w-md overflow-y-auto rounded-2xl bg-white p-8 shadow-xl">
+        <div className="mb-6 flex items-center justify-between">
           <h2 className="text-lg font-bold text-gray-900">{title}</h2>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-xl font-bold">
+          <button onClick={onClose} className="text-xl font-bold text-gray-400 hover:text-gray-600">
             ×
           </button>
         </div>
 
-        <form onSubmit={(e) => { e.preventDefault(); onSubmit(); }} className="space-y-4">
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            onSubmit();
+          }}
+          className="space-y-4"
+        >
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">상품명 *</label>
+            <label className="mb-1 block text-sm font-medium text-gray-700">상품명 *</label>
             <input
               name="name"
               value={form.name}
               onChange={onChange}
               required
               placeholder="꿀떡"
-              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-black focus:outline-none focus:ring-2 focus:ring-rose-400"
+              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-black focus:ring-2 focus:ring-rose-400 focus:outline-none"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">가격 (원) *</label>
+            <label className="mb-1 block text-sm font-medium text-gray-700">가격 (원) *</label>
             <input
               name="price"
               type="number"
@@ -66,20 +72,39 @@ export function ProductModal({
               onChange={onChange}
               required
               placeholder="ex. 29000"
-              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-black focus:outline-none focus:ring-2 focus:ring-rose-400"
+              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-black focus:ring-2 focus:ring-rose-400 focus:outline-none"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">상품 설명</label>
+            <label className="mb-1 block text-sm font-medium text-gray-700">상품 설명</label>
             <textarea
               name="descp"
               value={form.descp}
               onChange={onChange}
               rows={3}
               placeholder="상품에 대한 간단한 설명을 입력해주세요."
-              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-black focus:outline-none focus:ring-2 focus:ring-rose-400 resize-none"
+              className="w-full resize-none rounded-lg border border-gray-300 px-3 py-2 text-sm text-black focus:ring-2 focus:ring-rose-400 focus:outline-none"
             />
+          </div>
+
+          <div>
+            <label className="mb-1 block text-sm font-medium text-gray-700">
+              일별 재고 수량
+              <span className="ml-1 text-xs text-gray-400">(비워두면 무제한)</span>
+            </label>
+            <input
+              name="stockQuantity"
+              type="number"
+              min={0}
+              value={form.stockQuantity ?? ""}
+              onChange={onChange}
+              placeholder="예: 30"
+              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-black focus:ring-2 focus:ring-rose-400 focus:outline-none"
+            />
+            {form.stockQuantity === 0 && (
+              <p className="mt-1 text-xs text-red-500">수량 0 입력 시 즉시 품절 처리됩니다.</p>
+            )}
           </div>
 
           <div className="space-y-2">
@@ -102,14 +127,14 @@ export function ProductModal({
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">상품 이미지</label>
+            <label className="mb-1 block text-sm font-medium text-gray-700">상품 이미지</label>
             {preview ? (
-              <div className="relative w-full aspect-video rounded-lg overflow-hidden border border-gray-200 bg-gray-50">
+              <div className="relative aspect-video w-full overflow-hidden rounded-lg border border-gray-200 bg-gray-50">
                 <Image src={preview} alt="미리보기" fill unoptimized className="object-contain" />
                 <button
                   type="button"
                   onClick={onRemoveImage}
-                  className="absolute top-2 right-2 rounded-full bg-black/50 text-white text-xs px-2 py-1 hover:bg-black/70"
+                  className="absolute top-2 right-2 rounded-full bg-black/50 px-2 py-1 text-xs text-white hover:bg-black/70"
                 >
                   삭제
                 </button>
@@ -118,12 +143,18 @@ export function ProductModal({
               <button
                 type="button"
                 onClick={() => fileRef.current?.click()}
-                className="w-full rounded-lg border-2 border-dashed border-gray-300 py-6 text-sm text-gray-400 hover:border-rose-400 hover:text-rose-400 transition-colors"
+                className="w-full rounded-lg border-2 border-dashed border-gray-300 py-6 text-sm text-gray-400 transition-colors hover:border-rose-400 hover:text-rose-400"
               >
                 클릭하여 이미지 첨부
               </button>
             )}
-            <input ref={fileRef} type="file" accept="image/*" onChange={onImageChange} className="hidden" />
+            <input
+              ref={fileRef}
+              type="file"
+              accept="image/*"
+              onChange={onImageChange}
+              className="hidden"
+            />
           </div>
 
           {error && <p className="text-sm text-red-500">{error}</p>}

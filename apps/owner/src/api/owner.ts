@@ -28,6 +28,7 @@ export interface ProductRegisterRequest {
   isActive?: boolean;
   isSoldOut?: boolean;
   isRecommended?: boolean;
+  stockQuantity?: number | null;
 }
 
 export interface ProductUpdateRequest {
@@ -37,6 +38,7 @@ export interface ProductUpdateRequest {
   isActive?: boolean;
   isSoldOut?: boolean;
   isRecommended?: boolean;
+  stockQuantity?: number | null;
 }
 
 export interface ProductListResponse {
@@ -50,6 +52,8 @@ export interface ProductListResponse {
   active: boolean;
   soldOut: boolean;
   recommended: boolean;
+  stockQuantity: number | null;
+  currentStock: number | null;
 }
 
 export async function getProducts(): Promise<ProductListResponse[]> {
