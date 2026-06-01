@@ -185,14 +185,16 @@ export async function createBanner(body: BannerRequest, image?: File): Promise<v
   const formData = new FormData();
   if (image) formData.append("image", image);
   formData.append("data", new Blob([JSON.stringify(body)], { type: "application/json" }));
-  await api.post("/api/v1/owner/banners", formData);
+  await api.post("/api/v1/owner/banners", formData, { headers: { "Content-Type": undefined } });
 }
 
 export async function updateBanner(uuid: string, body: BannerRequest, image?: File): Promise<void> {
   const formData = new FormData();
   if (image) formData.append("image", image);
   formData.append("data", new Blob([JSON.stringify(body)], { type: "application/json" }));
-  await api.put(`/api/v1/owner/banners/${uuid}`, formData);
+  await api.put(`/api/v1/owner/banners/${uuid}`, formData, {
+    headers: { "Content-Type": undefined },
+  });
 }
 
 export async function deleteBanner(uuid: string): Promise<void> {
