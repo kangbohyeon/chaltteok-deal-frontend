@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { type ProductResponse } from "@/api/user";
@@ -25,6 +25,7 @@ interface SearchRowProps {
 function SearchRow({ product, onAddToCart }: SearchRowProps) {
   const rowContent = (
     <div
+      aria-disabled={product.soldOut}
       className={`flex items-center gap-3 border-b border-gray-100 px-4 py-3 transition-colors last:border-b-0 ${
         product.soldOut ? "cursor-not-allowed opacity-50" : "cursor-pointer hover:bg-gray-50"
       }`}
@@ -99,11 +100,15 @@ export default function ProductSection({
     setPage(0);
   }, [query]);
 
-  const filtered = query.trim()
-    ? (products ?? [])
-        .filter((p) => p.name.toLowerCase().includes(query.trim().toLowerCase()))
-        .slice(0, MAX_PREVIEW)
-    : [];
+  const filtered = useMemo(
+    () =>
+      query.trim()
+        ? (products ?? [])
+            .filter((p) => p.name.toLowerCase().includes(query.trim().toLowerCase()))
+            .slice(0, MAX_PREVIEW)
+        : [],
+    [products, query]
+  );
 
   const handleAddToCart = useCallback(
     (product: ProductResponse) => {

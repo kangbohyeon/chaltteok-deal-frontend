@@ -27,6 +27,7 @@ export default function ProductCard({ product }: ProductCardProps) {
 
   const cardContent = (
     <div
+      aria-disabled={product.soldOut}
       className={`flex flex-col gap-3 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm transition-all ${
         product.soldOut
           ? "cursor-not-allowed opacity-50"
