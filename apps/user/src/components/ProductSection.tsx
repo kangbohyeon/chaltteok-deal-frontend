@@ -17,7 +17,81 @@ interface ProductSectionProps {
   query: string;
 }
 
-export default function ProductSection({ products, isLoading, isError, query }: ProductSectionProps) {
+interface SearchRowProps {
+  product: ProductResponse;
+  onAddToCart: (product: ProductResponse) => void;
+}
+
+function SearchRow({ product, onAddToCart }: SearchRowProps) {
+  const rowContent = (
+    <div
+      className={`flex items-center gap-3 border-b border-gray-100 px-4 py-3 transition-colors last:border-b-0 ${
+        product.soldOut ? "cursor-not-allowed opacity-50" : "cursor-pointer hover:bg-gray-50"
+      }`}
+    >
+      <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-lg bg-gray-100">
+        {product.thumbnailUrl ? (
+          <Image
+            src={product.thumbnailUrl}
+            alt={product.name}
+            fill
+            unoptimized
+            className={`object-cover ${product.soldOut ? "grayscale" : ""}`}
+          />
+        ) : (
+          <div className="flex h-full w-full items-center justify-center text-xl text-gray-300">
+            🛍
+          </div>
+        )}
+      </div>
+      <div className="min-w-0 flex-1">
+        <div className="flex flex-wrap items-center gap-1.5">
+          <p className="truncate text-sm font-medium text-gray-800">{product.name}</p>
+          {product.recommended && !product.soldOut && (
+            <span className="shrink-0 rounded-full bg-rose-100 px-1.5 py-0.5 text-xs font-semibold text-rose-600">
+              추천
+            </span>
+          )}
+          {product.soldOut && (
+            <span className="shrink-0 rounded-full bg-red-50 px-1.5 py-0.5 text-xs text-red-500">
+              품절
+            </span>
+          )}
+        </div>
+        <p className="text-sm font-bold text-gray-900">{product.price.toLocaleString()}원</p>
+      </div>
+      <button
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          onAddToCart(product);
+        }}
+        disabled={product.soldOut}
+        aria-label={`${product.name} 장바구니 담기`}
+        className={`shrink-0 rounded-lg px-3 py-1.5 text-xs font-semibold text-white transition-colors ${
+          product.soldOut ? "cursor-not-allowed bg-gray-300" : "bg-rose-500 hover:bg-rose-600"
+        }`}
+      >
+        담기
+      </button>
+    </div>
+  );
+
+  if (product.soldOut) return rowContent;
+
+  return (
+    <Link href={`/products/${product.productUuid}`} className="block">
+      {rowContent}
+    </Link>
+  );
+}
+
+export default function ProductSection({
+  products,
+  isLoading,
+  isError,
+  query,
+}: ProductSectionProps) {
   const [page, setPage] = useState(0);
   const addItem = useCartStore((s) => s.addItem);
 
@@ -42,14 +116,14 @@ export default function ProductSection({ products, isLoading, isError, query }: 
         thumbnailUrl: product.thumbnailUrl,
       });
     },
-    [addItem],
+    [addItem]
   );
 
   if (isLoading) {
     return (
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {Array.from({ length: 6 }).map((_, i) => (
-          <div key={i} className="h-52 rounded-2xl bg-gray-100 animate-pulse" />
+          <div key={i} className="h-52 animate-pulse rounded-2xl bg-gray-100" />
         ))}
       </div>
     );
@@ -57,16 +131,14 @@ export default function ProductSection({ products, isLoading, isError, query }: 
 
   if (isError) {
     return (
-      <p className="rounded-xl bg-red-50 border border-red-100 px-4 py-3 text-sm text-red-500">
+      <p className="rounded-xl border border-red-100 bg-red-50 px-4 py-3 text-sm text-red-500">
         상품 목록을 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.
       </p>
     );
   }
 
   if (!products || products.length === 0) {
-    return (
-      <p className="text-center text-sm text-gray-400 py-12">등록된 상품이 없습니다.</p>
-    );
+    return <p className="py-12 text-center text-sm text-gray-400">등록된 상품이 없습니다.</p>;
   }
 
   const totalPages = Math.ceil(products.length / ITEMS_PER_PAGE);
@@ -75,53 +147,10 @@ export default function ProductSection({ products, isLoading, isError, query }: 
   return (
     <div className="space-y-6">
       {query.trim() && (
-        <div className="rounded-xl border border-gray-200 bg-white shadow-sm overflow-hidden">
+        <div className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
           {filtered.length > 0 ? (
             filtered.map((product) => (
-              <Link
-                key={product.id}
-                href={`/products/${product.productUuid}`}
-                className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-b-0"
-              >
-                <div className="relative w-12 h-12 rounded-lg overflow-hidden shrink-0 bg-gray-100">
-                  {product.thumbnailUrl ? (
-                    <Image
-                      src={product.thumbnailUrl}
-                      alt={product.name}
-                      fill
-                      unoptimized
-                      className="object-cover"
-                    />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center text-gray-300 text-xl">
-                      🛍
-                    </div>
-                  )}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-1.5">
-                    <p className="text-sm font-medium text-gray-800 truncate">{product.name}</p>
-                    {product.soldOut && (
-                      <span className="shrink-0 text-xs text-red-500 bg-red-50 rounded-full px-1.5 py-0.5">
-                        품절
-                      </span>
-                    )}
-                  </div>
-                  <p className="text-sm font-bold text-gray-900">
-                    {product.price.toLocaleString()}원
-                  </p>
-                </div>
-                <button
-                  onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleAddToCart(product); }}
-                  disabled={product.soldOut}
-                  aria-label={`${product.name} 장바구니 담기`}
-                  className={`shrink-0 rounded-lg px-3 py-1.5 text-xs font-semibold text-white transition-colors ${
-                    product.soldOut ? "bg-gray-300 cursor-not-allowed" : "bg-rose-500 hover:bg-rose-600"
-                  }`}
-                >
-                  담기
-                </button>
-              </Link>
+              <SearchRow key={product.id} product={product} onAddToCart={handleAddToCart} />
             ))
           ) : (
             <div className="px-4 py-6 text-center text-sm text-gray-400">
@@ -144,7 +173,7 @@ export default function ProductSection({ products, isLoading, isError, query }: 
               <button
                 onClick={() => setPage((p) => Math.max(0, p - 1))}
                 disabled={page === 0}
-                className="rounded-lg px-3 py-1.5 text-sm font-medium border border-gray-200 text-gray-600 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                className="rounded-lg border border-gray-200 px-3 py-1.5 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-40"
               >
                 이전
               </button>
@@ -153,7 +182,7 @@ export default function ProductSection({ products, isLoading, isError, query }: 
                   <button
                     key={i}
                     onClick={() => setPage(i)}
-                    className={`w-7 h-7 rounded-full text-xs font-semibold transition-colors ${
+                    className={`h-7 w-7 rounded-full text-xs font-semibold transition-colors ${
                       i === page ? "bg-rose-500 text-white" : "text-gray-500 hover:bg-gray-100"
                     }`}
                   >
@@ -164,7 +193,7 @@ export default function ProductSection({ products, isLoading, isError, query }: 
               <button
                 onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
                 disabled={page === totalPages - 1}
-                className="rounded-lg px-3 py-1.5 text-sm font-medium border border-gray-200 text-gray-600 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                className="rounded-lg border border-gray-200 px-3 py-1.5 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-40"
               >
                 다음
               </button>

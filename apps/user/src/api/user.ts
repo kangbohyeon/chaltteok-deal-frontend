@@ -60,6 +60,7 @@ export interface ProductResponse {
   description: string | null;
   thumbnailUrl: string | null;
   soldOut: boolean;
+  recommended: boolean;
   commentCount: number;
   averageRating: number | null;
 }
@@ -149,7 +150,9 @@ export interface OrderHistoryParams {
   paymentStatus?: string;
 }
 
-export async function getOrderHistory(params: OrderHistoryParams = {}): Promise<OrderHistoryPageResponse> {
+export async function getOrderHistory(
+  params: OrderHistoryParams = {}
+): Promise<OrderHistoryPageResponse> {
   const { page = 0, size = 10, keyword, status, fromDate, toDate, paymentStatus } = params;
   const res = await api.get<{ data: OrderHistoryPageResponse }>("/api/v1/user/orders", {
     params: {
@@ -288,11 +291,14 @@ export interface CommentPageResponse {
 export async function getComments(
   productUuid: string,
   page = 0,
-  size = 10,
+  size = 10
 ): Promise<CommentPageResponse> {
-  const res = await api.get<{ data: CommentPageResponse }>(`/api/v1/user/products/${productUuid}/comments`, {
-    params: { page, size },
-  });
+  const res = await api.get<{ data: CommentPageResponse }>(
+    `/api/v1/user/products/${productUuid}/comments`,
+    {
+      params: { page, size },
+    }
+  );
   return res.data.data;
 }
 
@@ -303,18 +309,33 @@ export async function checkEmailDuplicate(email: string): Promise<boolean> {
   return res.data.data.duplicate;
 }
 
-export async function createComment(productUuid: string, body: CommentRequest): Promise<CommentResponse> {
-  const res = await api.post<{ data: CommentResponse }>(`/api/v1/user/products/${productUuid}/comments`, body);
+export async function createComment(
+  productUuid: string,
+  body: CommentRequest
+): Promise<CommentResponse> {
+  const res = await api.post<{ data: CommentResponse }>(
+    `/api/v1/user/products/${productUuid}/comments`,
+    body
+  );
   return res.data.data;
 }
 
 export async function replyComment(commentUuid: string, content: string): Promise<CommentResponse> {
-  const res = await api.post<{ data: CommentResponse }>(`/api/v1/user/comments/${commentUuid}/reply`, { content });
+  const res = await api.post<{ data: CommentResponse }>(
+    `/api/v1/user/comments/${commentUuid}/reply`,
+    { content }
+  );
   return res.data.data;
 }
 
-export async function updateComment(commentUuid: string, body: CommentRequest): Promise<CommentResponse> {
-  const res = await api.put<{ data: CommentResponse }>(`/api/v1/user/comments/${commentUuid}`, body);
+export async function updateComment(
+  commentUuid: string,
+  body: CommentRequest
+): Promise<CommentResponse> {
+  const res = await api.put<{ data: CommentResponse }>(
+    `/api/v1/user/comments/${commentUuid}`,
+    body
+  );
   return res.data.data;
 }
 
