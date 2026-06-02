@@ -39,6 +39,7 @@ export interface ProductUpdateRequest {
   isSoldOut?: boolean;
   isRecommended?: boolean;
   stockQuantity?: number | null;
+  currentStock?: number | null;
 }
 
 export interface ProductListResponse {

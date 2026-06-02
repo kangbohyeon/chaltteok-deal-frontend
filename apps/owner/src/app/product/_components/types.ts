@@ -1,4 +1,4 @@
-import { type ProductListResponse } from "@/api/owner";
+import { type ProductListResponse, type ProductUpdateRequest } from "@/api/owner";
 
 export interface FormState {
   name: string;
@@ -8,6 +8,7 @@ export interface FormState {
   soldOut: boolean;
   recommended: boolean;
   stockQuantity: number | null;
+  currentStock: number | null;
 }
 
 export const EMPTY_FORM: FormState = {
@@ -18,6 +19,7 @@ export const EMPTY_FORM: FormState = {
   soldOut: false,
   recommended: false,
   stockQuantity: null,
+  currentStock: null,
 };
 
 export function toFormState(p: ProductListResponse): FormState {
@@ -29,5 +31,19 @@ export function toFormState(p: ProductListResponse): FormState {
     soldOut: p.soldOut,
     recommended: p.recommended,
     stockQuantity: p.stockQuantity,
+    currentStock: p.currentStock,
+  };
+}
+
+export function toUpdateRequest(form: FormState): ProductUpdateRequest {
+  return {
+    name: form.name,
+    price: form.price,
+    descp: form.descp || undefined,
+    isActive: form.active,
+    isSoldOut: form.soldOut,
+    isRecommended: form.recommended,
+    stockQuantity: form.stockQuantity,
+    currentStock: form.currentStock,
   };
 }
