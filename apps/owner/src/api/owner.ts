@@ -29,6 +29,7 @@ export interface ProductRegisterRequest {
   isSoldOut?: boolean;
   isRecommended?: boolean;
   stockQuantity?: number | null;
+  displayOrder?: number;
 }
 
 export interface ProductUpdateRequest {
@@ -40,6 +41,7 @@ export interface ProductUpdateRequest {
   isRecommended?: boolean;
   stockQuantity?: number | null;
   currentStock?: number | null;
+  displayOrder?: number;
 }
 
 export interface ProductListResponse {
@@ -55,6 +57,7 @@ export interface ProductListResponse {
   recommended: boolean;
   stockQuantity: number | null;
   currentStock: number | null;
+  displayOrder: number;
 }
 
 export async function getProducts(): Promise<ProductListResponse[]> {

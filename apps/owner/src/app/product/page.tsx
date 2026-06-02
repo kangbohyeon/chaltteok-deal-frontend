@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   deleteProduct,
   getProducts,
@@ -29,6 +29,7 @@ export default function ProductListPage() {
   const [modalError, setModalError] = useState<string | null>(null);
 
   const [deleteTarget, setDeleteTarget] = useState<ProductListResponse | null>(null);
+  const [ownerSort, setOwnerSort] = useState<"name" | "stock">("name");
 
   const load = () => {
     getProducts()
@@ -69,6 +70,8 @@ export default function ProductListPage() {
       setForm((prev) => ({ ...prev, stockQuantity: value === "" ? null : Number(value) }));
     } else if (name === "currentStock") {
       setForm((prev) => ({ ...prev, currentStock: value === "" ? null : Number(value) }));
+    } else if (name === "displayOrder") {
+      setForm((prev) => ({ ...prev, displayOrder: value === "" ? 0 : Number(value) }));
     } else {
       setForm((prev) => ({ ...prev, [name]: value }));
     }
@@ -96,6 +99,7 @@ export default function ProductListPage() {
       isSoldOut: form.soldOut,
       isRecommended: form.recommended,
       stockQuantity: form.stockQuantity,
+      displayOrder: form.displayOrder,
     };
     try {
       if (modal?.type === "create") {
@@ -113,6 +117,15 @@ export default function ProductListPage() {
     }
   };
 
+  const sortedProducts = useMemo(() => {
+    if (ownerSort === "stock") {
+      return [...products].sort(
+        (a, b) => (a.currentStock ?? Infinity) - (b.currentStock ?? Infinity)
+      );
+    }
+    return [...products].sort((a, b) => a.name.localeCompare(b.name, "ko"));
+  }, [products, ownerSort]);
+
   const handleDelete = async () => {
     if (!deleteTarget) return;
     try {
@@ -127,7 +140,24 @@ export default function ProductListPage() {
   return (
     <div className="mx-auto max-w-3xl px-4 py-12">
       <div className="mb-8 flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-gray-900">상품 관리</h1>
+        <div className="flex items-center gap-4">
+          <h1 className="text-2xl font-bold text-gray-900">상품 관리</h1>
+          <div className="flex items-center gap-2">
+            {(["name", "stock"] as const).map((s) => (
+              <button
+                key={s}
+                onClick={() => setOwnerSort(s)}
+                className={`rounded-lg border px-3 py-1 text-xs font-medium transition-colors ${
+                  ownerSort === s
+                    ? "border-rose-400 bg-rose-50 text-rose-600"
+                    : "border-gray-200 text-gray-500 hover:bg-gray-50"
+                }`}
+              >
+                {s === "name" ? "이름순" : "남은재고순"}
+              </button>
+            ))}
+          </div>
+        </div>
         <button
           onClick={openCreate}
           className="rounded-lg bg-rose-500 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-rose-600"
@@ -148,7 +178,7 @@ export default function ProductListPage() {
         <p className="text-sm text-gray-400">등록된 상품이 없습니다.</p>
       ) : (
         <ul className="space-y-3">
-          {products.map((product) => (
+          {sortedProducts.map((product) => (
             <li
               key={product.id}
               className="flex items-center gap-4 rounded-xl border border-gray-200 bg-white px-5 py-4 shadow-sm"
