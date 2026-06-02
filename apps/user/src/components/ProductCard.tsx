@@ -69,17 +69,18 @@ export default function ProductCard({ product }: ProductCardProps) {
         <p className="line-clamp-2 text-sm text-gray-500">{product.description}</p>
       )}
 
-      {product.averageRating !== null && product.averageRating !== undefined && (
-        <div className="flex items-center gap-1">
-          <span className="text-sm text-yellow-400">★</span>
-          <span className="text-sm font-medium text-gray-700">
-            {product.averageRating.toFixed(1)}
-          </span>
-          {product.commentCount > 0 && (
-            <span className="text-xs text-gray-400">({product.commentCount})</span>
-          )}
-        </div>
-      )}
+      {/* {product.averageRating !== null && product.averageRating !== undefined && (
+
+      )} */}
+      <div className="flex items-center gap-1">
+        <span className="text-sm text-yellow-400">★</span>
+        <span className="text-sm font-medium text-gray-700">
+          {product.averageRating !== null && product.averageRating !== undefined
+            ? product.averageRating.toFixed(1)
+            : 0}
+        </span>
+        <span className="text-xs text-gray-400">({product.commentCount})</span>
+      </div>
 
       <div className="mt-auto flex items-center justify-between">
         <p className="text-xl font-bold text-gray-900">
