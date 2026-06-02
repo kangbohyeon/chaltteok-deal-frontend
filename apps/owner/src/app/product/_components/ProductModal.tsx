@@ -107,6 +107,31 @@ export function ProductModal({
             )}
           </div>
 
+          {form.stockQuantity != null && (
+            <div>
+              <label className="mb-1 block text-sm font-medium text-gray-700">
+                현재 잔고
+                <span className="ml-1 text-xs text-gray-400">(오늘 남은 재고)</span>
+              </label>
+              <input
+                name="currentStock"
+                type="number"
+                min={0}
+                max={form.stockQuantity ?? undefined}
+                value={form.currentStock ?? ""}
+                onChange={onChange}
+                placeholder={`최대 ${form.stockQuantity}`}
+                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-black focus:ring-2 focus:ring-rose-400 focus:outline-none"
+              />
+              {form.currentStock === 0 && (
+                <p className="mt-1 text-xs text-orange-500">잔고 0: 저장 시 품절 처리됩니다.</p>
+              )}
+              {(form.currentStock ?? 0) > 0 && (
+                <p className="mt-1 text-xs text-green-600">양수 입력 시 품절이 자동 해제됩니다.</p>
+              )}
+            </div>
+          )}
+
           <div className="space-y-2">
             <label className="block text-sm font-medium text-gray-700">상품 설정</label>
             <ToggleRow

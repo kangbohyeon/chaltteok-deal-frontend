@@ -8,6 +8,7 @@ export interface FormState {
   soldOut: boolean;
   recommended: boolean;
   stockQuantity: number | null;
+  currentStock: number | null;
 }
 
 export const EMPTY_FORM: FormState = {
@@ -18,6 +19,7 @@ export const EMPTY_FORM: FormState = {
   soldOut: false,
   recommended: false,
   stockQuantity: null,
+  currentStock: null,
 };
 
 export function toFormState(p: ProductListResponse): FormState {
@@ -29,5 +31,6 @@ export function toFormState(p: ProductListResponse): FormState {
     soldOut: p.soldOut,
     recommended: p.recommended,
     stockQuantity: p.stockQuantity,
+    currentStock: p.currentStock,
   };
 }

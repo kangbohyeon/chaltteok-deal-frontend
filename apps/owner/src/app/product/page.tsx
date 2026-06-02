@@ -67,6 +67,8 @@ export default function ProductListPage() {
       setForm((prev) => ({ ...prev, price: Number(value) }));
     } else if (name === "stockQuantity") {
       setForm((prev) => ({ ...prev, stockQuantity: value === "" ? null : Number(value) }));
+    } else if (name === "currentStock") {
+      setForm((prev) => ({ ...prev, currentStock: value === "" ? null : Number(value) }));
     } else {
       setForm((prev) => ({ ...prev, [name]: value }));
     }
@@ -99,7 +101,11 @@ export default function ProductListPage() {
       if (modal?.type === "create") {
         await registerProduct(body, image ?? undefined);
       } else if (modal?.type === "edit") {
-        await updateProduct(modal.product.uuid, body, image ?? undefined);
+        await updateProduct(
+          modal.product.uuid,
+          { ...body, currentStock: form.currentStock },
+          image ?? undefined
+        );
       }
       setModal(null);
       clearImage();
