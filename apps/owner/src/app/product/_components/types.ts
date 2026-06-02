@@ -1,4 +1,4 @@
-import { type ProductListResponse } from "@/api/owner";
+import { type ProductListResponse, type ProductUpdateRequest } from "@/api/owner";
 
 export interface FormState {
   name: string;
@@ -32,5 +32,18 @@ export function toFormState(p: ProductListResponse): FormState {
     recommended: p.recommended,
     stockQuantity: p.stockQuantity,
     currentStock: p.currentStock,
+  };
+}
+
+export function toUpdateRequest(form: FormState): ProductUpdateRequest {
+  return {
+    name: form.name,
+    price: form.price,
+    descp: form.descp || undefined,
+    isActive: form.active,
+    isSoldOut: form.soldOut,
+    isRecommended: form.recommended,
+    stockQuantity: form.stockQuantity,
+    currentStock: form.currentStock,
   };
 }

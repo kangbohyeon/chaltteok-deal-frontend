@@ -10,7 +10,7 @@ import {
   type ProductListResponse,
   type ProductRegisterRequest,
 } from "@/api/owner";
-import { type FormState, EMPTY_FORM, toFormState } from "./_components/types";
+import { type FormState, EMPTY_FORM, toFormState, toUpdateRequest } from "./_components/types";
 import { ProductModal } from "./_components/ProductModal";
 import { ConfirmModal } from "./_components/ConfirmModal";
 
@@ -88,7 +88,7 @@ export default function ProductListPage() {
   const handleSubmit = async () => {
     setModalError(null);
     setModalLoading(true);
-    const body: ProductRegisterRequest = {
+    const createBody: ProductRegisterRequest = {
       name: form.name,
       price: form.price,
       descp: form.descp || undefined,
@@ -99,13 +99,9 @@ export default function ProductListPage() {
     };
     try {
       if (modal?.type === "create") {
-        await registerProduct(body, image ?? undefined);
+        await registerProduct(createBody, image ?? undefined);
       } else if (modal?.type === "edit") {
-        await updateProduct(
-          modal.product.uuid,
-          { ...body, currentStock: form.currentStock },
-          image ?? undefined
-        );
+        await updateProduct(modal.product.uuid, toUpdateRequest(form), image ?? undefined);
       }
       setModal(null);
       clearImage();
