@@ -9,6 +9,7 @@ export interface FormState {
   recommended: boolean;
   stockQuantity: number | null;
   currentStock: number | null;
+  displayOrder: number;
 }
 
 export const EMPTY_FORM: FormState = {
@@ -20,6 +21,7 @@ export const EMPTY_FORM: FormState = {
   recommended: false,
   stockQuantity: null,
   currentStock: null,
+  displayOrder: 0,
 };
 
 export function toFormState(p: ProductListResponse): FormState {
@@ -32,6 +34,7 @@ export function toFormState(p: ProductListResponse): FormState {
     recommended: p.recommended,
     stockQuantity: p.stockQuantity,
     currentStock: p.currentStock,
+    displayOrder: p.displayOrder,
   };
 }
 
@@ -45,5 +48,6 @@ export function toUpdateRequest(form: FormState): ProductUpdateRequest {
     isRecommended: form.recommended,
     stockQuantity: form.stockQuantity,
     currentStock: form.currentStock,
+    displayOrder: form.displayOrder,
   };
 }

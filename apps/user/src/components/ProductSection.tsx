@@ -10,6 +10,8 @@ import ProductCard from "./ProductCard";
 const ITEMS_PER_PAGE = 6;
 const MAX_PREVIEW = 8;
 
+type SortOption = "default" | "sales" | "name" | "rating";
+
 interface ProductSectionProps {
   products: ProductResponse[] | undefined;
   isLoading: boolean;
@@ -94,6 +96,7 @@ export default function ProductSection({
   query,
 }: ProductSectionProps) {
   const [page, setPage] = useState(0);
+  const [sort, setSort] = useState<SortOption>("default");
   const addItem = useCartStore((s) => s.addItem);
 
   useEffect(() => {
@@ -109,6 +112,22 @@ export default function ProductSection({
         : [],
     [products, query]
   );
+
+  const sorted = useMemo(() => {
+    if (!products || query.trim()) return products ?? [];
+    return [...products].sort((a, b) => {
+      switch (sort) {
+        case "sales":
+          return b.salesCount - a.salesCount;
+        case "name":
+          return a.name.localeCompare(b.name, "ko");
+        case "rating":
+          return (b.averageRating ?? 0) - (a.averageRating ?? 0);
+        default:
+          return 0; // 기본순: 서버에서 받은 순서 유지
+      }
+    });
+  }, [products, sort, query]);
 
   const handleAddToCart = useCallback(
     (product: ProductResponse) => {
@@ -146,8 +165,8 @@ export default function ProductSection({
     return <p className="py-12 text-center text-sm text-gray-400">등록된 상품이 없습니다.</p>;
   }
 
-  const totalPages = Math.ceil(products.length / ITEMS_PER_PAGE);
-  const paginated = products.slice(page * ITEMS_PER_PAGE, (page + 1) * ITEMS_PER_PAGE);
+  const totalPages = Math.ceil(sorted.length / ITEMS_PER_PAGE);
+  const paginated = sorted.slice(page * ITEMS_PER_PAGE, (page + 1) * ITEMS_PER_PAGE);
 
   return (
     <div className="space-y-6">
@@ -167,6 +186,28 @@ export default function ProductSection({
 
       {!query.trim() && (
         <>
+          <div className="flex flex-wrap gap-2">
+            {(["default", "sales", "name", "rating"] as const).map((s) => (
+              <button
+                key={s}
+                onClick={() => setSort(s)}
+                className={`rounded-full border px-3 py-1 text-xs font-medium transition-colors ${
+                  sort === s
+                    ? "border-rose-400 bg-rose-50 text-rose-600"
+                    : "border-gray-200 text-gray-500 hover:bg-gray-50"
+                }`}
+              >
+                {s === "default"
+                  ? "기본순"
+                  : s === "sales"
+                    ? "판매량순"
+                    : s === "name"
+                      ? "이름순"
+                      : "별점순"}
+              </button>
+            ))}
+          </div>
+
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {paginated.map((product) => (
               <ProductCard key={product.id} product={product} />

@@ -63,6 +63,7 @@ export interface ProductResponse {
   recommended: boolean;
   commentCount: number;
   averageRating: number | null;
+  salesCount: number;
 }
 
 export async function getProducts(): Promise<ProductResponse[]> {

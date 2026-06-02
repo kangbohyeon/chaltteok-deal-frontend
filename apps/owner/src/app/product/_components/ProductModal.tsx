@@ -90,6 +90,22 @@ export function ProductModal({
 
           <div>
             <label className="mb-1 block text-sm font-medium text-gray-700">
+              노출 순서
+              <span className="ml-1 text-xs text-gray-400">(숫자가 낮을수록 먼저 표시)</span>
+            </label>
+            <input
+              name="displayOrder"
+              type="number"
+              min={0}
+              value={form.displayOrder}
+              onChange={onChange}
+              placeholder="0"
+              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-black focus:ring-2 focus:ring-rose-400 focus:outline-none"
+            />
+          </div>
+
+          <div>
+            <label className="mb-1 block text-sm font-medium text-gray-700">
               일별 재고 수량
               <span className="ml-1 text-xs text-gray-400">(비워두면 무제한)</span>
             </label>
