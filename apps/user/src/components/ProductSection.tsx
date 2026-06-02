@@ -12,6 +12,13 @@ const MAX_PREVIEW = 8;
 
 type SortOption = "default" | "sales" | "name" | "rating";
 
+const SORT_LABELS: Record<SortOption, string> = {
+  default: "기본순",
+  sales: "판매량순",
+  name: "이름순",
+  rating: "별점순",
+};
+
 interface ProductSectionProps {
   products: ProductResponse[] | undefined;
   isLoading: boolean;
@@ -197,13 +204,7 @@ export default function ProductSection({
                     : "border-gray-200 text-gray-500 hover:bg-gray-50"
                 }`}
               >
-                {s === "default"
-                  ? "기본순"
-                  : s === "sales"
-                    ? "판매량순"
-                    : s === "name"
-                      ? "이름순"
-                      : "별점순"}
+                {SORT_LABELS[s]}
               </button>
             ))}
           </div>
