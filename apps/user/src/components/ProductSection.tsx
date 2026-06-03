@@ -11,6 +11,7 @@ const ITEMS_PER_PAGE = 6;
 const MAX_PREVIEW = 8;
 
 type SortOption = "default" | "sales" | "name" | "rating";
+type SortDir = "asc" | "desc";
 
 const SORT_LABELS: Record<SortOption, string> = {
   default: "기본순",
@@ -104,6 +105,16 @@ export default function ProductSection({
 }: ProductSectionProps) {
   const [page, setPage] = useState(0);
   const [sort, setSort] = useState<SortOption>("default");
+  const [sortDir, setSortDir] = useState<SortDir>("asc");
+
+  const handleSortClick = (s: SortOption) => {
+    if (s === sort && s !== "default") {
+      setSortDir((d) => (d === "asc" ? "desc" : "asc"));
+    } else {
+      setSort(s);
+      setSortDir("asc");
+    }
+  };
   const addItem = useCartStore((s) => s.addItem);
 
   useEffect(() => {
@@ -122,19 +133,20 @@ export default function ProductSection({
 
   const sorted = useMemo(() => {
     if (!products || query.trim()) return products ?? [];
+    const dir = sortDir === "asc" ? 1 : -1;
     return [...products].sort((a, b) => {
       switch (sort) {
         case "sales":
-          return b.salesCount - a.salesCount;
+          return dir * (b.salesCount - a.salesCount);
         case "name":
-          return a.name.localeCompare(b.name, "ko");
+          return dir * a.name.localeCompare(b.name, "ko");
         case "rating":
-          return (b.averageRating ?? 0) - (a.averageRating ?? 0);
+          return dir * ((b.averageRating ?? 0) - (a.averageRating ?? 0));
         default:
-          return 0; // 기본순: 서버에서 받은 순서 유지
+          return 0;
       }
     });
-  }, [products, sort, query]);
+  }, [products, sort, sortDir, query]);
 
   const handleAddToCart = useCallback(
     (product: ProductResponse) => {
@@ -197,7 +209,7 @@ export default function ProductSection({
             {(["default", "sales", "name", "rating"] as const).map((s) => (
               <button
                 key={s}
-                onClick={() => setSort(s)}
+                onClick={() => handleSortClick(s)}
                 className={`rounded-full border px-3 py-1 text-xs font-medium transition-colors ${
                   sort === s
                     ? "border-rose-400 bg-rose-50 text-rose-600"
@@ -205,6 +217,9 @@ export default function ProductSection({
                 }`}
               >
                 {SORT_LABELS[s]}
+                {sort === s && s !== "default" && (
+                  <span className="ml-0.5">{sortDir === "asc" ? " ↑" : " ↓"}</span>
+                )}
               </button>
             ))}
           </div>

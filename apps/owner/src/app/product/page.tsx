@@ -30,6 +30,16 @@ export default function ProductListPage() {
 
   const [deleteTarget, setDeleteTarget] = useState<ProductListResponse | null>(null);
   const [ownerSort, setOwnerSort] = useState<"name" | "stock">("name");
+  const [ownerSortDir, setOwnerSortDir] = useState<"asc" | "desc">("asc");
+
+  const handleOwnerSortClick = (s: "name" | "stock") => {
+    if (s === ownerSort) {
+      setOwnerSortDir((d) => (d === "asc" ? "desc" : "asc"));
+    } else {
+      setOwnerSort(s);
+      setOwnerSortDir("asc");
+    }
+  };
 
   const load = () => {
     getProducts()
@@ -118,13 +128,14 @@ export default function ProductListPage() {
   };
 
   const sortedProducts = useMemo(() => {
+    const dir = ownerSortDir === "asc" ? 1 : -1;
     if (ownerSort === "stock") {
       return [...products].sort(
-        (a, b) => (a.currentStock ?? Infinity) - (b.currentStock ?? Infinity)
+        (a, b) => dir * ((a.currentStock ?? Infinity) - (b.currentStock ?? Infinity))
       );
     }
-    return [...products].sort((a, b) => a.name.localeCompare(b.name, "ko"));
-  }, [products, ownerSort]);
+    return [...products].sort((a, b) => dir * a.name.localeCompare(b.name, "ko"));
+  }, [products, ownerSort, ownerSortDir]);
 
   const handleDelete = async () => {
     if (!deleteTarget) return;
@@ -146,7 +157,7 @@ export default function ProductListPage() {
             {(["name", "stock"] as const).map((s) => (
               <button
                 key={s}
-                onClick={() => setOwnerSort(s)}
+                onClick={() => handleOwnerSortClick(s)}
                 className={`rounded-lg border px-3 py-1 text-xs font-medium transition-colors ${
                   ownerSort === s
                     ? "border-rose-400 bg-rose-50 text-rose-600"
@@ -154,6 +165,9 @@ export default function ProductListPage() {
                 }`}
               >
                 {s === "name" ? "이름순" : "남은재고순"}
+                {ownerSort === s && (
+                  <span className="ml-0.5">{ownerSortDir === "asc" ? " ↑" : " ↓"}</span>
+                )}
               </button>
             ))}
           </div>
