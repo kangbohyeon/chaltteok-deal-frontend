@@ -2,7 +2,13 @@
 
 import { useState, useEffect } from "react";
 import { useAuthStore } from "@chaltteok/shared-store";
-import { getMyInquiries, createInquiry, type InquiryResponse } from "@/api/user";
+import {
+  getMyInquiries,
+  createInquiry,
+  uploadFile,
+  type InquiryResponse,
+  type FileUploadResponse,
+} from "@/api/user";
 
 const STATUS_LABEL: Record<string, string> = {
   PENDING: "답변 대기",
@@ -24,6 +30,8 @@ export default function InquiryPage() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [expanded, setExpanded] = useState<string | null>(null);
+  const [attachments, setAttachments] = useState<FileUploadResponse[]>([]);
+  const [uploadError, setUploadError] = useState<string | null>(null);
 
   const fetchInquiries = () => {
     setLoading(true);
@@ -34,9 +42,28 @@ export default function InquiryPage() {
   };
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (role === "ROLE_USER") fetchInquiries();
     else setLoading(false);
   }, [role]);
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files ?? []);
+    if (attachments.length + files.length > 3) {
+      setUploadError("이미지는 최대 3장까지 첨부 가능합니다.");
+      return;
+    }
+    setUploadError(null);
+    for (const file of files) {
+      try {
+        const result = await uploadFile(file);
+        setAttachments((prev) => [...prev, result]);
+      } catch {
+        setUploadError("파일 업로드에 실패했습니다.");
+      }
+    }
+    e.target.value = "";
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -44,9 +71,14 @@ export default function InquiryPage() {
     setSubmitting(true);
     setError(null);
     try {
-      await createInquiry({ title, content });
+      await createInquiry({
+        title,
+        content,
+        attachmentUuids: attachments.map((a) => a.attachmentUuid),
+      });
       setTitle("");
       setContent("");
+      setAttachments([]);
       setShowForm(false);
       fetchInquiries();
     } catch {
@@ -66,11 +98,11 @@ export default function InquiryPage() {
 
   return (
     <div className="mx-auto max-w-2xl px-4 py-10">
-      <div className="flex items-center justify-between mb-6">
+      <div className="mb-6 flex items-center justify-between">
         <h1 className="text-2xl font-bold text-gray-900">1:1 문의</h1>
         <button
           onClick={() => setShowForm((v) => !v)}
-          className="rounded-lg bg-rose-500 px-4 py-2 text-sm font-semibold text-white hover:bg-rose-600 transition-colors"
+          className="rounded-lg bg-rose-500 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-rose-600"
         >
           {showForm ? "취소" : "+ 문의하기"}
         </button>
@@ -79,35 +111,88 @@ export default function InquiryPage() {
       {showForm && (
         <form
           onSubmit={handleSubmit}
-          className="mb-6 rounded-2xl border border-gray-200 bg-white p-5 shadow-sm space-y-3"
+          className="mb-6 space-y-3 rounded-2xl border border-gray-200 bg-white p-5 shadow-sm"
         >
           <div>
-            <label className="block text-xs font-medium text-gray-600 mb-1">제목</label>
+            <label className="mb-1 block text-xs font-medium text-gray-600">제목</label>
             <input
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="문의 제목을 입력하세요"
               required
-              className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-rose-300"
+              className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-800 focus:ring-2 focus:ring-rose-300 focus:outline-none"
             />
           </div>
           <div>
-            <label className="block text-xs font-medium text-gray-600 mb-1">내용</label>
+            <label className="mb-1 block text-xs font-medium text-gray-600">내용</label>
             <textarea
               value={content}
               onChange={(e) => setContent(e.target.value)}
               placeholder="문의 내용을 입력하세요"
               rows={4}
               required
-              className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-rose-300 resize-none"
+              className="w-full resize-none rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-800 focus:ring-2 focus:ring-rose-300 focus:outline-none"
             />
+          </div>
+          <div className="space-y-2">
+            {attachments.length > 0 && (
+              <div className="flex flex-wrap gap-2">
+                {attachments.map((att) => (
+                  <div key={att.attachmentUuid} className="relative">
+                    <img
+                      src={`http://localhost:8080${att.fileUrl}`}
+                      alt={att.originalFilename}
+                      className="h-16 w-16 rounded-lg border border-gray-200 object-cover"
+                    />
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setAttachments((prev) =>
+                          prev.filter((a) => a.attachmentUuid !== att.attachmentUuid)
+                        )
+                      }
+                      className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-gray-700 text-[10px] text-white hover:bg-red-500"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+            {attachments.length < 3 && (
+              <label className="inline-flex cursor-pointer items-center gap-1 text-xs text-gray-400 transition-colors hover:text-rose-500">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-3.5 w-3.5"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth={2}
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"
+                  />
+                </svg>
+                사진 첨부 ({attachments.length}/3)
+                <input
+                  type="file"
+                  className="hidden"
+                  accept="image/jpeg,image/png"
+                  multiple
+                  onChange={handleFileChange}
+                />
+              </label>
+            )}
+            {uploadError && <p className="text-xs text-red-500">{uploadError}</p>}
           </div>
           {error && <p className="text-xs text-red-500">{error}</p>}
           <div className="flex justify-end">
             <button
               type="submit"
               disabled={submitting}
-              className="rounded-lg bg-rose-500 px-4 py-1.5 text-xs font-semibold text-white hover:bg-rose-600 disabled:opacity-50 transition-colors"
+              className="rounded-lg bg-rose-500 px-4 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-rose-600 disabled:opacity-50"
             >
               {submitting ? "등록 중..." : "등록"}
             </button>
@@ -115,21 +200,23 @@ export default function InquiryPage() {
         </form>
       )}
 
-      {loading && <div className="text-center py-20 text-gray-400">불러오는 중...</div>}
+      {loading && <div className="py-20 text-center text-gray-400">불러오는 중...</div>}
 
       {!loading && inquiries.length === 0 && (
-        <div className="text-center py-20 text-gray-500">등록된 문의가 없습니다.</div>
+        <div className="py-20 text-center text-gray-500">등록된 문의가 없습니다.</div>
       )}
 
       <ul className="space-y-3">
         {inquiries.map((inquiry) => (
           <li
             key={inquiry.inquiryUuid}
-            className="rounded-2xl border border-gray-200 bg-white shadow-sm overflow-hidden"
+            className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm"
           >
             <button
-              onClick={() => setExpanded(expanded === inquiry.inquiryUuid ? null : inquiry.inquiryUuid)}
-              className="w-full flex items-center justify-between px-5 py-4 text-left hover:bg-gray-50 transition-colors"
+              onClick={() =>
+                setExpanded(expanded === inquiry.inquiryUuid ? null : inquiry.inquiryUuid)
+              }
+              className="flex w-full items-center justify-between px-5 py-4 text-left transition-colors hover:bg-gray-50"
             >
               <div className="flex items-center gap-2">
                 <span
@@ -137,33 +224,54 @@ export default function InquiryPage() {
                 >
                   {STATUS_LABEL[inquiry.status] ?? inquiry.status}
                 </span>
-                <span className="font-medium text-gray-800 text-sm">{inquiry.title}</span>
+                <span className="text-sm font-medium text-gray-800">{inquiry.title}</span>
               </div>
-              <div className="flex items-center gap-2 shrink-0">
+              <div className="flex shrink-0 items-center gap-2">
                 <span className="text-xs text-gray-400">
                   {new Date(inquiry.createdAt).toLocaleDateString("ko-KR")}
                 </span>
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
-                  className={`w-4 h-4 text-gray-400 transition-transform ${expanded === inquiry.inquiryUuid ? "rotate-180" : ""}`}
-                  fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}
+                  className={`h-4 w-4 text-gray-400 transition-transform ${expanded === inquiry.inquiryUuid ? "rotate-180" : ""}`}
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth={2}
                 >
                   <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
                 </svg>
               </div>
             </button>
             {expanded === inquiry.inquiryUuid && (
-              <div className="border-t border-gray-100 px-5 pb-4 space-y-3 bg-gray-50">
+              <div className="space-y-3 border-t border-gray-100 bg-gray-50 px-5 pb-4">
                 <div className="pt-3">
-                  <p className="text-xs font-medium text-gray-500 mb-1">문의 내용</p>
-                  <p className="text-sm text-gray-700 whitespace-pre-wrap">{inquiry.content}</p>
+                  <p className="mb-1 text-xs font-medium text-gray-500">문의 내용</p>
+                  <p className="text-sm whitespace-pre-wrap text-gray-700">{inquiry.content}</p>
+                  {inquiry.attachments && inquiry.attachments.length > 0 && (
+                    <div className="flex flex-wrap gap-1.5 pt-2">
+                      {inquiry.attachments.map((att) => (
+                        <a
+                          key={att.attachmentUuid}
+                          href={`http://localhost:8080${att.fileUrl}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          <img
+                            src={`http://localhost:8080${att.fileUrl}`}
+                            alt={att.originalFilename}
+                            className="h-16 w-16 rounded-lg border border-gray-200 object-cover transition-opacity hover:opacity-80"
+                          />
+                        </a>
+                      ))}
+                    </div>
+                  )}
                 </div>
                 {inquiry.answer && (
-                  <div className="rounded-lg bg-rose-50 border border-rose-100 p-3">
-                    <p className="text-xs font-semibold text-rose-600 mb-1">점주 답변</p>
-                    <p className="text-sm text-gray-700 whitespace-pre-wrap">{inquiry.answer}</p>
+                  <div className="rounded-lg border border-rose-100 bg-rose-50 p-3">
+                    <p className="mb-1 text-xs font-semibold text-rose-600">점주 답변</p>
+                    <p className="text-sm whitespace-pre-wrap text-gray-700">{inquiry.answer}</p>
                     {inquiry.answeredAt && (
-                      <p className="text-[10px] text-gray-400 mt-1">
+                      <p className="mt-1 text-[10px] text-gray-400">
                         {new Date(inquiry.answeredAt).toLocaleDateString("ko-KR")}
                       </p>
                     )}

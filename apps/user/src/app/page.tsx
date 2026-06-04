@@ -20,6 +20,7 @@ export default function Home() {
   const searchRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (!searchOpen) setQuery("");
   }, [searchOpen]);
 
