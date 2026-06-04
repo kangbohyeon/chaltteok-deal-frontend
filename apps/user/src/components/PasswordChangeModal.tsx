@@ -1,6 +1,6 @@
 "use client";
 
-import { useId, useMemo, useState, type SyntheticEvent } from "react";
+import { useId, useMemo, useState } from "react";
 
 const PASSWORD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]).{10,}$/;
 
@@ -36,7 +36,7 @@ export default function PasswordChangeModal({ saving, error, success, onSubmit, 
     special: /[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/.test(newPassword),
   }), [newPassword]);
 
-  const handleSubmit = (e: SyntheticEvent<HTMLFormElement>) => {
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setValidationError(null);
 

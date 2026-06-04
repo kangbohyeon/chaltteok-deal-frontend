@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { registerUser, checkEmailDuplicate } from "@/api/user";
+import { getApiErrorMessage } from "@/lib/error";
 
 const PASSWORD_REGEX = /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]).{10,}$/;
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -75,9 +76,7 @@ export default function UserRegisterPage() {
       await registerUser({ email: form.email, password: form.password, name: form.name, phone: form.phone });
       router.push("/login");
     } catch (err: unknown) {
-      const msg =
-        (err as { response?: { data?: { errorMessage?: string } } })?.response?.data?.errorMessage;
-      setServerError(msg ?? "회원가입에 실패했습니다. 다시 시도해 주세요.");
+      setServerError(getApiErrorMessage(err) ?? "회원가입에 실패했습니다. 다시 시도해 주세요.");
     } finally {
       setLoading(false);
     }

@@ -1,11 +1,12 @@
 "use client";
 
-import { useState, type SyntheticEvent } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useCartStore } from "@chaltteok/shared-store";
 import { checkout } from "@/api/user";
 import { PAYMENT_METHODS } from "@/constants/payment";
+import { getApiErrorMessage } from "@/lib/error";
 
 export default function CheckoutPage() {
   const router = useRouter();
@@ -30,7 +31,7 @@ export default function CheckoutPage() {
     );
   }
 
-  const handleSubmit = async (e: SyntheticEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError(null);
     setLoading(true);
@@ -47,9 +48,7 @@ export default function CheckoutPage() {
       clearCart();
       router.push(`/checkout/complete?orderId=${result.orderId}&amount=${result.totalAmount}`);
     } catch (err: unknown) {
-      const msg =
-        (err as { response?: { data?: { errorMessage?: string } } })?.response?.data?.errorMessage;
-      setError(msg ?? "결제 처리 중 오류가 발생했습니다. 다시 시도해 주세요.");
+      setError(getApiErrorMessage(err) ?? "결제 처리 중 오류가 발생했습니다. 다시 시도해 주세요.");
     } finally {
       setLoading(false);
     }
