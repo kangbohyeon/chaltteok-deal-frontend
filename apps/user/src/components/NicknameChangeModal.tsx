@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useId, useState, type SyntheticEvent } from "react";
+import { useEffect, useId, useState } from "react";
 
 interface Props {
   currentNickname: string;
@@ -22,7 +22,7 @@ export default function NicknameChangeModal({ currentNickname, saving, error, su
     }
   }, [success, onClose]);
 
-  const handleSubmit = (e: SyntheticEvent<HTMLFormElement>) => {
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!nickname.trim()) return;
     onSubmit(nickname.trim());

@@ -69,9 +69,6 @@ export default function ProductCard({ product }: ProductCardProps) {
         <p className="line-clamp-2 text-sm text-gray-500">{product.description}</p>
       )}
 
-      {/* {product.averageRating !== null && product.averageRating !== undefined && (
-
-      )} */}
       <div className="flex items-center gap-1">
         <span className="text-sm text-yellow-400">★</span>
         <span className="text-sm font-medium text-gray-700">

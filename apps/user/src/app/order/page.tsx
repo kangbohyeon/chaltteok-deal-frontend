@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, type SyntheticEvent } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { getOpenDailyStocks, placeOrder, type OpenDailyStockResponse } from "@/api/user";
 
@@ -21,7 +21,7 @@ export default function OrderPage() {
       .catch(() => setFetchError("이벤트 목록을 불러오지 못했습니다."));
   }, []);
 
-  const handleSubmit = async (e: SyntheticEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError(null);
     setLoading(true);
