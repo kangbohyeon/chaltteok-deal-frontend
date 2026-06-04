@@ -2,13 +2,10 @@
 
 import { useState, useEffect } from "react";
 import { useAuthStore } from "@chaltteok/shared-store";
-import {
-  getMyInquiries,
-  createInquiry,
-  uploadFile,
-  type InquiryResponse,
-  type FileUploadResponse,
-} from "@/api/user";
+import { getMyInquiries, createInquiry, type InquiryResponse } from "@/api/user";
+import { API_BASE_URL } from "@/lib/config";
+import { useFileAttachment } from "@/hooks/useFileAttachment";
+import AttachmentUploader from "@/components/AttachmentUploader";
 
 const STATUS_LABEL: Record<string, string> = {
   PENDING: "답변 대기",
@@ -30,8 +27,14 @@ export default function InquiryPage() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [expanded, setExpanded] = useState<string | null>(null);
-  const [attachments, setAttachments] = useState<FileUploadResponse[]>([]);
-  const [uploadError, setUploadError] = useState<string | null>(null);
+  const {
+    previews,
+    error: uploadError,
+    addFiles,
+    removeFile,
+    uploadAll,
+    reset: resetAttachments,
+  } = useFileAttachment();
 
   const fetchInquiries = () => {
     setLoading(true);
@@ -47,38 +50,17 @@ export default function InquiryPage() {
     else setLoading(false);
   }, [role]);
 
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(e.target.files ?? []);
-    if (attachments.length + files.length > 3) {
-      setUploadError("이미지는 최대 3장까지 첨부 가능합니다.");
-      return;
-    }
-    setUploadError(null);
-    for (const file of files) {
-      try {
-        const result = await uploadFile(file);
-        setAttachments((prev) => [...prev, result]);
-      } catch {
-        setUploadError("파일 업로드에 실패했습니다.");
-      }
-    }
-    e.target.value = "";
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!title.trim() || !content.trim()) return;
     setSubmitting(true);
     setError(null);
     try {
-      await createInquiry({
-        title,
-        content,
-        attachmentUuids: attachments.map((a) => a.attachmentUuid),
-      });
+      const attachmentUuids = await uploadAll();
+      await createInquiry({ title, content, attachmentUuids });
       setTitle("");
       setContent("");
-      setAttachments([]);
+      resetAttachments();
       setShowForm(false);
       fetchInquiries();
     } catch {
@@ -134,59 +116,12 @@ export default function InquiryPage() {
               className="w-full resize-none rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-800 focus:ring-2 focus:ring-rose-300 focus:outline-none"
             />
           </div>
-          <div className="space-y-2">
-            {attachments.length > 0 && (
-              <div className="flex flex-wrap gap-2">
-                {attachments.map((att) => (
-                  <div key={att.attachmentUuid} className="relative">
-                    <img
-                      src={`http://localhost:8080${att.fileUrl}`}
-                      alt={att.originalFilename}
-                      className="h-16 w-16 rounded-lg border border-gray-200 object-cover"
-                    />
-                    <button
-                      type="button"
-                      onClick={() =>
-                        setAttachments((prev) =>
-                          prev.filter((a) => a.attachmentUuid !== att.attachmentUuid)
-                        )
-                      }
-                      className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-gray-700 text-[10px] text-white hover:bg-red-500"
-                    >
-                      ✕
-                    </button>
-                  </div>
-                ))}
-              </div>
-            )}
-            {attachments.length < 3 && (
-              <label className="inline-flex cursor-pointer items-center gap-1 text-xs text-gray-400 transition-colors hover:text-rose-500">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-3.5 w-3.5"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  strokeWidth={2}
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"
-                  />
-                </svg>
-                사진 첨부 ({attachments.length}/3)
-                <input
-                  type="file"
-                  className="hidden"
-                  accept="image/jpeg,image/png"
-                  multiple
-                  onChange={handleFileChange}
-                />
-              </label>
-            )}
-            {uploadError && <p className="text-xs text-red-500">{uploadError}</p>}
-          </div>
+          <AttachmentUploader
+            previews={previews}
+            onAddFiles={addFiles}
+            onRemove={removeFile}
+            error={uploadError}
+          />
           {error && <p className="text-xs text-red-500">{error}</p>}
           <div className="flex justify-end">
             <button
@@ -252,12 +187,12 @@ export default function InquiryPage() {
                       {inquiry.attachments.map((att) => (
                         <a
                           key={att.attachmentUuid}
-                          href={`http://localhost:8080${att.fileUrl}`}
+                          href={`${API_BASE_URL}${att.fileUrl}`}
                           target="_blank"
                           rel="noopener noreferrer"
                         >
                           <img
-                            src={`http://localhost:8080${att.fileUrl}`}
+                            src={`${API_BASE_URL}${att.fileUrl}`}
                             alt={att.originalFilename}
                             className="h-16 w-16 rounded-lg border border-gray-200 object-cover transition-opacity hover:opacity-80"
                           />
