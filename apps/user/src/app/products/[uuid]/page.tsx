@@ -37,7 +37,6 @@ export default function ProductDetailPage() {
     if (!product || product.soldOut) return;
     for (let i = 0; i < qty; i++) {
       addItem({
-        productId: product.id,
         productUuid: product.productUuid,
         name: product.name,
         price: product.price,
@@ -51,7 +50,6 @@ export default function ProductDetailPage() {
     clearCart();
     for (let i = 0; i < qty; i++) {
       addItem({
-        productId: product.id,
         productUuid: product.productUuid,
         name: product.name,
         price: product.price,

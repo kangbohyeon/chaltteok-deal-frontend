@@ -57,7 +57,6 @@ export default function RecommendedSection({ products, isLoading, isError }: Pro
   const handleAddToCart = () => {
     if (product.soldOut) return;
     addItem({
-      productId: product.id,
       productUuid: product.productUuid,
       name: product.name,
       price: product.price,

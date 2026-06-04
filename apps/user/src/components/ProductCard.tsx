@@ -17,7 +17,6 @@ export default function ProductCard({ product }: ProductCardProps) {
     e.stopPropagation();
     if (product.soldOut) return;
     addItem({
-      productId: product.id,
       productUuid: product.productUuid,
       name: product.name,
       price: product.price,
