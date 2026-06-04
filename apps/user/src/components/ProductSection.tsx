@@ -152,7 +152,6 @@ export default function ProductSection({
     (product: ProductResponse) => {
       if (product.soldOut) return;
       addItem({
-        productId: product.id,
         productUuid: product.productUuid,
         name: product.name,
         price: product.price,
@@ -193,7 +192,7 @@ export default function ProductSection({
         <div className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
           {filtered.length > 0 ? (
             filtered.map((product) => (
-              <SearchRow key={product.id} product={product} onAddToCart={handleAddToCart} />
+              <SearchRow key={product.productUuid} product={product} onAddToCart={handleAddToCart} />
             ))
           ) : (
             <div className="px-4 py-6 text-center text-sm text-gray-400">
@@ -226,7 +225,7 @@ export default function ProductSection({
 
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {paginated.map((product) => (
-              <ProductCard key={product.id} product={product} />
+              <ProductCard key={product.productUuid} product={product} />
             ))}
           </div>
 

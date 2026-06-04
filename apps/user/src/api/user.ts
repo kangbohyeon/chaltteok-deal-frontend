@@ -53,7 +53,6 @@ export async function getOpenDailyStocks(): Promise<OpenDailyStockResponse[]> {
 }
 
 export interface ProductResponse {
-  id: number;
   productUuid: string;
   name: string;
   price: number;
@@ -82,7 +81,7 @@ export async function getRecommendedProducts(): Promise<ProductResponse[]> {
 }
 
 export interface CheckoutItem {
-  productId: number;
+  productUuid: string;
   quantity: number;
   price: number;
 }

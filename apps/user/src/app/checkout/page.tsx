@@ -37,7 +37,7 @@ export default function CheckoutPage() {
     try {
       const result = await checkout({
         items: items.map((item) => ({
-          productId: item.productId,
+          productUuid: item.productUuid,
           quantity: item.quantity,
           price: item.price,
         })),
@@ -65,7 +65,7 @@ export default function CheckoutPage() {
           <h2 className="text-base font-semibold text-gray-900 mb-4">주문 상품</h2>
           <ul className="space-y-3">
             {items.map((item) => (
-              <li key={item.productId} className="flex justify-between items-center text-sm">
+              <li key={item.productUuid} className="flex justify-between items-center text-sm">
                 <div className="flex items-center gap-3">
                   {item.thumbnailUrl ? (
                     <img

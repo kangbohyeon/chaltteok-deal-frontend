@@ -37,7 +37,7 @@ export default function CartPage() {
       <ul className="space-y-4 mb-8">
         {items.map((item) => (
           <li
-            key={item.productId}
+            key={item.productUuid}
             className="flex items-center gap-4 rounded-2xl border border-gray-200 bg-white p-4 shadow-sm"
           >
             {item.thumbnailUrl ? (
@@ -57,7 +57,7 @@ export default function CartPage() {
 
             <div className="flex items-center gap-2 shrink-0">
               <button
-                onClick={() => updateQuantity(item.productId, item.quantity - 1)}
+                onClick={() => updateQuantity(item.productUuid, item.quantity - 1)}
                 className="w-7 h-7 rounded-full border border-gray-300 text-gray-600 hover:border-rose-400 hover:text-rose-500 flex items-center justify-center text-sm font-bold transition-colors"
               >
                 −
@@ -66,7 +66,7 @@ export default function CartPage() {
                 {item.quantity}
               </span>
               <button
-                onClick={() => updateQuantity(item.productId, item.quantity + 1)}
+                onClick={() => updateQuantity(item.productUuid, item.quantity + 1)}
                 className="w-7 h-7 rounded-full border border-gray-300 text-gray-600 hover:border-rose-400 hover:text-rose-500 flex items-center justify-center text-sm font-bold transition-colors"
               >
                 +
@@ -78,7 +78,7 @@ export default function CartPage() {
             </p>
 
             <button
-              onClick={() => removeItem(item.productId)}
+              onClick={() => removeItem(item.productUuid)}
               className="text-gray-300 hover:text-red-400 transition-colors text-lg shrink-0"
             >
               ✕
