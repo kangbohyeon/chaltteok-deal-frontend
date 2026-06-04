@@ -118,6 +118,7 @@ export default function ProductSection({
   const addItem = useCartStore((s) => s.addItem);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setPage(0);
   }, [query]);
 

@@ -40,6 +40,7 @@ export function useOrderHistory({
   }, [page, size, keyword, status, fromDate, toDate, paymentStatus]);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchOrders();
   }, [fetchOrders]);
 

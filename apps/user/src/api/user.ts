@@ -1,5 +1,28 @@
 import api from "@chaltteok/shared-api";
 
+// ── Attachment ────────────────────────────────────────────────────────────────
+
+export interface AttachmentInfo {
+  attachmentUuid: string;
+  fileUrl: string;
+  originalFilename: string;
+}
+
+export interface FileUploadResponse {
+  attachmentUuid: string;
+  fileUrl: string;
+  originalFilename: string;
+}
+
+export async function uploadFile(file: File): Promise<FileUploadResponse> {
+  const formData = new FormData();
+  formData.append("file", file);
+  const res = await api.post<{ data: FileUploadResponse }>("/api/v1/user/files", formData, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
+  return res.data.data;
+}
+
 export interface LoginRequest {
   username: string;
   password: string;
@@ -238,6 +261,7 @@ export async function getNotices(): Promise<NoticeResponse[]> {
 export interface InquiryRequest {
   title: string;
   content: string;
+  attachmentUuids?: string[];
 }
 
 export interface InquiryResponse {
@@ -248,6 +272,7 @@ export interface InquiryResponse {
   answer: string | null;
   answeredAt: string | null;
   createdAt: string;
+  attachments: AttachmentInfo[];
 }
 
 export async function getMyInquiries(): Promise<InquiryResponse[]> {
@@ -272,12 +297,14 @@ export interface CommentResponse {
   replies: CommentResponse[];
   createdAt: string;
   isMine: boolean;
+  attachments: AttachmentInfo[];
 }
 
 export interface CommentRequest {
   content: string;
   rating?: number | null;
   isSecret?: boolean;
+  attachmentUuids?: string[];
 }
 
 export interface CommentPageResponse {
@@ -320,10 +347,14 @@ export async function createComment(
   return res.data.data;
 }
 
-export async function replyComment(commentUuid: string, content: string): Promise<CommentResponse> {
+export async function replyComment(
+  commentUuid: string,
+  content: string,
+  attachmentUuids?: string[]
+): Promise<CommentResponse> {
   const res = await api.post<{ data: CommentResponse }>(
     `/api/v1/user/comments/${commentUuid}/reply`,
-    { content }
+    { content, ...(attachmentUuids ? { attachmentUuids } : {}) }
   );
   return res.data.data;
 }
