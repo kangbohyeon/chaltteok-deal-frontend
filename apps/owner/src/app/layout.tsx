@@ -5,6 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { Geist } from "next/font/google";
 import "./globals.css";
 import { useAuthStore } from "@chaltteok/shared-store";
+import NotificationBell from "@/components/NotificationBell";
 
 const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
 
@@ -61,6 +62,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                     <Link href="/inquiry" className="transition-colors hover:text-rose-500">
                       문의 관리
                     </Link>
+                  </li>
+                  <li>
+                    <NotificationBell />
                   </li>
                   <li>
                     <button

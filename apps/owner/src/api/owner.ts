@@ -364,3 +364,28 @@ export async function getOwnerInquiries(page = 0, size = 10): Promise<OwnerInqui
 export async function answerInquiry(uuid: string, answer: string): Promise<void> {
   await api.put(`/api/v1/owner/inquiries/${uuid}/answer`, { answer });
 }
+
+// ── Notification ──────────────────────────────────────────────────────────────
+
+export interface NotificationItem {
+  notificationUuid: string;
+  type: string;
+  title: string;
+  message: string;
+  isRead: boolean;
+  createdAt: string;
+}
+
+export interface NotificationListResponse {
+  notifications: NotificationItem[];
+  unreadCount: number;
+}
+
+export async function getNotifications(): Promise<NotificationListResponse> {
+  const res = await api.get<{ data: NotificationListResponse }>("/api/v1/owner/notifications");
+  return res.data.data;
+}
+
+export async function markNotificationsRead(): Promise<void> {
+  await api.patch("/api/v1/owner/notifications/read");
+}
