@@ -1,39 +1,16 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import {
-  getDashboardOverview,
-  getSalesTrend,
-  getTopProducts,
-  getHourlySales,
-  type DashboardPeriod,
-  type DashboardOverview,
-  type SalesTrendItem,
-  type TopProductItem,
-  type HourlySalesItem,
-} from "@/api/dashboard";
+import { type DashboardPeriod } from "@/api/dashboard";
+import { useDashboard, toISODate, getPeriodRange, type PeriodMode } from "@/hooks/useDashboard";
 
-type PeriodMode = DashboardPeriod | "CUSTOM";
+const PERIOD_LABELS: Record<DashboardPeriod, string> = {
+  DAILY: "오늘",
+  WEEKLY: "최근 7일",
+  MONTHLY: "이번 달",
+};
 
 function formatKRW(amount: number): string {
   return amount.toLocaleString("ko-KR") + "원";
-}
-
-function toISODate(d: Date): string {
-  return d.toISOString().split("T")[0];
-}
-
-function getPeriodRange(period: DashboardPeriod): { from: string; to: string } {
-  const today = new Date();
-  const to = toISODate(today);
-  if (period === "DAILY") return { from: to, to };
-  if (period === "WEEKLY") {
-    const from = new Date(today);
-    from.setDate(today.getDate() - 6);
-    return { from: toISODate(from), to };
-  }
-  const from = new Date(today.getFullYear(), today.getMonth(), 1);
-  return { from: toISODate(from), to };
 }
 
 function getPeriodDisplayLabel(
@@ -88,64 +65,22 @@ function BarChart({
 }
 
 export default function DashboardPage() {
-  const [periodMode, setPeriodMode] = useState<PeriodMode>("DAILY");
-  const [customFrom, setCustomFrom] = useState("");
-  const [customTo, setCustomTo] = useState("");
-  const [appliedRange, setAppliedRange] = useState<{ from: string; to: string } | null>(null);
-  const [overview, setOverview] = useState<DashboardOverview | null>(null);
-  const [trend, setTrend] = useState<SalesTrendItem[]>([]);
-  const [topProducts, setTopProducts] = useState<TopProductItem[]>([]);
-  const [hourlySales, setHourlySales] = useState<HourlySalesItem[]>([]);
-  const [fetchedPeriod, setFetchedPeriod] = useState<PeriodMode | null>(null);
-  const [error, setError] = useState<string | null>(null);
-
-  const loading = fetchedPeriod !== periodMode;
-
-  const periodLabels: Record<DashboardPeriod, string> = {
-    DAILY: "오늘",
-    WEEKLY: "최근 7일",
-    MONTHLY: "이번 달",
-  };
-
-  useEffect(() => {
-    let from: string;
-    let to: string;
-
-    if (periodMode === "CUSTOM") {
-      if (!appliedRange) return; // 조회 버튼 누르기 전엔 fetch 안 함
-      from = appliedRange.from;
-      to = appliedRange.to;
-    } else {
-      const range = getPeriodRange(periodMode as DashboardPeriod);
-      from = range.from;
-      to = range.to;
-    }
-
-    const today = toISODate(new Date());
-
-    Promise.all([
-      getDashboardOverview(
-        periodMode === "CUSTOM" ? "DAILY" : (periodMode as DashboardPeriod),
-        periodMode === "CUSTOM" ? from : undefined,
-        periodMode === "CUSTOM" ? to : undefined
-      ),
-      getSalesTrend(from, to),
-      getTopProducts(from, to),
-      getHourlySales(periodMode === "CUSTOM" ? to : today),
-    ])
-      .then(([ov, tr, tp, hs]) => {
-        setOverview(ov);
-        setTrend(tr.trend);
-        setTopProducts(tp.products);
-        setHourlySales(hs.hourlySales);
-        setError(null);
-        setFetchedPeriod(periodMode);
-      })
-      .catch(() => {
-        setError("데이터를 불러오는 중 오류가 발생했습니다.");
-        setFetchedPeriod(periodMode);
-      });
-  }, [periodMode, appliedRange]);
+  const {
+    periodMode,
+    setPeriodMode,
+    customFrom,
+    setCustomFrom,
+    customTo,
+    setCustomTo,
+    appliedRange,
+    applyCustomRange,
+    overview,
+    trend,
+    topProducts,
+    hourlySales,
+    loading,
+    error,
+  } = useDashboard();
 
   return (
     <div className="mx-auto max-w-6xl space-y-8 px-4 py-8">
@@ -165,7 +100,6 @@ export default function DashboardPage() {
                 key={p}
                 onClick={() => {
                   setPeriodMode(p);
-                  setAppliedRange(null);
                 }}
                 className={`rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
                   periodMode === p
@@ -173,7 +107,7 @@ export default function DashboardPage() {
                     : "border border-gray-200 bg-white text-gray-600 hover:border-rose-300"
                 }`}
               >
-                {periodLabels[p]}
+                {PERIOD_LABELS[p]}
               </button>
             ))}
             <button
@@ -215,9 +149,7 @@ export default function DashboardPage() {
               />
             </div>
             <button
-              onClick={() => {
-                if (customFrom && customTo) setAppliedRange({ from: customFrom, to: customTo });
-              }}
+              onClick={applyCustomRange}
               disabled={!customFrom || !customTo}
               className="rounded-lg bg-rose-500 px-4 py-1.5 text-sm font-semibold text-white transition-colors hover:bg-rose-600 disabled:opacity-40"
             >
@@ -323,7 +255,10 @@ export default function DashboardPage() {
             {/* 시간대별 판매량 */}
             <section className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
               <h2 className="mb-4 text-sm font-semibold text-gray-700">
-                시간대별 판매량 <span className="text-xs font-normal text-gray-400">(오늘)</span>
+                시간대별 판매량{" "}
+                <span className="text-xs font-normal text-gray-400">
+                  ({appliedRange?.to ?? "오늘"})
+                </span>
               </h2>
               {hourlySales.length === 0 ? (
                 <p className="py-8 text-center text-sm text-gray-400">데이터 없음</p>
