@@ -63,6 +63,8 @@ export interface OpenDailyStockResponse {
   remainStock: number;
   totalStock: number;
   maxPurchaseCount: number;
+  startAt: string | null;
+  endAt: string | null;
 }
 
 export async function placeOrder(body: OrderRequest): Promise<string> {
