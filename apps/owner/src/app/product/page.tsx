@@ -4,15 +4,19 @@ import Image from "next/image";
 import { useEffect, useMemo, useState } from "react";
 import {
   deleteProduct,
+  deleteDailyStock,
+  getDailyStocks,
   getProducts,
   registerProduct,
   updateProduct,
+  type DailyStockListResponse,
   type ProductListResponse,
   type ProductRegisterRequest,
 } from "@/api/owner";
 import { type FormState, EMPTY_FORM, toFormState, toUpdateRequest } from "./_components/types";
 import { ProductModal } from "./_components/ProductModal";
 import { ConfirmModal } from "./_components/ConfirmModal";
+import { TimesaleModal } from "./_components/TimesaleModal";
 
 type ModalMode = { type: "create" } | { type: "edit"; product: ProductListResponse };
 
@@ -29,6 +33,8 @@ export default function ProductListPage() {
   const [modalError, setModalError] = useState<string | null>(null);
 
   const [deleteTarget, setDeleteTarget] = useState<ProductListResponse | null>(null);
+  const [timesaleModal, setTimesaleModal] = useState<ProductListResponse | null>(null);
+  const [timesaleStocks, setTimesaleStocks] = useState<DailyStockListResponse[]>([]);
   const [ownerSort, setOwnerSort] = useState<"name" | "stock">("name");
   const [ownerSortDir, setOwnerSortDir] = useState<"asc" | "desc">("asc");
 
@@ -42,10 +48,22 @@ export default function ProductListPage() {
   };
 
   const load = () => {
-    getProducts()
-      .then(setProducts)
+    Promise.all([getProducts(), getDailyStocks()])
+      .then(([p, s]) => {
+        setProducts(p);
+        setTimesaleStocks(s.filter((s) => s.stockType === "TIMESALE"));
+      })
       .catch(() => setPageError("상품 목록을 불러오지 못했습니다."))
       .finally(() => setPageLoading(false));
+  };
+
+  const handleTimesaleDelete = async (uuid: string) => {
+    try {
+      await deleteDailyStock(uuid);
+      load();
+    } catch {
+      alert("삭제에 실패했습니다.");
+    }
   };
 
   useEffect(() => {
@@ -137,6 +155,16 @@ export default function ProductListPage() {
     return [...products].sort((a, b) => dir * a.name.localeCompare(b.name, "ko"));
   }, [products, ownerSort, ownerSortDir]);
 
+  const timesaleByProduct = useMemo(() => {
+    const map = new Map<string, DailyStockListResponse[]>();
+    for (const s of timesaleStocks) {
+      const list = map.get(s.productUuid) ?? [];
+      list.push(s);
+      map.set(s.productUuid, list);
+    }
+    return map;
+  }, [timesaleStocks]);
+
   const handleDelete = async () => {
     if (!deleteTarget) return;
     try {
@@ -192,64 +220,118 @@ export default function ProductListPage() {
         <p className="text-sm text-gray-400">등록된 상품이 없습니다.</p>
       ) : (
         <ul className="space-y-3">
-          {sortedProducts.map((product) => (
-            <li
-              key={product.id}
-              className="flex items-center gap-4 rounded-xl border border-gray-200 bg-white px-5 py-4 shadow-sm"
-            >
-              <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-lg border border-gray-100">
-                {product.imageUrl && (
-                  <Image
-                    src={product.imageUrl}
-                    alt={product.name}
-                    fill
-                    unoptimized
-                    className="object-cover"
-                  />
-                )}
-              </div>
-              <div className="min-w-0 flex-1">
-                <div className="mb-0.5 flex items-center gap-2">
-                  <p className="truncate font-semibold text-gray-900">{product.name}</p>
-                  <span className="shrink-0 rounded bg-gray-100 px-1.5 py-0.5 text-xs font-medium text-gray-500">
-                    {!product.active ? "비노출" : "노출"}
-                  </span>
-                  {product.soldOut && (
-                    <span className="shrink-0 rounded bg-red-100 px-1.5 py-0.5 text-xs font-medium text-red-500">
-                      품절
-                    </span>
-                  )}
-                  {product.recommended && (
-                    <span className="shrink-0 rounded bg-red-100 px-1.5 py-0.5 text-xs font-medium text-orange-500">
-                      추천
-                    </span>
-                  )}
+          {sortedProducts.map((product) => {
+            const productTimesales = timesaleByProduct.get(product.uuid) ?? [];
+            return (
+              <li key={product.id} className="rounded-xl border border-gray-200 bg-white shadow-sm">
+                <div className="flex items-center gap-4 px-5 py-4">
+                  <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-lg border border-gray-100">
+                    {product.imageUrl && (
+                      <Image
+                        src={product.imageUrl}
+                        alt={product.name}
+                        fill
+                        unoptimized
+                        className="object-cover"
+                      />
+                    )}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <div className="mb-0.5 flex items-center gap-2">
+                      <p className="truncate font-semibold text-gray-900">{product.name}</p>
+                      <span className="shrink-0 rounded bg-gray-100 px-1.5 py-0.5 text-xs font-medium text-gray-500">
+                        {!product.active ? "비노출" : "노출"}
+                      </span>
+                      {product.soldOut && (
+                        <span className="shrink-0 rounded bg-red-100 px-1.5 py-0.5 text-xs font-medium text-red-500">
+                          품절
+                        </span>
+                      )}
+                      {product.recommended && (
+                        <span className="shrink-0 rounded bg-red-100 px-1.5 py-0.5 text-xs font-medium text-orange-500">
+                          추천
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-sm text-gray-500">
+                      {product.price.toLocaleString()}원
+                      {product.stockQuantity != null && (
+                        <span className="ml-2 text-xs text-gray-400">
+                          재고 {product.currentStock ?? 0}/{product.stockQuantity}
+                        </span>
+                      )}
+                    </p>
+                  </div>
+                  <div className="flex shrink-0 items-center gap-2">
+                    <button
+                      onClick={() => setTimesaleModal(product)}
+                      className="rounded-lg border border-rose-200 px-3 py-1 text-xs font-medium text-rose-500 hover:bg-rose-50"
+                    >
+                      타임세일
+                    </button>
+                    <button
+                      onClick={() => openEdit(product)}
+                      className="rounded-lg border border-gray-300 px-3 py-1 text-xs font-medium text-gray-600 hover:bg-gray-50"
+                    >
+                      수정
+                    </button>
+                    <button
+                      onClick={() => setDeleteTarget(product)}
+                      className="rounded-lg border border-red-200 px-3 py-1 text-xs font-medium text-red-500 hover:bg-red-50"
+                    >
+                      삭제
+                    </button>
+                  </div>
                 </div>
-                <p className="text-sm text-gray-500">
-                  {product.price.toLocaleString()}원
-                  {product.stockQuantity != null && (
-                    <span className="ml-2 text-xs text-gray-400">
-                      재고 {product.currentStock ?? 0}/{product.stockQuantity}
-                    </span>
-                  )}
-                </p>
-              </div>
-              <div className="flex shrink-0 items-center gap-2">
-                <button
-                  onClick={() => openEdit(product)}
-                  className="rounded-lg border border-gray-300 px-3 py-1 text-xs font-medium text-gray-600 hover:bg-gray-50"
-                >
-                  수정
-                </button>
-                <button
-                  onClick={() => setDeleteTarget(product)}
-                  className="rounded-lg border border-red-200 px-3 py-1 text-xs font-medium text-red-500 hover:bg-red-50"
-                >
-                  삭제
-                </button>
-              </div>
-            </li>
-          ))}
+
+                {productTimesales.length > 0 && (
+                  <ul className="space-y-1.5 border-t border-gray-100 px-5 py-2">
+                    {productTimesales.map((ts) => (
+                      <li
+                        key={ts.id}
+                        className="flex items-center justify-between text-xs text-gray-500"
+                      >
+                        <span>
+                          <span className="mr-1.5 rounded bg-red-500 px-1 py-0.5 font-bold text-white">
+                            타임세일
+                          </span>
+                          {ts.startAt && ts.endAt
+                            ? `${ts.startAt.slice(0, 16).replace("T", " ")} ~ ${ts.endAt.slice(11, 16)}`
+                            : ts.saleDate}
+                          {" · "}
+                          {ts.salePrice.toLocaleString()}원 · 잔여 {ts.remainStock}/{ts.totalQty}개
+                          {" · "}
+                          <span
+                            className={
+                              ts.status === "OPEN"
+                                ? "text-green-600"
+                                : ts.status === "SCHEDULED"
+                                  ? "text-blue-500"
+                                  : "text-gray-400"
+                            }
+                          >
+                            {ts.status === "SCHEDULED"
+                              ? "예약됨"
+                              : ts.status === "OPEN"
+                                ? "판매 중"
+                                : ts.status === "SOLD_OUT"
+                                  ? "품절"
+                                  : "마감"}
+                          </span>
+                        </span>
+                        <button
+                          onClick={() => handleTimesaleDelete(ts.uuid)}
+                          className="ml-3 shrink-0 text-red-400 hover:text-red-600"
+                        >
+                          삭제
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </li>
+            );
+          })}
         </ul>
       )}
 
@@ -277,6 +359,17 @@ export default function ProductListPage() {
           message={`"${deleteTarget.name}" 상품을 삭제하시겠습니까?`}
           onConfirm={handleDelete}
           onCancel={() => setDeleteTarget(null)}
+        />
+      )}
+
+      {timesaleModal && (
+        <TimesaleModal
+          product={timesaleModal}
+          onSuccess={() => {
+            setTimesaleModal(null);
+            load();
+          }}
+          onClose={() => setTimesaleModal(null)}
         />
       )}
     </div>
