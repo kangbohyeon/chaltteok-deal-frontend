@@ -288,7 +288,7 @@ export default function ProductListPage() {
                   <ul className="space-y-1.5 border-t border-gray-100 px-5 py-2">
                     {productTimesales.map((ts) => (
                       <li
-                        key={ts.id}
+                        key={ts.uuid}
                         className="flex items-center justify-between text-xs text-gray-500"
                       >
                         <span>

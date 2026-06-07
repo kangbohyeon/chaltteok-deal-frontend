@@ -270,7 +270,6 @@ export interface DailyStockRegisterRequest {
 }
 
 export interface DailyStockListResponse {
-  id: number;
   uuid: string;
   productUuid: string;
   productName: string;
