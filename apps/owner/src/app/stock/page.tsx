@@ -343,13 +343,18 @@ export default function StockListPage() {
             ? Number(value)
             : value,
       };
-      if (name === "stockType" && value !== "TIMESALE") {
-        delete next.startAt;
-        delete next.endAt;
-        next.maxPurchaseCount = undefined;
-      }
-      if (name === "stockType" && value === "TIMESALE" && !next.maxPurchaseCount) {
-        next.maxPurchaseCount = 1;
+      if (name === "stockType") {
+        if (value !== "TIMESALE") {
+          delete next.startAt;
+          delete next.endAt;
+          next.maxPurchaseCount = undefined;
+        }
+        if (value === "NORMAL") {
+          next.salePrice = undefined;
+        }
+        if (value === "TIMESALE" && !next.maxPurchaseCount) {
+          next.maxPurchaseCount = 1;
+        }
       }
       return next;
     });
