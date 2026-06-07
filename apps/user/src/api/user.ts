@@ -52,11 +52,11 @@ export async function registerUser(body: RegisterRequest): Promise<void> {
 }
 
 export interface OrderRequest {
-  dailyStockId: number;
+  stockUuid: string;
 }
 
 export interface OpenDailyStockResponse {
-  id: number;
+  uuid: string;
   productName: string;
   price: number;
   saleDate: string;
@@ -67,8 +67,14 @@ export interface OpenDailyStockResponse {
   endAt: string | null;
 }
 
-export async function placeOrder(body: OrderRequest): Promise<string> {
-  const res = await api.post<{ data: string }>("/api/v1/user/orders", body);
+export interface PlaceOrderResponse {
+  orderId: number;
+  totalAmount: number;
+  status: string;
+}
+
+export async function placeOrder(body: OrderRequest): Promise<PlaceOrderResponse> {
+  const res = await api.post<{ data: PlaceOrderResponse }>("/api/v1/user/orders", body);
   return res.data.data;
 }
 
@@ -128,8 +134,8 @@ export async function checkout(body: CheckoutRequest): Promise<CheckoutResponse>
   return res.data.data;
 }
 
-export async function getParticipatedStockIds(): Promise<number[]> {
-  const res = await api.get<{ data: number[] }>("/api/v1/user/daily-stocks/participated");
+export async function getParticipatedStockIds(): Promise<string[]> {
+  const res = await api.get<{ data: string[] }>("/api/v1/user/daily-stocks/participated");
   return res.data.data;
 }
 
