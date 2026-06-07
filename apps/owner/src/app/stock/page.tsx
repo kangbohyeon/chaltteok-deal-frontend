@@ -416,7 +416,7 @@ export default function StockListPage() {
         <ul className="space-y-3">
           {stocks.map((s) => (
             <li
-              key={s.id}
+              key={s.uuid}
               className="flex items-center justify-between rounded-xl border border-gray-200 bg-white px-5 py-4 shadow-sm"
             >
               <div className="min-w-0">
