@@ -53,10 +53,12 @@ export async function registerUser(body: RegisterRequest): Promise<void> {
 
 export interface OrderRequest {
   stockUuid: string;
+  quantity: number;
 }
 
 export interface OpenDailyStockResponse {
   uuid: string;
+  productUuid: string;
   productName: string;
   price: number;
   saleDate: string;

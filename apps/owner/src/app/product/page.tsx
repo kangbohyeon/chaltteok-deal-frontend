@@ -34,6 +34,10 @@ export default function ProductListPage() {
 
   const [deleteTarget, setDeleteTarget] = useState<ProductListResponse | null>(null);
   const [timesaleModal, setTimesaleModal] = useState<ProductListResponse | null>(null);
+  const [editTimesale, setEditTimesale] = useState<{
+    stock: DailyStockListResponse;
+    product: ProductListResponse;
+  } | null>(null);
   const [timesaleStocks, setTimesaleStocks] = useState<DailyStockListResponse[]>([]);
   const [ownerSort, setOwnerSort] = useState<"name" | "stock">("name");
   const [ownerSortDir, setOwnerSortDir] = useState<"asc" | "desc">("asc");
@@ -320,6 +324,12 @@ export default function ProductListPage() {
                           </span>
                         </span>
                         <button
+                          onClick={() => setEditTimesale({ stock: ts, product })}
+                          className="ml-3 shrink-0 text-xs text-blue-400 hover:text-blue-600"
+                        >
+                          수정
+                        </button>
+                        <button
                           onClick={() => handleTimesaleDelete(ts.uuid)}
                           className="ml-3 shrink-0 text-red-400 hover:text-red-600"
                         >
@@ -370,6 +380,18 @@ export default function ProductListPage() {
             load();
           }}
           onClose={() => setTimesaleModal(null)}
+        />
+      )}
+
+      {editTimesale && (
+        <TimesaleModal
+          product={editTimesale.product}
+          editStock={editTimesale.stock}
+          onSuccess={() => {
+            setEditTimesale(null);
+            load();
+          }}
+          onClose={() => setEditTimesale(null)}
         />
       )}
     </div>

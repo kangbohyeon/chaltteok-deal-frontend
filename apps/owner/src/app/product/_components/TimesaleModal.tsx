@@ -3,11 +3,18 @@
 import { useState } from "react";
 import {
   registerDailyStock,
+  updateDailyStock,
+  type DailyStockListResponse,
   type DailyStockRegisterRequest,
   type ProductListResponse,
 } from "@/api/owner";
 
 const today = () => new Date().toISOString().split("T")[0];
+
+const toDatetimeLocal = (val: string | null): string => {
+  if (!val) return "";
+  return val.slice(0, 16); // "YYYY-MM-DDTHH:mm"
+};
 
 interface TimesaleForm {
   saleDate: string;
@@ -28,12 +35,25 @@ const EMPTY: Omit<TimesaleForm, "saleDate"> = {
 
 interface TimesaleModalProps {
   product: ProductListResponse;
+  editStock?: DailyStockListResponse;
   onSuccess: () => void;
   onClose: () => void;
 }
 
-export function TimesaleModal({ product, onSuccess, onClose }: TimesaleModalProps) {
-  const [form, setForm] = useState<TimesaleForm>(() => ({ ...EMPTY, saleDate: today() }));
+export function TimesaleModal({ product, editStock, onSuccess, onClose }: TimesaleModalProps) {
+  const [form, setForm] = useState<TimesaleForm>(() => {
+    if (editStock) {
+      return {
+        saleDate: editStock.saleDate,
+        salePrice: editStock.salePrice,
+        startAt: toDatetimeLocal(editStock.startAt),
+        endAt: toDatetimeLocal(editStock.endAt),
+        maxPurchaseCount: editStock.maxPurchaseCount,
+        totalQty: editStock.totalQty,
+      };
+    }
+    return { ...EMPTY, saleDate: today() };
+  });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -73,7 +93,11 @@ export function TimesaleModal({ product, onSuccess, onClose }: TimesaleModalProp
       maxPurchaseCount: form.maxPurchaseCount,
     };
     try {
-      await registerDailyStock(body);
+      if (editStock) {
+        await updateDailyStock(editStock.uuid, body);
+      } else {
+        await registerDailyStock(body);
+      }
       onSuccess();
     } catch {
       setError("저장에 실패했습니다. 다시 시도해주세요.");
@@ -86,7 +110,9 @@ export function TimesaleModal({ product, onSuccess, onClose }: TimesaleModalProp
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
       <div className="mx-4 w-full max-w-md rounded-2xl bg-white p-8 shadow-xl">
         <div className="mb-1 flex items-center justify-between">
-          <h2 className="text-lg font-bold text-gray-900">타임세일 등록</h2>
+          <h2 className="text-lg font-bold text-gray-900">
+            {editStock ? "타임세일 수정" : "타임세일 등록"}
+          </h2>
           <button onClick={onClose} className="text-xl font-bold text-gray-400 hover:text-gray-600">
             ×
           </button>
@@ -212,7 +238,7 @@ export function TimesaleModal({ product, onSuccess, onClose }: TimesaleModalProp
               disabled={loading}
               className="flex-1 rounded-lg bg-rose-500 py-2 text-sm font-semibold text-white hover:bg-rose-600 disabled:opacity-50"
             >
-              {loading ? "처리 중..." : "등록"}
+              {loading ? "처리 중..." : editStock ? "수정" : "등록"}
             </button>
           </div>
         </form>
