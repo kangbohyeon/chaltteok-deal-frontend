@@ -34,8 +34,10 @@ export default function ProductListPage() {
 
   const [deleteTarget, setDeleteTarget] = useState<ProductListResponse | null>(null);
   const [timesaleModal, setTimesaleModal] = useState<ProductListResponse | null>(null);
-  const [editTimesaleTarget, setEditTimesaleTarget] = useState<DailyStockListResponse | null>(null);
-  const [editTimesaleProduct, setEditTimesaleProduct] = useState<ProductListResponse | null>(null);
+  const [editTimesale, setEditTimesale] = useState<{
+    stock: DailyStockListResponse;
+    product: ProductListResponse;
+  } | null>(null);
   const [timesaleStocks, setTimesaleStocks] = useState<DailyStockListResponse[]>([]);
   const [ownerSort, setOwnerSort] = useState<"name" | "stock">("name");
   const [ownerSortDir, setOwnerSortDir] = useState<"asc" | "desc">("asc");
@@ -322,10 +324,7 @@ export default function ProductListPage() {
                           </span>
                         </span>
                         <button
-                          onClick={() => {
-                            setEditTimesaleProduct(product);
-                            setEditTimesaleTarget(ts);
-                          }}
+                          onClick={() => setEditTimesale({ stock: ts, product })}
                           className="ml-3 shrink-0 text-xs text-blue-400 hover:text-blue-600"
                         >
                           수정
@@ -384,19 +383,15 @@ export default function ProductListPage() {
         />
       )}
 
-      {editTimesaleTarget && editTimesaleProduct && (
+      {editTimesale && (
         <TimesaleModal
-          product={editTimesaleProduct}
-          editStock={editTimesaleTarget}
+          product={editTimesale.product}
+          editStock={editTimesale.stock}
           onSuccess={() => {
-            setEditTimesaleTarget(null);
-            setEditTimesaleProduct(null);
+            setEditTimesale(null);
             load();
           }}
-          onClose={() => {
-            setEditTimesaleTarget(null);
-            setEditTimesaleProduct(null);
-          }}
+          onClose={() => setEditTimesale(null)}
         />
       )}
     </div>
