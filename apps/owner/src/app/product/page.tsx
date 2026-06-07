@@ -34,6 +34,8 @@ export default function ProductListPage() {
 
   const [deleteTarget, setDeleteTarget] = useState<ProductListResponse | null>(null);
   const [timesaleModal, setTimesaleModal] = useState<ProductListResponse | null>(null);
+  const [editTimesaleTarget, setEditTimesaleTarget] = useState<DailyStockListResponse | null>(null);
+  const [editTimesaleProduct, setEditTimesaleProduct] = useState<ProductListResponse | null>(null);
   const [timesaleStocks, setTimesaleStocks] = useState<DailyStockListResponse[]>([]);
   const [ownerSort, setOwnerSort] = useState<"name" | "stock">("name");
   const [ownerSortDir, setOwnerSortDir] = useState<"asc" | "desc">("asc");
@@ -320,6 +322,15 @@ export default function ProductListPage() {
                           </span>
                         </span>
                         <button
+                          onClick={() => {
+                            setEditTimesaleProduct(product);
+                            setEditTimesaleTarget(ts);
+                          }}
+                          className="ml-3 shrink-0 text-xs text-blue-400 hover:text-blue-600"
+                        >
+                          수정
+                        </button>
+                        <button
                           onClick={() => handleTimesaleDelete(ts.uuid)}
                           className="ml-3 shrink-0 text-red-400 hover:text-red-600"
                         >
@@ -370,6 +381,22 @@ export default function ProductListPage() {
             load();
           }}
           onClose={() => setTimesaleModal(null)}
+        />
+      )}
+
+      {editTimesaleTarget && editTimesaleProduct && (
+        <TimesaleModal
+          product={editTimesaleProduct}
+          editStock={editTimesaleTarget}
+          onSuccess={() => {
+            setEditTimesaleTarget(null);
+            setEditTimesaleProduct(null);
+            load();
+          }}
+          onClose={() => {
+            setEditTimesaleTarget(null);
+            setEditTimesaleProduct(null);
+          }}
         />
       )}
     </div>
