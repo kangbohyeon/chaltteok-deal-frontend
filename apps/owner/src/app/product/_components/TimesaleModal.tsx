@@ -18,8 +18,7 @@ interface TimesaleForm {
   totalQty: number;
 }
 
-const EMPTY: TimesaleForm = {
-  saleDate: today(),
+const EMPTY: Omit<TimesaleForm, "saleDate"> = {
   salePrice: "",
   startAt: "",
   endAt: "",
@@ -34,7 +33,7 @@ interface TimesaleModalProps {
 }
 
 export function TimesaleModal({ product, onSuccess, onClose }: TimesaleModalProps) {
-  const [form, setForm] = useState<TimesaleForm>(EMPTY);
+  const [form, setForm] = useState<TimesaleForm>(() => ({ ...EMPTY, saleDate: today() }));
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 

@@ -155,6 +155,16 @@ export default function ProductListPage() {
     return [...products].sort((a, b) => dir * a.name.localeCompare(b.name, "ko"));
   }, [products, ownerSort, ownerSortDir]);
 
+  const timesaleByProduct = useMemo(() => {
+    const map = new Map<string, DailyStockListResponse[]>();
+    for (const s of timesaleStocks) {
+      const list = map.get(s.productUuid) ?? [];
+      list.push(s);
+      map.set(s.productUuid, list);
+    }
+    return map;
+  }, [timesaleStocks]);
+
   const handleDelete = async () => {
     if (!deleteTarget) return;
     try {
@@ -211,7 +221,7 @@ export default function ProductListPage() {
       ) : (
         <ul className="space-y-3">
           {sortedProducts.map((product) => {
-            const productTimesales = timesaleStocks.filter((s) => s.productUuid === product.uuid);
+            const productTimesales = timesaleByProduct.get(product.uuid) ?? [];
             return (
               <li key={product.id} className="rounded-xl border border-gray-200 bg-white shadow-sm">
                 <div className="flex items-center gap-4 px-5 py-4">
