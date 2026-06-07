@@ -261,9 +261,12 @@ export async function replyOwnerComment(
 export interface DailyStockRegisterRequest {
   optionId: string;
   saleDate: string;
-  stockType?: "NORMAL" | "EVENT";
+  stockType?: "NORMAL" | "EVENT" | "TIMESALE";
   salePrice?: number;
   totalQty: number;
+  startAt?: string;
+  endAt?: string;
+  maxPurchaseCount?: number;
 }
 
 export interface DailyStockListResponse {
@@ -278,6 +281,9 @@ export interface DailyStockListResponse {
   totalQty: number;
   remainStock: number;
   status: string;
+  startAt: string | null;
+  endAt: string | null;
+  maxPurchaseCount: number;
 }
 
 export async function getDailyStocks(): Promise<DailyStockListResponse[]> {
