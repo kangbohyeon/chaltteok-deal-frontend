@@ -119,7 +119,7 @@ export default function StockCard({ stock, participated = false }: StockCardProp
         </div>
       ) : (
         <Link
-          href={`/order?stockId=${stock.id}`}
+          href={`/order?stockId=${stock.uuid}`}
           className="mt-auto block rounded-lg bg-rose-500 py-2.5 text-center text-sm font-semibold text-white transition-colors hover:bg-rose-600"
         >
           참여하기

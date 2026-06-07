@@ -18,8 +18,8 @@ function OrderPageContent() {
     getOpenDailyStocks()
       .then((data) => {
         setStocks(data);
-        const target = stockIdParam ? data.find((s) => String(s.id) === stockIdParam) : data[0];
-        if (target) setSelectedId(String(target.id));
+        const target = stockIdParam ? data.find((s) => s.uuid === stockIdParam) : data[0];
+        if (target) setSelectedId(target.uuid);
       })
       .catch(() => setFetchError("이벤트 목록을 불러오지 못했습니다."));
   }, [stockIdParam]);
@@ -29,8 +29,8 @@ function OrderPageContent() {
     setError(null);
     setLoading(true);
     try {
-      await placeOrder({ dailyStockId: Number(selectedId) });
-      router.push("/checkout/complete?type=event");
+      const result = await placeOrder({ stockUuid: selectedId });
+      router.push(`/checkout/complete?orderId=${result.orderId}&amount=${result.totalAmount}`);
     } catch (err: unknown) {
       let msg = "주문 요청에 실패했습니다. 다시 시도해주세요.";
       if (
@@ -50,7 +50,7 @@ function OrderPageContent() {
     }
   };
 
-  const selectedStock = stocks.find((s) => String(s.id) === selectedId);
+  const selectedStock = stocks.find((s) => s.uuid === selectedId);
 
   return (
     <div className="mx-auto max-w-lg px-4 py-12">
@@ -80,7 +80,7 @@ function OrderPageContent() {
               className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-black focus:ring-2 focus:ring-rose-400 focus:outline-none"
             >
               {stocks.map((s) => (
-                <option key={s.id} value={s.id}>
+                <option key={s.uuid} value={s.uuid}>
                   {s.productName} — 남은 수량: {s.remainStock}개
                 </option>
               ))}
