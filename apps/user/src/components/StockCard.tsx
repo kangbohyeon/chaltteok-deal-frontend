@@ -9,18 +9,27 @@ interface StockCardProps {
   participated?: boolean;
 }
 
-function useCountdown(endAt: string | null): { display: string; isUrgent: boolean } {
+function useCountdown(endAt: string | null): {
+  display: string;
+  isUrgent: boolean;
+  isExpired: boolean;
+} {
   const [display, setDisplay] = useState<string>("");
   const [isUrgent, setIsUrgent] = useState<boolean>(false);
+  const [isExpired, setIsExpired] = useState<boolean>(false);
 
   useEffect(() => {
     if (!endAt) return;
+
+    let id: ReturnType<typeof setInterval>;
 
     const tick = () => {
       const diff = new Date(endAt).getTime() - Date.now();
       if (diff <= 0) {
         setDisplay("마감");
         setIsUrgent(false);
+        setIsExpired(true);
+        clearInterval(id);
         return;
       }
       const totalSeconds = Math.floor(diff / 1000);
@@ -35,18 +44,18 @@ function useCountdown(endAt: string | null): { display: string; isUrgent: boolea
     };
 
     tick();
-    const id = setInterval(tick, 1000);
+    id = setInterval(tick, 1000);
     return () => clearInterval(id);
   }, [endAt]);
 
-  return { display, isUrgent };
+  return { display, isUrgent, isExpired };
 }
 
 export default function StockCard({ stock, participated = false }: StockCardProps) {
   const isSoldOut = stock.remainStock === 0;
-  const isDisabled = isSoldOut || participated;
-  const { display: countdown, isUrgent } = useCountdown(stock.endAt);
+  const { display: countdown, isUrgent, isExpired } = useCountdown(stock.endAt);
   const hasTimesale = stock.endAt !== null;
+  const isDisabled = isSoldOut || participated || isExpired;
 
   return (
     <div className="flex flex-col gap-3 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
@@ -105,12 +114,8 @@ export default function StockCard({ stock, participated = false }: StockCardProp
       </div>
 
       {isDisabled ? (
-        <div
-          className={`mt-auto block rounded-lg py-2.5 text-center text-sm font-semibold ${
-            participated ? "bg-gray-100 text-gray-400" : "bg-gray-100 text-gray-400"
-          }`}
-        >
-          {participated ? "이미 참여하셨습니다" : "품절"}
+        <div className="mt-auto block rounded-lg bg-gray-100 py-2.5 text-center text-sm font-semibold text-gray-400">
+          {participated ? "이미 참여하셨습니다" : isExpired ? "마감" : "품절"}
         </div>
       ) : (
         <Link
