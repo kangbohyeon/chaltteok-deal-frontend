@@ -5,14 +5,14 @@ interface EventStockSectionProps {
   stocks: OpenDailyStockResponse[] | undefined;
   isLoading: boolean;
   isError: boolean;
-  participatedIds?: string[];
+  participationCounts?: Record<string, number>;
 }
 
 export default function EventStockSection({
   stocks,
   isLoading,
   isError,
-  participatedIds = [],
+  participationCounts = {},
 }: EventStockSectionProps) {
   if (isLoading) {
     return (
@@ -46,7 +46,7 @@ export default function EventStockSection({
         <StockCard
           key={stock.uuid}
           stock={stock}
-          participated={participatedIds.includes(stock.uuid)}
+          participationCount={participationCounts[stock.uuid] ?? 0}
         />
       ))}
     </div>

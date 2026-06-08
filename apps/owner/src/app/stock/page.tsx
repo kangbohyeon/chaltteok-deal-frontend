@@ -49,7 +49,7 @@ function stockFromExisting(
     totalQty: stock.totalQty,
     startAt: toDatetimeLocal(stock.startAt) || undefined,
     endAt: toDatetimeLocal(stock.endAt) || undefined,
-    maxPurchaseCount: stock.maxPurchaseCount ?? 1,
+    maxPurchaseCount: stock.maxPurchaseCount,
   };
 }
 
@@ -198,16 +198,17 @@ function StockModal({
 
               <div>
                 <label className="mb-1 block text-sm font-medium text-gray-700">
-                  1인 최대 구매 횟수 *
+                  1인 최대 구매 횟수
+                  <span className="ml-1 text-xs font-normal text-gray-400">(미입력 시 무제한)</span>
                 </label>
                 <input
                   name="maxPurchaseCount"
                   type="number"
                   min={1}
                   max={99}
-                  value={form.maxPurchaseCount ?? 1}
+                  value={form.maxPurchaseCount ?? ""}
+                  placeholder="무제한"
                   onChange={onChange}
-                  required
                   className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-black focus:ring-2 focus:ring-rose-400 focus:outline-none"
                 />
               </div>
@@ -339,9 +340,13 @@ export default function StockListPage() {
       const next = {
         ...prev,
         [name]:
-          name === "totalQty" || name === "salePrice" || name === "maxPurchaseCount"
+          name === "totalQty" || name === "salePrice"
             ? Number(value)
-            : value,
+            : name === "maxPurchaseCount"
+              ? value === ""
+                ? undefined
+                : Number(value)
+              : value,
       };
       if (name === "stockType") {
         if (value !== "TIMESALE") {
@@ -351,9 +356,6 @@ export default function StockListPage() {
         }
         if (value === "NORMAL") {
           next.salePrice = undefined;
-        }
-        if (value === "TIMESALE" && !next.maxPurchaseCount) {
-          next.maxPurchaseCount = 1;
         }
       }
       return next;
@@ -447,7 +449,9 @@ export default function StockListPage() {
                     {STATUS_LABEL[s.status] ?? s.status}
                   </span>
                   {s.stockType === "TIMESALE" && (
-                    <span className="ml-1 text-gray-400">· 1인 {s.maxPurchaseCount}회</span>
+                    <span className="ml-1 text-gray-400">
+                      · 1인 {s.maxPurchaseCount !== null ? `${s.maxPurchaseCount}회` : "무제한"}
+                    </span>
                   )}
                 </p>
               </div>
