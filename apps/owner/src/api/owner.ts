@@ -42,6 +42,7 @@ export interface ProductUpdateRequest {
   stockQuantity?: number | null;
   currentStock?: number | null;
   displayOrder?: number;
+  deleteImage?: boolean;
 }
 
 export interface ProductListResponse {

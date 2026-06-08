@@ -38,7 +38,7 @@ export function toFormState(p: ProductListResponse): FormState {
   };
 }
 
-export function toUpdateRequest(form: FormState): ProductUpdateRequest {
+export function toUpdateRequest(form: FormState, deleteImage?: boolean): ProductUpdateRequest {
   return {
     name: form.name,
     price: form.price,
@@ -49,5 +49,6 @@ export function toUpdateRequest(form: FormState): ProductUpdateRequest {
     stockQuantity: form.stockQuantity,
     currentStock: form.currentStock,
     displayOrder: form.displayOrder,
+    deleteImage,
   };
 }

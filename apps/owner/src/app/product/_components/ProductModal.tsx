@@ -17,6 +17,8 @@ export interface ModalProps {
   onRemoveImage: () => void;
   onSubmit: () => void;
   onClose: () => void;
+  existingImageUrl?: string | null;
+  onDeleteExistingImage?: () => void;
 }
 
 export function ProductModal({
@@ -31,6 +33,8 @@ export function ProductModal({
   onRemoveImage,
   onSubmit,
   onClose,
+  existingImageUrl,
+  onDeleteExistingImage,
 }: ModalProps) {
   const fileRef = useRef<HTMLInputElement>(null);
   return (
@@ -178,6 +182,23 @@ export function ProductModal({
                   className="absolute top-2 right-2 rounded-full bg-black/50 px-2 py-1 text-xs text-white hover:bg-black/70"
                 >
                   삭제
+                </button>
+              </div>
+            ) : existingImageUrl ? (
+              <div className="relative aspect-video w-full overflow-hidden rounded-lg border border-gray-200 bg-gray-50">
+                <Image
+                  src={existingImageUrl}
+                  alt="기존 이미지"
+                  fill
+                  unoptimized
+                  className="object-contain"
+                />
+                <button
+                  type="button"
+                  onClick={onDeleteExistingImage}
+                  className="absolute top-2 right-2 rounded-full bg-black/50 px-2 py-1 text-xs text-white hover:bg-black/70"
+                >
+                  이미지 삭제
                 </button>
               </div>
             ) : (

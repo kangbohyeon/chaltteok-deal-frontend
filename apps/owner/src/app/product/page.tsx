@@ -29,6 +29,7 @@ export default function ProductListPage() {
   const [form, setForm] = useState<FormState>(EMPTY_FORM);
   const [image, setImage] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
+  const [deleteImage, setDeleteImage] = useState(false);
   const [modalLoading, setModalLoading] = useState(false);
   const [modalError, setModalError] = useState<string | null>(null);
 
@@ -84,6 +85,7 @@ export default function ProductListPage() {
   const openEdit = (p: ProductListResponse) => {
     setForm(toFormState(p));
     clearImage();
+    setDeleteImage(false);
     setModalError(null);
     setModal({ type: "edit", product: p });
   };
@@ -92,6 +94,7 @@ export default function ProductListPage() {
     if (preview) URL.revokeObjectURL(preview);
     setImage(null);
     setPreview(null);
+    setDeleteImage(false);
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -137,7 +140,11 @@ export default function ProductListPage() {
       if (modal?.type === "create") {
         await registerProduct(createBody, image ?? undefined);
       } else if (modal?.type === "edit") {
-        await updateProduct(modal.product.uuid, toUpdateRequest(form), image ?? undefined);
+        await updateProduct(
+          modal.product.uuid,
+          toUpdateRequest(form, deleteImage),
+          image ?? undefined
+        );
       }
       setModal(null);
       clearImage();
@@ -359,6 +366,11 @@ export default function ProductListPage() {
           onSubmit={handleSubmit}
           onClose={() => {
             setModal(null);
+            clearImage();
+          }}
+          existingImageUrl={modal.type === "edit" && !deleteImage ? modal.product.imageUrl : null}
+          onDeleteExistingImage={() => {
+            setDeleteImage(true);
             clearImage();
           }}
         />
