@@ -89,7 +89,24 @@ export async function updateProduct(
 }
 
 export async function deleteProduct(productUuid: string): Promise<void> {
-  await api.delete(`/api/v1/owner/products/${productUuid}`);
+  try {
+    await api.delete(`/api/v1/owner/products/${productUuid}`);
+  } catch (error) {
+    const serverMessage =
+      error !== null &&
+      typeof error === "object" &&
+      "response" in error &&
+      error.response !== null &&
+      typeof error.response === "object" &&
+      "data" in error.response &&
+      error.response.data !== null &&
+      typeof error.response.data === "object" &&
+      "message" in error.response.data &&
+      typeof error.response.data.message === "string"
+        ? error.response.data.message
+        : null;
+    throw serverMessage ? new Error(serverMessage) : error;
+  }
 }
 
 export async function toggleActive(productUuid: string): Promise<void> {
