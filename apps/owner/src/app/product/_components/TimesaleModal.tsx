@@ -21,7 +21,7 @@ interface TimesaleForm {
   salePrice: number | "";
   startAt: string;
   endAt: string;
-  maxPurchaseCount: number;
+  maxPurchaseCount: number | "";
   totalQty: number;
 }
 
@@ -29,7 +29,7 @@ const EMPTY: Omit<TimesaleForm, "saleDate"> = {
   salePrice: "",
   startAt: "",
   endAt: "",
-  maxPurchaseCount: 1,
+  maxPurchaseCount: "",
   totalQty: 10,
 };
 
@@ -48,7 +48,7 @@ export function TimesaleModal({ product, editStock, onSuccess, onClose }: Timesa
         salePrice: editStock.salePrice,
         startAt: toDatetimeLocal(editStock.startAt),
         endAt: toDatetimeLocal(editStock.endAt),
-        maxPurchaseCount: editStock.maxPurchaseCount,
+        maxPurchaseCount: editStock.maxPurchaseCount ?? "",
         totalQty: editStock.totalQty,
       };
     }
@@ -90,7 +90,7 @@ export function TimesaleModal({ product, editStock, onSuccess, onClose }: Timesa
       totalQty: form.totalQty,
       startAt: form.startAt,
       endAt: form.endAt,
-      maxPurchaseCount: form.maxPurchaseCount,
+      maxPurchaseCount: form.maxPurchaseCount === "" ? null : form.maxPurchaseCount,
     };
     try {
       if (editStock) {
@@ -207,7 +207,8 @@ export function TimesaleModal({ product, editStock, onSuccess, onClose }: Timesa
                 htmlFor="ts-maxPurchaseCount"
                 className="mb-1 block text-sm font-medium text-gray-700"
               >
-                1인 최대 구매 *
+                1인 최대 구매
+                <span className="ml-1 text-xs font-normal text-gray-400">(미입력 시 무제한)</span>
               </label>
               <input
                 id="ts-maxPurchaseCount"
@@ -217,7 +218,7 @@ export function TimesaleModal({ product, editStock, onSuccess, onClose }: Timesa
                 max={99}
                 value={form.maxPurchaseCount}
                 onChange={handleChange}
-                required
+                placeholder="무제한"
                 className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-black focus:ring-2 focus:ring-rose-400 focus:outline-none"
               />
             </div>

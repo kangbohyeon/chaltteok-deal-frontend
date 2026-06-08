@@ -29,7 +29,9 @@ function OrderPageContent() {
   const selectedStock = stocks.find((s) => s.uuid === selectedId);
 
   const maxQty = selectedStock
-    ? Math.min(selectedStock.remainStock, selectedStock.maxPurchaseCount)
+    ? selectedStock.maxPurchaseCount !== null
+      ? Math.min(selectedStock.remainStock, selectedStock.maxPurchaseCount)
+      : selectedStock.remainStock
     : 1;
 
   const handleSelectChange = (uuid: string) => {
@@ -114,9 +116,14 @@ function OrderPageContent() {
                 남은 재고: <span className="font-semibold">{selectedStock.remainStock}</span> /{" "}
                 {selectedStock.totalStock}개
               </p>
-              <p>
-                1인 최대: <span className="font-semibold">{selectedStock.maxPurchaseCount}</span>개
-              </p>
+              {selectedStock.maxPurchaseCount !== null ? (
+                <p>
+                  1인 최대: <span className="font-semibold">{selectedStock.maxPurchaseCount}</span>
+                  개
+                </p>
+              ) : (
+                <p>구매 수량 제한 없음</p>
+              )}
             </div>
 
             {/* 수량 선택 */}

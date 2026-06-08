@@ -65,7 +65,7 @@ export interface OpenDailyStockResponse {
   saleDate: string;
   remainStock: number;
   totalStock: number;
-  maxPurchaseCount: number;
+  maxPurchaseCount: number | null;
   startAt: string | null;
   endAt: string | null;
 }
@@ -137,8 +137,10 @@ export async function checkout(body: CheckoutRequest): Promise<CheckoutResponse>
   return res.data.data;
 }
 
-export async function getParticipatedStockIds(): Promise<string[]> {
-  const res = await api.get<{ data: string[] }>("/api/v1/user/daily-stocks/participated");
+export async function getParticipationCounts(): Promise<Record<string, number>> {
+  const res = await api.get<{ data: Record<string, number> }>(
+    "/api/v1/user/daily-stocks/participated"
+  );
   return res.data.data;
 }
 

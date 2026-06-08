@@ -266,7 +266,7 @@ export interface DailyStockRegisterRequest {
   totalQty: number;
   startAt?: string;
   endAt?: string;
-  maxPurchaseCount?: number;
+  maxPurchaseCount?: number | null;
 }
 
 export interface DailyStockListResponse {
@@ -282,7 +282,7 @@ export interface DailyStockListResponse {
   status: string;
   startAt: string | null;
   endAt: string | null;
-  maxPurchaseCount: number;
+  maxPurchaseCount: number | null;
 }
 
 export async function getDailyStocks(): Promise<DailyStockListResponse[]> {

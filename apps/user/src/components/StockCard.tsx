@@ -6,7 +6,7 @@ import { type OpenDailyStockResponse } from "@/api/user";
 
 interface StockCardProps {
   stock: OpenDailyStockResponse;
-  participated?: boolean;
+  participationCount?: number;
 }
 
 function useCountdown(endAt: string | null): {
@@ -51,11 +51,14 @@ function useCountdown(endAt: string | null): {
   return { display, isUrgent, isExpired };
 }
 
-export default function StockCard({ stock, participated = false }: StockCardProps) {
+export default function StockCard({ stock, participationCount = 0 }: StockCardProps) {
   const isSoldOut = stock.remainStock === 0;
   const { display: countdown, isUrgent, isExpired } = useCountdown(stock.endAt);
   const hasTimesale = stock.endAt !== null;
-  const isDisabled = isSoldOut || participated || isExpired;
+
+  const isAtLimit =
+    stock.maxPurchaseCount !== null && participationCount >= (stock.maxPurchaseCount ?? Infinity);
+  const isDisabled = isSoldOut || isAtLimit || isExpired;
 
   return (
     <div className="flex flex-col gap-3 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
@@ -78,7 +81,7 @@ export default function StockCard({ stock, participated = false }: StockCardProp
 
       <div className="flex items-start justify-between">
         <h3 className="text-lg leading-tight font-semibold text-gray-900">{stock.productName}</h3>
-        {participated ? (
+        {isAtLimit ? (
           <span className="shrink-0 rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-500">
             참여완료
           </span>
@@ -107,15 +110,22 @@ export default function StockCard({ stock, participated = false }: StockCardProp
           </span>
           <span className="text-gray-400"> / {stock.totalStock}개</span>
         </p>
-        <p>
-          1인 <span className="font-medium text-gray-700">{stock.maxPurchaseCount}회</span> 구매
-          가능
-        </p>
+        {stock.maxPurchaseCount !== null ? (
+          <p>
+            1인 최대 <span className="font-medium text-gray-700">{stock.maxPurchaseCount}개</span>{" "}
+            구매 가능
+            {participationCount > 0 && (
+              <span className="ml-1 text-rose-500">({participationCount}개 구매함)</span>
+            )}
+          </p>
+        ) : (
+          <p>구매 수량 제한 없음</p>
+        )}
       </div>
 
       {isDisabled ? (
         <div className="mt-auto block rounded-lg bg-gray-100 py-2.5 text-center text-sm font-semibold text-gray-400">
-          {participated ? "이미 참여하셨습니다" : isExpired ? "마감" : "품절"}
+          {isAtLimit ? "이미 참여하셨습니다" : isExpired ? "마감" : "품절"}
         </div>
       ) : (
         <Link

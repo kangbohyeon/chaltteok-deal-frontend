@@ -11,7 +11,7 @@ import RollingBanner from "@/components/RollingBanner";
 
 export default function Home() {
   const { data: stocks, isLoading: isLoadingStocks, isError: isErrorStocks } = useOpenStocks();
-  const { data: participatedIds = [] } = useParticipatedStocks();
+  const { data: participationCounts = {} } = useParticipatedStocks();
   const { data: banners, isLoading: isLoadingBanners, isError: isErrorBanners } = useBanners();
   const { data: products, isLoading: isLoadingProducts, isError: isErrorProducts } = useProducts();
 
@@ -53,7 +53,7 @@ export default function Home() {
             stocks={activeStocks}
             isLoading={isLoadingStocks}
             isError={isErrorStocks}
-            participatedIds={participatedIds}
+            participationCounts={participationCounts}
           />
         </section>
       )}
