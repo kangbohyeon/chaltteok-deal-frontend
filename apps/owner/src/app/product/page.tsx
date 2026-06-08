@@ -182,8 +182,8 @@ export default function ProductListPage() {
       await deleteProduct(deleteTarget.uuid);
       setDeleteTarget(null);
       load();
-    } catch {
-      alert("삭제에 실패했습니다.");
+    } catch (err) {
+      alert(err instanceof Error ? err.message : "삭제에 실패했습니다.");
     }
   };
 
