@@ -2,8 +2,7 @@
 
 import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { getOpenDailyStocks, placeOrder, type OpenDailyStockResponse } from "@/api/user";
-import { getApiErrorMessage } from "@/lib/error";
+import { getOpenDailyStocks, type OpenDailyStockResponse } from "@/api/user";
 
 function OrderPageContent() {
   const router = useRouter();
@@ -12,9 +11,7 @@ function OrderPageContent() {
   const [stocks, setStocks] = useState<OpenDailyStockResponse[]>([]);
   const [selectedId, setSelectedId] = useState<string>("");
   const [quantity, setQuantity] = useState(1);
-  const [loading, setLoading] = useState(false);
   const [fetchError, setFetchError] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     getOpenDailyStocks()
@@ -43,18 +40,9 @@ function OrderPageContent() {
     setQuantity((q) => Math.max(1, Math.min(maxQty, q + delta)));
   };
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setError(null);
-    setLoading(true);
-    try {
-      const result = await placeOrder({ stockUuid: selectedId, quantity });
-      router.push(`/checkout/complete?orderId=${result.orderId}&amount=${result.totalAmount}`);
-    } catch (err: unknown) {
-      setError(getApiErrorMessage(err) ?? "주문 요청에 실패했습니다. 다시 시도해주세요.");
-    } finally {
-      setLoading(false);
-    }
+    router.push(`/order/checkout?stockId=${selectedId}&qty=${quantity}`);
   };
 
   const totalPrice = selectedStock ? selectedStock.price * quantity : 0;
@@ -160,18 +148,12 @@ function OrderPageContent() {
           </>
         )}
 
-        {error && (
-          <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3">
-            <p className="text-sm text-red-600">{error}</p>
-          </div>
-        )}
-
         <button
           type="submit"
-          disabled={loading || !selectedStock || selectedStock.remainStock === 0}
+          disabled={!selectedStock || selectedStock.remainStock === 0}
           className="w-full rounded-lg bg-rose-500 py-3 text-sm font-semibold text-white transition-colors hover:bg-rose-600 disabled:opacity-50"
         >
-          {loading ? "처리 중..." : `${totalPrice.toLocaleString()}원 바로구매`}
+          {totalPrice.toLocaleString()}원 바로구매
         </button>
       </form>
     </div>
