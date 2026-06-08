@@ -7,17 +7,31 @@ import { getOpenDailyStocks, placeOrder, type OpenDailyStockResponse } from "@/a
 import { PAYMENT_METHODS } from "@/constants/payment";
 import { getApiErrorMessage } from "@/lib/error";
 
+function ErrorFallback({ message }: { message: string }) {
+  return (
+    <div className="mx-auto max-w-lg px-4 py-20 text-center">
+      <p className="mb-6 text-sm text-red-500">{message}</p>
+      <Link
+        href="/order"
+        className="inline-block rounded-lg bg-rose-500 px-6 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-rose-600"
+      >
+        이벤트 목록으로
+      </Link>
+    </div>
+  );
+}
+
 function OrderCheckoutContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const stockId = searchParams.get("stockId") ?? "";
-  const qty = Number(searchParams.get("qty") ?? "1");
+  const rawQty = Number(searchParams.get("qty") ?? "1");
 
   const [stock, setStock] = useState<OpenDailyStockResponse | null>(null);
   const [fetchError, setFetchError] = useState<string | null>(null);
-  const [paymentMethod, setPaymentMethod] = useState("CARD");
+  const [paymentMethod, setPaymentMethod] = useState<string>(PAYMENT_METHODS[0].value);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!stockId) return;
@@ -34,53 +48,38 @@ function OrderCheckoutContent() {
   }, [stockId]);
 
   if (!stockId) {
-    return (
-      <div className="mx-auto max-w-lg px-4 py-20 text-center">
-        <p className="mb-6 text-sm text-red-500">잘못된 접근입니다.</p>
-        <Link
-          href="/order"
-          className="inline-block rounded-lg bg-rose-500 px-6 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-rose-600"
-        >
-          이벤트 목록으로
-        </Link>
-      </div>
-    );
+    return <ErrorFallback message="잘못된 접근입니다." />;
   }
 
-  const quantity = Math.max(1, qty);
-  const totalPrice = stock ? stock.price * quantity : 0;
-
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setError(null);
-    setLoading(true);
-    try {
-      const result = await placeOrder({ stockUuid: stockId, quantity });
-      router.push(`/checkout/complete?orderId=${result.orderId}&amount=${result.totalAmount}`);
-    } catch (err: unknown) {
-      setError(getApiErrorMessage(err) ?? "주문 요청에 실패했습니다. 다시 시도해주세요.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
   if (fetchError) {
-    return (
-      <div className="mx-auto max-w-lg px-4 py-20 text-center">
-        <p className="mb-6 text-sm text-red-500">{fetchError}</p>
-        <Link
-          href="/order"
-          className="inline-block rounded-lg bg-rose-500 px-6 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-rose-600"
-        >
-          이벤트 목록으로
-        </Link>
-      </div>
-    );
+    return <ErrorFallback message={fetchError} />;
   }
 
   if (!stock) {
     return <div className="py-20 text-center text-gray-400">불러오는 중...</div>;
   }
+
+  const maxQty =
+    stock.maxPurchaseCount !== null
+      ? Math.min(stock.remainStock, stock.maxPurchaseCount)
+      : stock.remainStock;
+  const quantity = Number.isFinite(rawQty) ? Math.max(1, Math.min(maxQty, rawQty)) : 1;
+  const totalPrice = stock.price * quantity;
+  const formattedTotal = totalPrice.toLocaleString();
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setSubmitError(null);
+    setLoading(true);
+    try {
+      const result = await placeOrder({ stockUuid: stockId, quantity });
+      router.push(`/checkout/complete?orderId=${result.orderId}&amount=${result.totalAmount}`);
+    } catch (err: unknown) {
+      setSubmitError(getApiErrorMessage(err) ?? "주문 요청에 실패했습니다. 다시 시도해주세요.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="mx-auto max-w-lg px-4 py-12">
@@ -106,12 +105,6 @@ function OrderCheckoutContent() {
             <div className="flex justify-between">
               <span className="text-gray-500">수량</span>
               <span>{quantity}개</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-gray-500">남은 재고</span>
-              <span>
-                {stock.remainStock} / {stock.totalStock}개
-              </span>
             </div>
           </div>
         </div>
@@ -148,7 +141,7 @@ function OrderCheckoutContent() {
           <h2 className="text-base font-semibold text-gray-900">결제 금액</h2>
           <div className="flex justify-between text-sm text-gray-600">
             <span>상품 합계</span>
-            <span>{totalPrice.toLocaleString()}원</span>
+            <span>{formattedTotal}원</span>
           </div>
           <div className="flex justify-between text-sm text-gray-600">
             <span>배송비</span>
@@ -156,13 +149,13 @@ function OrderCheckoutContent() {
           </div>
           <div className="flex justify-between border-t border-gray-100 pt-3 font-bold text-gray-900">
             <span>총 결제 금액</span>
-            <span className="text-xl text-rose-500">{totalPrice.toLocaleString()}원</span>
+            <span className="text-xl text-rose-500">{formattedTotal}원</span>
           </div>
         </div>
 
-        {error && (
+        {submitError && (
           <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3">
-            <p className="text-sm text-red-600">{error}</p>
+            <p className="text-sm text-red-600">{submitError}</p>
           </div>
         )}
 
@@ -171,7 +164,7 @@ function OrderCheckoutContent() {
           disabled={loading || stock.remainStock === 0}
           className="w-full rounded-lg bg-rose-500 py-3.5 text-sm font-semibold text-white transition-colors hover:bg-rose-600 disabled:opacity-50"
         >
-          {loading ? "결제 처리 중..." : `${totalPrice.toLocaleString()}원 결제하기`}
+          {loading ? "결제 처리 중..." : `${formattedTotal}원 결제하기`}
         </button>
 
         <Link
