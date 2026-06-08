@@ -15,10 +15,14 @@ export default function Home() {
   const { data: banners, isLoading: isLoadingBanners, isError: isErrorBanners } = useBanners();
   const { data: products, isLoading: isLoadingProducts, isError: isErrorProducts } = useProducts();
 
+  // OPEN + SCHEDULED 타임세일 상품을 일반 목록에서 제외
   const timesaleProductUuids = useMemo(
     () => new Set((stocks ?? []).map((s) => s.productUuid)),
     [stocks]
   );
+
+  // EventStockSection에는 현재 판매 중(OPEN)인 상품만 표시
+  const activeStocks = useMemo(() => (stocks ?? []).filter((s) => s.status === "OPEN"), [stocks]);
 
   const regularProducts = useMemo(
     () => (products ?? []).filter((p) => !timesaleProductUuids.has(p.productUuid)),
@@ -36,7 +40,7 @@ export default function Home() {
 
   return (
     <div className="mx-auto max-w-5xl space-y-16 px-4 py-16">
-      {stocks?.length !== 0 && (
+      {(isLoadingStocks || activeStocks.length > 0) && (
         <section>
           <div className="mb-6">
             <span className="mb-2 inline-block rounded-full bg-rose-100 px-3 py-1 text-xs font-semibold text-rose-600">
@@ -46,7 +50,7 @@ export default function Home() {
             <p className="mt-1 text-sm text-gray-500">매일 한정 수량으로 만나는 특별한 이벤트 딜</p>
           </div>
           <EventStockSection
-            stocks={stocks}
+            stocks={activeStocks}
             isLoading={isLoadingStocks}
             isError={isErrorStocks}
             participatedIds={participatedIds}

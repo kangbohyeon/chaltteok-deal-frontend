@@ -61,6 +61,7 @@ export interface OpenDailyStockResponse {
   productUuid: string;
   productName: string;
   price: number;
+  status: "OPEN" | "SCHEDULED" | "SOLD_OUT";
   saleDate: string;
   remainStock: number;
   totalStock: number;
