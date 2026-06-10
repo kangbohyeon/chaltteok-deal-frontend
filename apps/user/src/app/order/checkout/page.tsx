@@ -72,8 +72,8 @@ function OrderCheckoutContent() {
     setSubmitError(null);
     setLoading(true);
     try {
-      const result = await placeOrder({ stockUuid: stockId, quantity });
-      router.push(`/checkout/complete?orderId=${result.orderId}&amount=${result.totalAmount}`);
+      await placeOrder({ stockUuid: stockId, quantity, paymentMethod });
+      router.push(`/checkout/complete?type=event&amount=${totalPrice}`);
     } catch (err: unknown) {
       setSubmitError(getApiErrorMessage(err) ?? "주문 요청에 실패했습니다. 다시 시도해주세요.");
     } finally {

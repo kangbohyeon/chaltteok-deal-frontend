@@ -54,6 +54,7 @@ export async function registerUser(body: RegisterRequest): Promise<void> {
 export interface OrderRequest {
   stockUuid: string;
   quantity: number;
+  paymentMethod: string;
 }
 
 export interface OpenDailyStockResponse {
