@@ -3,7 +3,12 @@
 import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { getOpenDailyStocks, placeOrder, type OpenDailyStockResponse } from "@/api/user";
+import {
+  getOpenDailyStocks,
+  placeOrder,
+  type OpenDailyStockResponse,
+  type PaymentMethod,
+} from "@/api/user";
 import { PAYMENT_METHODS } from "@/constants/payment";
 import { getApiErrorMessage } from "@/lib/error";
 
@@ -29,7 +34,7 @@ function OrderCheckoutContent() {
 
   const [stock, setStock] = useState<OpenDailyStockResponse | null>(null);
   const [fetchError, setFetchError] = useState<string | null>(null);
-  const [paymentMethod, setPaymentMethod] = useState<string>(PAYMENT_METHODS[0].value);
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>(PAYMENT_METHODS[0].value);
   const [loading, setLoading] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
 
