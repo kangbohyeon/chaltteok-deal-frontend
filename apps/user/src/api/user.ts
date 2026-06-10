@@ -51,9 +51,12 @@ export async function registerUser(body: RegisterRequest): Promise<void> {
   await api.post("/api/v1/user/auth/register", body);
 }
 
+export type PaymentMethod = "CARD" | "TRANSFER";
+
 export interface OrderRequest {
   stockUuid: string;
   quantity: number;
+  paymentMethod: PaymentMethod;
 }
 
 export interface OpenDailyStockResponse {
