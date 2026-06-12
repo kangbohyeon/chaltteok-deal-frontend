@@ -13,6 +13,7 @@ import {
 import { API_BASE_URL } from "@/lib/config";
 import { useFileAttachment } from "@/hooks/useFileAttachment";
 import AttachmentUploader from "@/components/AttachmentUploader";
+import ConfirmModal from "@/components/ConfirmModal";
 
 interface Props {
   productUuid: string;
@@ -173,16 +174,22 @@ function CommentItem({
 }: CommentItemProps) {
   const [showReplyForm, setShowReplyForm] = useState(false);
   const [showEditForm, setShowEditForm] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [showDeleteError, setShowDeleteError] = useState(false);
 
   const isContentMasked = (comment.isSecret && !comment.isMine) || (parentIsSecret ?? false);
 
-  const handleDelete = async () => {
-    if (!confirm("댓글을 삭제하시겠습니까?")) return;
+  const handleDelete = () => {
+    setShowDeleteConfirm(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    setShowDeleteConfirm(false);
     try {
       await deleteComment(comment.commentUuid);
       onDeleted();
     } catch {
-      alert("삭제에 실패했습니다.");
+      setShowDeleteError(true);
     }
   };
 
@@ -209,113 +216,133 @@ function CommentItem({
   };
 
   return (
-    <div className={`${comment.isOwnerReply ? "ml-6 border-l-2 border-rose-200 pl-3" : ""}`}>
-      <div className="space-y-1.5 rounded-xl border border-gray-100 bg-gray-50 p-3">
-        <div className="flex items-center justify-between gap-2">
-          <div className="flex items-center gap-2">
-            <span
-              className={`text-xs font-semibold ${comment.isOwnerReply ? "text-rose-600" : "text-gray-700"}`}
-            >
-              {comment.isOwnerReply ? "점주" : (comment.nickname ?? "사용자")}
-            </span>
-            {comment.isSecret && (
-              <span className="rounded-full bg-gray-200 px-1.5 py-0.5 text-[10px] text-gray-500">
-                비밀
-              </span>
-            )}
-            {comment.rating != null && <StarRating value={comment.rating} readonly />}
-          </div>
-          <span className="text-[10px] text-gray-400">
-            {new Date(comment.createdAt).toLocaleDateString("ko-KR")}
-          </span>
-        </div>
-        {showEditForm ? (
-          <CommentForm
-            initial={{
-              content: comment.content,
-              rating: comment.rating,
-              isSecret: comment.isSecret,
-            }}
-            onSubmit={handleEdit}
-            onCancel={() => setShowEditForm(false)}
-          />
-        ) : isContentMasked ? (
-          <p className="text-sm text-gray-400 italic">비밀댓글입니다.</p>
-        ) : (
-          <>
-            <p className="text-sm text-gray-700">{comment.content}</p>
-            {comment.attachments && comment.attachments.length > 0 && (
-              <div className="flex flex-wrap gap-1.5 pt-1">
-                {comment.attachments.map((att) => (
-                  <a
-                    key={att.attachmentUuid}
-                    href={`${API_BASE_URL}${att.fileUrl}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    <img
-                      src={`${API_BASE_URL}${att.fileUrl}`}
-                      alt={att.originalFilename}
-                      className="h-14 w-14 rounded-lg border border-gray-200 object-cover transition-opacity hover:opacity-80"
-                    />
-                  </a>
-                ))}
-              </div>
-            )}
-          </>
-        )}
-        {!showEditForm && (
-          <div className="flex gap-2">
-            {comment.isMine && !comment.isOwnerReply && (
-              <>
-                <button
-                  onClick={() => setShowEditForm(true)}
-                  className="text-[10px] text-gray-400 transition-colors hover:text-gray-600"
-                >
-                  수정
-                </button>
-                <button
-                  onClick={handleDelete}
-                  className="text-[10px] text-gray-400 transition-colors hover:text-red-500"
-                >
-                  삭제
-                </button>
-              </>
-            )}
-            {!comment.isOwnerReply && !isNested && isLoggedIn && (
-              <button
-                onClick={() => setShowReplyForm((v) => !v)}
-                className="text-[10px] text-gray-400 transition-colors hover:text-rose-500"
+    <>
+      {showDeleteConfirm && (
+        <ConfirmModal
+          title="댓글 삭제"
+          message="댓글을 삭제하시겠습니까? 삭제 후에는 복구할 수 없습니다."
+          confirmLabel="삭제"
+          variant="danger"
+          onConfirm={handleDeleteConfirm}
+          onCancel={() => setShowDeleteConfirm(false)}
+        />
+      )}
+      {showDeleteError && (
+        <ConfirmModal
+          title="삭제 실패"
+          message="삭제에 실패했습니다. 다시 시도해 주세요."
+          confirmLabel="확인"
+          onConfirm={() => setShowDeleteError(false)}
+        />
+      )}
+      <div className={`${comment.isOwnerReply ? "ml-6 border-l-2 border-rose-200 pl-3" : ""}`}>
+        <div className="space-y-1.5 rounded-xl border border-gray-100 bg-gray-50 p-3">
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex items-center gap-2">
+              <span
+                className={`text-xs font-semibold ${comment.isOwnerReply ? "text-rose-600" : "text-gray-700"}`}
               >
-                답글
-              </button>
-            )}
+                {comment.isOwnerReply ? "점주" : (comment.nickname ?? "사용자")}
+              </span>
+              {comment.isSecret && (
+                <span className="rounded-full bg-gray-200 px-1.5 py-0.5 text-[10px] text-gray-500">
+                  비밀
+                </span>
+              )}
+              {comment.rating != null && <StarRating value={comment.rating} readonly />}
+            </div>
+            <span className="text-[10px] text-gray-400">
+              {new Date(comment.createdAt).toLocaleDateString("ko-KR")}
+            </span>
+          </div>
+          {showEditForm ? (
+            <CommentForm
+              initial={{
+                content: comment.content,
+                rating: comment.rating,
+                isSecret: comment.isSecret,
+              }}
+              onSubmit={handleEdit}
+              onCancel={() => setShowEditForm(false)}
+            />
+          ) : isContentMasked ? (
+            <p className="text-sm text-gray-400 italic">비밀댓글입니다.</p>
+          ) : (
+            <>
+              <p className="text-sm text-gray-700">{comment.content}</p>
+              {comment.attachments && comment.attachments.length > 0 && (
+                <div className="flex flex-wrap gap-1.5 pt-1">
+                  {comment.attachments.map((att) => (
+                    <a
+                      key={att.attachmentUuid}
+                      href={`${API_BASE_URL}${att.fileUrl}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <img
+                        src={`${API_BASE_URL}${att.fileUrl}`}
+                        alt={att.originalFilename}
+                        className="h-14 w-14 rounded-lg border border-gray-200 object-cover transition-opacity hover:opacity-80"
+                      />
+                    </a>
+                  ))}
+                </div>
+              )}
+            </>
+          )}
+          {!showEditForm && (
+            <div className="flex gap-2">
+              {comment.isMine && !comment.isOwnerReply && (
+                <>
+                  <button
+                    onClick={() => setShowEditForm(true)}
+                    className="text-[10px] text-gray-400 transition-colors hover:text-gray-600"
+                  >
+                    수정
+                  </button>
+                  <button
+                    onClick={handleDelete}
+                    className="text-[10px] text-gray-400 transition-colors hover:text-red-500"
+                  >
+                    삭제
+                  </button>
+                </>
+              )}
+              {!comment.isOwnerReply && !isNested && isLoggedIn && (
+                <button
+                  onClick={() => setShowReplyForm((v) => !v)}
+                  className="text-[10px] text-gray-400 transition-colors hover:text-rose-500"
+                >
+                  답글
+                </button>
+              )}
+            </div>
+          )}
+        </div>
+
+        {showReplyForm && (
+          <div className="mt-2 ml-4">
+            <CommentForm isReply onSubmit={handleReply} onCancel={() => setShowReplyForm(false)} />
+          </div>
+        )}
+
+        {comment.replies.length > 0 && (
+          <div className="mt-2 ml-4 space-y-2">
+            {comment.replies.map((reply) => (
+              <CommentItem
+                key={reply.commentUuid}
+                comment={reply}
+                isLoggedIn={isLoggedIn}
+                onDeleted={onDeleted}
+                onReplied={onReplied}
+                isNested
+                parentIsSecret={comment.isSecret && !comment.isMine}
+              />
+            ))}
           </div>
         )}
       </div>
-
-      {showReplyForm && (
-        <div className="mt-2 ml-4">
-          <CommentForm isReply onSubmit={handleReply} onCancel={() => setShowReplyForm(false)} />
-        </div>
-      )}
-
-      {comment.replies.length > 0 && (
-        <div className="mt-2 ml-4 space-y-2">
-          {comment.replies.map((reply) => (
-            <CommentItem
-              key={reply.commentUuid}
-              comment={reply}
-              isLoggedIn={isLoggedIn}
-              onDeleted={onDeleted}
-              onReplied={onReplied}
-              isNested
-              parentIsSecret={comment.isSecret && !comment.isMine}
-            />
-          ))}
-        </div>
-      )}
-    </div>
+    </>
   );
 }
 
