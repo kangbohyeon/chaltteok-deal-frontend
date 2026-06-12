@@ -5,6 +5,7 @@ import { useId } from "react";
 interface Props {
   title: string;
   message: string;
+  mode?: "confirm" | "alert";
   confirmLabel?: string;
   cancelLabel?: string;
   variant?: "danger" | "default";
@@ -15,6 +16,7 @@ interface Props {
 export default function ConfirmModal({
   title,
   message,
+  mode = "confirm",
   confirmLabel = "확인",
   cancelLabel = "취소",
   variant = "default",
@@ -22,12 +24,13 @@ export default function ConfirmModal({
   onCancel,
 }: Props) {
   const titleId = useId();
-  const isAlert = onCancel === undefined;
+  const isAlert = mode === "alert";
 
+  const baseBtn = "flex-1 rounded-lg py-2.5 text-sm font-semibold transition-colors";
   const confirmButtonClass =
     variant === "danger"
-      ? "flex-1 rounded-lg bg-red-500 py-2.5 text-sm font-semibold text-white hover:bg-red-600 transition-colors"
-      : "flex-1 rounded-lg bg-rose-500 py-2.5 text-sm font-semibold text-white hover:bg-rose-600 transition-colors";
+      ? `${baseBtn} bg-red-500 text-white hover:bg-red-600`
+      : `${baseBtn} bg-rose-500 text-white hover:bg-rose-600`;
 
   return (
     <div
@@ -53,7 +56,7 @@ export default function ConfirmModal({
           {!isAlert && (
             <button
               onClick={onCancel}
-              className="flex-1 rounded-lg border border-gray-300 py-2.5 text-sm font-semibold text-gray-600 transition-colors hover:bg-gray-50"
+              className={`${baseBtn} border border-gray-300 text-gray-600 hover:bg-gray-50`}
             >
               {cancelLabel}
             </button>

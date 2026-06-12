@@ -175,7 +175,7 @@ function CommentItem({
   const [showReplyForm, setShowReplyForm] = useState(false);
   const [showEditForm, setShowEditForm] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  const [showDeleteError, setShowDeleteError] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
 
   const isContentMasked = (comment.isSecret && !comment.isMine) || (parentIsSecret ?? false);
 
@@ -189,7 +189,7 @@ function CommentItem({
       await deleteComment(comment.commentUuid);
       onDeleted();
     } catch {
-      setShowDeleteError(true);
+      setDeleteError("삭제에 실패했습니다. 다시 시도해 주세요.");
     }
   };
 
@@ -225,14 +225,6 @@ function CommentItem({
           variant="danger"
           onConfirm={handleDeleteConfirm}
           onCancel={() => setShowDeleteConfirm(false)}
-        />
-      )}
-      {showDeleteError && (
-        <ConfirmModal
-          title="삭제 실패"
-          message="삭제에 실패했습니다. 다시 시도해 주세요."
-          confirmLabel="확인"
-          onConfirm={() => setShowDeleteError(false)}
         />
       )}
       <div className={`${comment.isOwnerReply ? "ml-6 border-l-2 border-rose-200 pl-3" : ""}`}>
@@ -319,6 +311,8 @@ function CommentItem({
             </div>
           )}
         </div>
+
+        {deleteError && <p className="mt-1 text-xs text-red-500">{deleteError}</p>}
 
         {showReplyForm && (
           <div className="mt-2 ml-4">
