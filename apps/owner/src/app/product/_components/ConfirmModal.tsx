@@ -2,6 +2,12 @@
 
 import { useId } from "react";
 
+const BASE_BTN = "flex-1 rounded-lg py-2 text-sm font-semibold transition-colors";
+const VARIANT_CLASS = {
+  danger: `${BASE_BTN} bg-red-500 text-white hover:bg-red-600`,
+  default: `${BASE_BTN} bg-rose-500 text-white hover:bg-rose-600`,
+} as const;
+
 interface Props {
   title: string;
   message: string;
@@ -25,12 +31,6 @@ export function ConfirmModal({
 }: Props) {
   const titleId = useId();
   const isAlert = mode === "alert";
-
-  const baseBtn = "flex-1 rounded-lg py-2 text-sm font-semibold transition-colors";
-  const confirmButtonClass =
-    variant === "danger"
-      ? `${baseBtn} bg-red-500 text-white hover:bg-red-600`
-      : `${baseBtn} bg-rose-500 text-white hover:bg-rose-600`;
 
   return (
     <div
@@ -56,12 +56,12 @@ export function ConfirmModal({
           {!isAlert && (
             <button
               onClick={onCancel}
-              className={`${baseBtn} border border-gray-300 text-gray-600 hover:bg-gray-50`}
+              className={`${BASE_BTN} border border-gray-300 text-gray-600 hover:bg-gray-50`}
             >
               {cancelLabel}
             </button>
           )}
-          <button onClick={onConfirm} className={confirmButtonClass}>
+          <button onClick={onConfirm} className={VARIANT_CLASS[variant]}>
             {confirmLabel}
           </button>
         </div>

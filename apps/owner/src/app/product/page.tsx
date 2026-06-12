@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   deleteProduct,
   deleteDailyStock,
@@ -22,6 +22,14 @@ import { ConfirmModal } from "./_components/ConfirmModal";
 import { TimesaleModal } from "./_components/TimesaleModal";
 
 type ModalMode = { type: "create" } | { type: "edit"; product: ProductListResponse };
+
+const TIMESALE_STATUS_MAP: Record<string, { label: string; className: string }> = {
+  OPEN: { label: "판매 중", className: "text-green-600" },
+  SCHEDULED: { label: "예약됨", className: "text-blue-500" },
+  SOLD_OUT: { label: "품절", className: "text-gray-400" },
+};
+const getTimesaleStatus = (status: string) =>
+  TIMESALE_STATUS_MAP[status] ?? { label: "마감", className: "text-gray-400" };
 
 export default function ProductListPage() {
   const [products, setProducts] = useState<ProductListResponse[]>([]);
@@ -55,15 +63,15 @@ export default function ProductListPage() {
     }
   };
 
-  const load = () => {
+  const load = useCallback(() => {
     Promise.all([getProducts(), getDailyStocks()])
-      .then(([p, s]) => {
+      .then(([p, stocks]) => {
         setProducts(p);
-        setTimesaleStocks(s.filter((s) => s.stockType === "TIMESALE"));
+        setTimesaleStocks(stocks.filter((stock) => stock.stockType === "TIMESALE"));
       })
       .catch(() => setPageError("상품 목록을 불러오지 못했습니다."))
       .finally(() => setPageLoading(false));
-  };
+  }, []);
 
   const handleTimesaleDelete = async (uuid: string) => {
     try {
@@ -74,40 +82,27 @@ export default function ProductListPage() {
     }
   };
 
-  const handleToggleActive = async (uuid: string) => {
-    setProducts((prev) => prev.map((p) => (p.uuid === uuid ? { ...p, active: !p.active } : p)));
-    try {
-      await toggleActive(uuid);
-    } catch {
-      setProducts((prev) => prev.map((p) => (p.uuid === uuid ? { ...p, active: !p.active } : p)));
-    }
-  };
+  type ToggleField = keyof Pick<ProductListResponse, "active" | "soldOut" | "recommended">;
+  const makeToggleHandler =
+    (field: ToggleField, apiFn: (uuid: string) => Promise<void>) => async (uuid: string) => {
+      setProducts((prev) => prev.map((p) => (p.uuid === uuid ? { ...p, [field]: !p[field] } : p)));
+      try {
+        await apiFn(uuid);
+      } catch {
+        setProducts((prev) =>
+          prev.map((p) => (p.uuid === uuid ? { ...p, [field]: !p[field] } : p))
+        );
+        alert("상태 변경에 실패했습니다. 다시 시도해주세요.");
+      }
+    };
 
-  const handleToggleSoldOut = async (uuid: string) => {
-    setProducts((prev) => prev.map((p) => (p.uuid === uuid ? { ...p, soldOut: !p.soldOut } : p)));
-    try {
-      await toggleSoldOut(uuid);
-    } catch {
-      setProducts((prev) => prev.map((p) => (p.uuid === uuid ? { ...p, soldOut: !p.soldOut } : p)));
-    }
-  };
-
-  const handleToggleRecommend = async (uuid: string) => {
-    setProducts((prev) =>
-      prev.map((p) => (p.uuid === uuid ? { ...p, recommended: !p.recommended } : p))
-    );
-    try {
-      await toggleRecommend(uuid);
-    } catch {
-      setProducts((prev) =>
-        prev.map((p) => (p.uuid === uuid ? { ...p, recommended: !p.recommended } : p))
-      );
-    }
-  };
+  const handleToggleActive = makeToggleHandler("active", toggleActive);
+  const handleToggleSoldOut = makeToggleHandler("soldOut", toggleSoldOut);
+  const handleToggleRecommend = makeToggleHandler("recommended", toggleRecommend);
 
   useEffect(() => {
     load();
-  }, []);
+  }, [load]);
 
   const openCreate = () => {
     setForm(EMPTY_FORM);
@@ -210,6 +205,14 @@ export default function ProductListPage() {
     return map;
   }, [timesaleStocks]);
 
+  const occupiedProductUuids = useMemo(() => {
+    const set = new Set<string>();
+    for (const s of timesaleStocks) {
+      if (s.status === "OPEN") set.add(s.productUuid);
+    }
+    return set;
+  }, [timesaleStocks]);
+
   const handleDelete = async () => {
     if (!deleteTarget) return;
     try {
@@ -267,7 +270,7 @@ export default function ProductListPage() {
         <ul className="space-y-3">
           {sortedProducts.map((product) => {
             const productTimesales = timesaleByProduct.get(product.uuid) ?? [];
-            const isOccupied = productTimesales.some((ts) => ts.status === "OPEN");
+            const isOccupied = occupiedProductUuids.has(product.uuid);
             return (
               <li key={product.id} className="rounded-xl border border-gray-200 bg-white shadow-sm">
                 <div className="flex items-center gap-4 px-5 py-4">
@@ -375,26 +378,12 @@ export default function ProductListPage() {
                             {" · "}
                             {ts.salePrice.toLocaleString()}원 · 잔여 {ts.remainStock}/{ts.totalQty}
                             개{" · "}
-                            <span
-                              className={
-                                ts.status === "OPEN"
-                                  ? "text-green-600"
-                                  : ts.status === "SCHEDULED"
-                                    ? "text-blue-500"
-                                    : "text-gray-400"
-                              }
-                            >
-                              {ts.status === "SCHEDULED"
-                                ? "예약됨"
-                                : ts.status === "OPEN"
-                                  ? "판매 중"
-                                  : ts.status === "SOLD_OUT"
-                                    ? "품절"
-                                    : "마감"}
+                            <span className={getTimesaleStatus(ts.status).className}>
+                              {getTimesaleStatus(ts.status).label}
                             </span>
                           </span>
                           <button
-                            onClick={() => !tsOpen && setEditTimesale({ stock: ts, product })}
+                            onClick={() => setEditTimesale({ stock: ts, product })}
                             disabled={tsOpen}
                             title={tsOpen ? "판매 중에는 수정할 수 없습니다" : undefined}
                             className={`ml-3 shrink-0 text-xs ${
@@ -406,7 +395,7 @@ export default function ProductListPage() {
                             수정
                           </button>
                           <button
-                            onClick={() => !tsOpen && handleTimesaleDelete(ts.uuid)}
+                            onClick={() => handleTimesaleDelete(ts.uuid)}
                             disabled={tsOpen}
                             title={tsOpen ? "판매 중에는 삭제할 수 없습니다" : undefined}
                             className={`ml-3 shrink-0 ${
