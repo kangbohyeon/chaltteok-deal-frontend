@@ -14,11 +14,25 @@ function formatDate(isoString: string): string {
   });
 }
 
+/** 주문번호: 영대문자+숫자 혼합, 숫자 반드시 1개 이상 포함, 6자 이상 */
+const ORDER_NUMBER_PATTERN = /(?=[A-Z0-9]*\d)[A-Z0-9]{6,}/;
+const EXCLUDED_WORDS = new Set([
+  "COMPLETED",
+  "PENDING",
+  "CANCELLED",
+  "FAILED",
+  "SUCCESS",
+  "CARD",
+  "TRANSFER",
+]);
+
 function extractOrderNumber(item: NotificationItem): string | null {
-  // message 또는 title에서 주문번호(영문+숫자 조합, 6자 이상) 추출 시도
   const combined = `${item.title} ${item.message}`;
-  const match = combined.match(/[A-Z0-9]{6,}/);
-  return match ? match[0] : null;
+  const match = combined.match(ORDER_NUMBER_PATTERN);
+  if (!match) return null;
+  const candidate = match[0];
+  if (EXCLUDED_WORDS.has(candidate)) return null;
+  return candidate;
 }
 
 export default function NotificationBell() {

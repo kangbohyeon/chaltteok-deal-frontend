@@ -1,5 +1,7 @@
 "use client";
 
+import { useState } from "react";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { Geist } from "next/font/google";
@@ -10,6 +12,12 @@ import NotificationBell from "@/components/NotificationBell";
 const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
+  const [queryClient] = useState(
+    () =>
+      new QueryClient({
+        defaultOptions: { queries: { staleTime: 60 * 1000, retry: 1 } },
+      })
+  );
   const { role, clearAuth } = useAuthStore();
   const router = useRouter();
   const pathname = usePathname();
@@ -25,6 +33,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="ko" className={`${geistSans.variable} h-full antialiased`}>
       <body className="min-h-full bg-gray-50">
+        <QueryClientProvider client={queryClient}>
         <div className="flex min-h-screen flex-col">
           {isLoggedIn && !isLoginPage && (
             <header className="sticky top-0 z-50 border-b border-gray-200 bg-white">
@@ -80,6 +89,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           )}
           <main className="flex-1">{children}</main>
         </div>
+        </QueryClientProvider>
       </body>
     </html>
   );

@@ -1,7 +1,7 @@
 "use client";
 
 import { useParams, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import {
   getOwnerOrderDetail,
   type OwnerOrderDetailResponse,
@@ -70,32 +70,16 @@ export default function OwnerOrderDetailPage() {
   const router = useRouter();
   const orderNumber = typeof params.orderNumber === "string" ? params.orderNumber : "";
 
-  const [order, setOrder] = useState<OwnerOrderDetailResponse | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isError, setIsError] = useState(false);
-
-  useEffect(() => {
-    if (!orderNumber) return;
-    let cancelled = false;
-
-    const load = async () => {
-      try {
-        setIsLoading(true);
-        setIsError(false);
-        const data = await getOwnerOrderDetail(orderNumber);
-        if (!cancelled) setOrder(data);
-      } catch {
-        if (!cancelled) setIsError(true);
-      } finally {
-        if (!cancelled) setIsLoading(false);
-      }
-    };
-
-    void load();
-    return () => {
-      cancelled = true;
-    };
-  }, [orderNumber]);
+  const {
+    data: order,
+    isLoading,
+    isError,
+  } = useQuery<OwnerOrderDetailResponse>({
+    queryKey: ["owner", "order", orderNumber],
+    queryFn: () => getOwnerOrderDetail(orderNumber),
+    enabled: Boolean(orderNumber),
+    retry: 1,
+  });
 
   if (isLoading) {
     return (
@@ -124,8 +108,7 @@ export default function OwnerOrderDetailPage() {
   }
 
   const handleCancel = () => {
-    // TODO: 주문 취소 API 연동
-    alert("주문 취소 기능은 준비 중입니다.");
+    console.warn("TODO: 주문 취소 API 연동");
   };
 
   return (
@@ -163,7 +146,7 @@ export default function OwnerOrderDetailPage() {
         <div className="space-y-3">
           {order.items.map((item: OwnerOrderItemResponse, index: number) => (
             <div
-              key={index}
+              key={item.productName + "-" + index}
               className="flex items-center justify-between rounded-xl bg-gray-50 px-4 py-3"
             >
               <div className="min-w-0 flex-1">
@@ -198,7 +181,8 @@ export default function OwnerOrderDetailPage() {
       {order.canCancel && (
         <button
           onClick={handleCancel}
-          className="w-full rounded-2xl border border-red-200 bg-red-50 py-3.5 text-sm font-semibold text-red-600 transition-colors hover:bg-red-100"
+          disabled
+          className="w-full rounded-2xl border border-red-200 bg-red-50 py-3.5 text-sm font-semibold text-red-600 transition-colors hover:bg-red-100 disabled:cursor-not-allowed disabled:opacity-50"
         >
           주문 취소
         </button>

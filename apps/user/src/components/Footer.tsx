@@ -19,7 +19,7 @@ export default function Footer() {
         {/* 서비스명 + 카피라이트 */}
         <div className="text-xs text-gray-400">
           <p className="mb-1 font-semibold text-gray-500">찰떡딜</p>
-          <p>© 2024 찰떡딜. All rights reserved.</p>
+          <p>© {new Date().getFullYear()} 찰떡딜. All rights reserved.</p>
         </div>
       </div>
     </footer>
