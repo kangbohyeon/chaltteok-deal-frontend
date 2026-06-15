@@ -65,7 +65,8 @@ export default function NotificationBell() {
               notifications.map((item: NotificationItem) => {
                 const handleClick = () => {
                   setOpen(false);
-                  if (item.orderNumber) {
+                  const SAFE_ORDER_NUMBER = /^[A-Za-z0-9-]{1,50}$/;
+                  if (item.orderNumber && SAFE_ORDER_NUMBER.test(item.orderNumber)) {
                     router.push("/orders/" + item.orderNumber);
                   } else {
                     router.push("/dashboard");
