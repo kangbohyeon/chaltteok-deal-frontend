@@ -397,6 +397,7 @@ export interface NotificationItem {
   message: string;
   isRead: boolean;
   createdAt: string;
+  orderNumber?: string | null;
 }
 
 export interface NotificationListResponse {
