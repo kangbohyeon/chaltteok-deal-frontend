@@ -412,3 +412,35 @@ export async function getNotifications(): Promise<NotificationListResponse> {
 export async function markNotificationsRead(): Promise<void> {
   await api.patch("/api/v1/owner/notifications/read");
 }
+
+// ── Order Detail ──────────────────────────────────────────────────────────────
+
+export interface OwnerOrderItemResponse {
+  productName: string;
+  quantity: number;
+  price: number;
+}
+
+export interface OwnerOrderPaymentResponse {
+  amount: number;
+  paymentMethod: string;
+  status: string;
+  paidAt: string | null;
+}
+
+export interface OwnerOrderDetailResponse {
+  orderNumber: string;
+  totalPrice: number;
+  status: string;
+  orderedAt: string;
+  items: OwnerOrderItemResponse[];
+  payment: OwnerOrderPaymentResponse | null;
+  canCancel: boolean;
+}
+
+export async function getOwnerOrderDetail(orderNumber: string): Promise<OwnerOrderDetailResponse> {
+  const res = await api.get<{ data: OwnerOrderDetailResponse }>(
+    `/api/v1/owner/orders/${orderNumber}`
+  );
+  return res.data.data;
+}
