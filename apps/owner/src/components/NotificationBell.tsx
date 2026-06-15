@@ -14,27 +14,6 @@ function formatDate(isoString: string): string {
   });
 }
 
-/** 주문번호: 영대문자+숫자 혼합, 숫자 반드시 1개 이상 포함, 6자 이상 */
-const ORDER_NUMBER_PATTERN = /(?=[A-Z0-9]*\d)[A-Z0-9]{6,}/;
-const EXCLUDED_WORDS = new Set([
-  "COMPLETED",
-  "PENDING",
-  "CANCELLED",
-  "FAILED",
-  "SUCCESS",
-  "CARD",
-  "TRANSFER",
-]);
-
-function extractOrderNumber(item: NotificationItem): string | null {
-  const combined = `${item.title} ${item.message}`;
-  const match = combined.match(ORDER_NUMBER_PATTERN);
-  if (!match) return null;
-  const candidate = match[0];
-  if (EXCLUDED_WORDS.has(candidate)) return null;
-  return candidate;
-}
-
 export default function NotificationBell() {
   const router = useRouter();
   const { notifications, unreadCount, markRead } = useNotifications();
@@ -84,11 +63,10 @@ export default function NotificationBell() {
               <li className="px-4 py-6 text-center text-sm text-gray-400">새 알림이 없습니다</li>
             ) : (
               notifications.map((item: NotificationItem) => {
-                const orderNumber = extractOrderNumber(item);
                 const handleClick = () => {
                   setOpen(false);
-                  if (orderNumber) {
-                    router.push("/orders/" + orderNumber);
+                  if (item.orderNumber) {
+                    router.push("/orders/" + item.orderNumber);
                   } else {
                     router.push("/dashboard");
                   }
