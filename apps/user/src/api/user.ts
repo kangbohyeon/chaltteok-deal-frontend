@@ -408,3 +408,28 @@ export async function getBanners(): Promise<BannerResponse[]> {
   const res = await api.get<{ data: BannerResponse[] }>("/api/v1/user/banners");
   return res.data.data;
 }
+
+// ── Account Recovery ──────────────────────────────────────────────────────────
+
+export interface FindAccountRequest {
+  name: string;
+  phone: string;
+}
+
+export interface FindAccountResponse {
+  maskedEmail: string;
+}
+
+export interface ResetPasswordRequest {
+  email: string;
+  name: string;
+}
+
+export async function findAccount(body: FindAccountRequest): Promise<FindAccountResponse> {
+  const res = await api.post<{ data: FindAccountResponse }>("/api/v1/user/auth/find-account", body);
+  return res.data.data;
+}
+
+export async function resetPassword(body: ResetPasswordRequest): Promise<void> {
+  await api.post("/api/v1/user/auth/reset-password", body);
+}
