@@ -40,10 +40,7 @@ export const useAuthStore = create<AuthState>()(
     }),
     {
       name: "chaltteok-auth",
-      storage:
-        typeof window !== "undefined"
-          ? createJSONStorage(() => sessionStorage)
-          : undefined,
+      storage: typeof window !== "undefined" ? createJSONStorage(() => sessionStorage) : undefined,
       partialize: (state) => ({
         refreshToken: state.refreshToken,
         role: state.role,

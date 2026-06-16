@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
+import { Pagination } from "@chaltteok/shared-ui";
 import { getOwnerOrders, type OwnerOrderStatus, type OwnerOrderSummaryResponse } from "@/api/owner";
 
 const STATUS_TABS: { label: string; value: OwnerOrderStatus | undefined }[] = [
@@ -131,37 +132,9 @@ export default function OwnerOrderListPage() {
           )}
 
           {/* 페이지네이션 */}
-          {data.totalPages > 1 && (
-            <div className="mt-8 flex items-center justify-center gap-2">
-              <button
-                onClick={() => setPage((p) => Math.max(0, p - 1))}
-                disabled={page === 0}
-                className="rounded-lg border border-gray-200 px-3 py-1.5 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-40"
-              >
-                이전
-              </button>
-              <div className="flex items-center gap-1">
-                {Array.from({ length: data.totalPages }).map((_, i) => (
-                  <button
-                    key={i}
-                    onClick={() => setPage(i)}
-                    className={`h-7 w-7 rounded-full text-xs font-semibold transition-colors ${
-                      i === page ? "bg-rose-500 text-white" : "text-gray-500 hover:bg-gray-100"
-                    }`}
-                  >
-                    {i + 1}
-                  </button>
-                ))}
-              </div>
-              <button
-                onClick={() => setPage((p) => Math.min(data.totalPages - 1, p + 1))}
-                disabled={page === data.totalPages - 1}
-                className="rounded-lg border border-gray-200 px-3 py-1.5 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-40"
-              >
-                다음
-              </button>
-            </div>
-          )}
+          <div className="mt-8">
+            <Pagination page={page} totalPages={data.totalPages} onPageChange={setPage} />
+          </div>
 
           <p className="mt-4 text-center text-xs text-gray-400">
             총 {data.totalElements.toLocaleString()}건

@@ -1,8 +1,6 @@
-import nextConfig from 'eslint-config-next';
+import nextConfig from "eslint-config-next";
 
 /** @type {import('eslint').Linter.Config[]} */
-const eslintConfig = [
-  ...nextConfig,
-];
+const eslintConfig = [...nextConfig];
 
 export default eslintConfig;

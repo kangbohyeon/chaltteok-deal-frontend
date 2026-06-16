@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { type ProductResponse } from "@/api/user";
 import { useCartStore } from "@chaltteok/shared-store";
+import { Pagination } from "@chaltteok/shared-ui";
 import ProductCard from "./ProductCard";
 
 const ITEMS_PER_PAGE = 6;
@@ -193,7 +194,11 @@ export default function ProductSection({
         <div className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
           {filtered.length > 0 ? (
             filtered.map((product) => (
-              <SearchRow key={product.productUuid} product={product} onAddToCart={handleAddToCart} />
+              <SearchRow
+                key={product.productUuid}
+                product={product}
+                onAddToCart={handleAddToCart}
+              />
             ))
           ) : (
             <div className="px-4 py-6 text-center text-sm text-gray-400">
@@ -230,37 +235,7 @@ export default function ProductSection({
             ))}
           </div>
 
-          {totalPages > 1 && (
-            <div className="flex items-center justify-center gap-2">
-              <button
-                onClick={() => setPage((p) => Math.max(0, p - 1))}
-                disabled={page === 0}
-                className="rounded-lg border border-gray-200 px-3 py-1.5 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-40"
-              >
-                이전
-              </button>
-              <div className="flex items-center gap-1">
-                {Array.from({ length: totalPages }).map((_, i) => (
-                  <button
-                    key={i}
-                    onClick={() => setPage(i)}
-                    className={`h-7 w-7 rounded-full text-xs font-semibold transition-colors ${
-                      i === page ? "bg-rose-500 text-white" : "text-gray-500 hover:bg-gray-100"
-                    }`}
-                  >
-                    {i + 1}
-                  </button>
-                ))}
-              </div>
-              <button
-                onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
-                disabled={page === totalPages - 1}
-                className="rounded-lg border border-gray-200 px-3 py-1.5 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-40"
-              >
-                다음
-              </button>
-            </div>
-          )}
+          <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
         </>
       )}
     </div>

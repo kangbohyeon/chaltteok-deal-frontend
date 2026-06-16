@@ -4,13 +4,14 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@chaltteok/shared-store";
-import { loginUser, getMyProfile } from "@/api/user";
+import { loginUser, getMyProfile, type PasswordChangeReason } from "@/api/user";
 import PasswordChangePopup from "@/components/PasswordChangePopup";
 import FindAccountModal from "@/components/FindAccountModal";
 import ResetPasswordModal from "@/components/ResetPasswordModal";
+import AccountLockedModal from "@/components/AccountLockedModal";
 
 interface ApiErrorResponse {
-  code?: string;
+  errorCode?: string;
   message?: string;
 }
 
@@ -30,8 +31,12 @@ export default function UserLoginPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showPasswordChangePopup, setShowPasswordChangePopup] = useState(false);
+  const [passwordChangeReason, setPasswordChangeReason] = useState<PasswordChangeReason | null>(
+    null
+  );
   const [showFindAccountModal, setShowFindAccountModal] = useState(false);
   const [showResetPasswordModal, setShowResetPasswordModal] = useState(false);
+  const [showAccountLockedModal, setShowAccountLockedModal] = useState(false);
   const router = useRouter();
   const setAuth = useAuthStore((s) => s.setAuth);
   const setNickname = useAuthStore((s) => s.setNickname);
@@ -41,22 +46,21 @@ export default function UserLoginPage() {
     setError(null);
     setLoading(true);
     try {
-      const { accessToken, refreshToken, userUuid, requirePasswordChange } = await loginUser({
-        username,
-        password,
-      });
+      const { accessToken, refreshToken, userUuid, requirePasswordChange, passwordChangeReason } =
+        await loginUser({ username, password });
       setAuth(accessToken, refreshToken, "ROLE_USER", userUuid);
       getMyProfile()
         .then((p) => setNickname(p.nickname))
         .catch(() => {});
       if (requirePasswordChange) {
+        setPasswordChangeReason(passwordChangeReason);
         setShowPasswordChangePopup(true);
       } else {
         router.push("/");
       }
     } catch (err: unknown) {
-      if (isAxiosLikeError(err) && err.response?.data?.code === "ACCOUNT_LOCKED") {
-        setError("계정이 잠겼습니다. 관리자에게 문의하세요.");
+      if (isAxiosLikeError(err) && err.response?.data?.errorCode === "ACCOUNT_LOCKED") {
+        setShowAccountLockedModal(true);
       } else {
         setError("이메일 또는 비밀번호가 올바르지 않습니다.");
       }
@@ -69,6 +73,7 @@ export default function UserLoginPage() {
     <div className="mx-auto max-w-sm px-4 py-20">
       {showPasswordChangePopup && (
         <PasswordChangePopup
+          reason={passwordChangeReason}
           onClose={() => {
             setShowPasswordChangePopup(false);
             router.push("/");
@@ -78,6 +83,15 @@ export default function UserLoginPage() {
       {showFindAccountModal && <FindAccountModal onClose={() => setShowFindAccountModal(false)} />}
       {showResetPasswordModal && (
         <ResetPasswordModal onClose={() => setShowResetPasswordModal(false)} />
+      )}
+      {showAccountLockedModal && (
+        <AccountLockedModal
+          onClose={() => setShowAccountLockedModal(false)}
+          onResetPassword={() => {
+            setShowAccountLockedModal(false);
+            setShowResetPasswordModal(true);
+          }}
+        />
       )}
 
       <div className="mb-8 text-center">

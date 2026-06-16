@@ -41,7 +41,7 @@ export default function RecommendedSection({ products, isLoading, isError }: Pro
   }, [paused, goTo, total]);
 
   if (isLoading) {
-    return <div className="h-52 rounded-2xl bg-gray-100 animate-pulse" />;
+    return <div className="h-52 animate-pulse rounded-2xl bg-gray-100" />;
   }
 
   if (isError) {
@@ -66,18 +66,18 @@ export default function RecommendedSection({ products, isLoading, isError }: Pro
 
   return (
     <div
-      className="relative rounded-2xl border border-amber-100 bg-linear-to-br from-amber-50 to-white overflow-hidden shadow-sm select-none"
+      className="relative overflow-hidden rounded-2xl border border-amber-100 bg-linear-to-br from-amber-50 to-white shadow-sm select-none"
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
     >
       {/* 슬라이드 본문 */}
       <div
-        className={`flex items-center gap-5 px-10 py-6 min-h-49 transition-opacity duration-200 ${
+        className={`flex min-h-49 items-center gap-5 px-10 py-6 transition-opacity duration-200 ${
           fading ? "opacity-0" : "opacity-100"
         }`}
       >
         {/* 상품 이미지 */}
-        <div className="relative w-36 h-36 rounded-xl overflow-hidden shrink-0 bg-gray-100 shadow-sm">
+        <div className="relative h-36 w-36 shrink-0 overflow-hidden rounded-xl bg-gray-100 shadow-sm">
           {product.thumbnailUrl ? (
             <Image
               src={product.thumbnailUrl}
@@ -87,31 +87,31 @@ export default function RecommendedSection({ products, isLoading, isError }: Pro
               className="object-cover"
             />
           ) : (
-            <div className="w-full h-full flex items-center justify-center text-gray-300 text-4xl">
+            <div className="flex h-full w-full items-center justify-center text-4xl text-gray-300">
               🛍
             </div>
           )}
           {product.soldOut && (
-            <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
-              <span className="text-white text-xs font-bold tracking-wide">품절</span>
+            <div className="absolute inset-0 flex items-center justify-center bg-black/40">
+              <span className="text-xs font-bold tracking-wide text-white">품절</span>
             </div>
           )}
         </div>
 
         {/* 상품 정보 */}
-        <div className="flex-1 min-w-0 space-y-2">
-          <div className="flex items-center gap-2 flex-wrap">
-            <span className="text-xs font-semibold text-amber-700 bg-amber-100 rounded-full px-2.5 py-0.5">
+        <div className="min-w-0 flex-1 space-y-2">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-semibold text-amber-700">
               점주 추천
             </span>
             {product.soldOut && (
-              <span className="text-xs font-medium text-red-500 bg-red-50 rounded-full px-2.5 py-0.5">
+              <span className="rounded-full bg-red-50 px-2.5 py-0.5 text-xs font-medium text-red-500">
                 품절
               </span>
             )}
           </div>
 
-          <h3 className="text-xl font-bold text-gray-900 leading-snug line-clamp-1">
+          <h3 className="line-clamp-1 text-xl leading-snug font-bold text-gray-900">
             {product.name}
           </h3>
 
@@ -137,7 +137,7 @@ export default function RecommendedSection({ products, isLoading, isError }: Pro
           )}
 
           {product.description && (
-            <p className="text-sm text-gray-500 line-clamp-2 leading-relaxed">
+            <p className="line-clamp-2 text-sm leading-relaxed text-gray-500">
               {product.description}
             </p>
           )}
@@ -145,14 +145,14 @@ export default function RecommendedSection({ products, isLoading, isError }: Pro
           <div className="flex items-center justify-between pt-1">
             <p className="text-2xl font-bold text-gray-900">
               {product.price.toLocaleString()}
-              <span className="text-sm font-normal text-gray-400 ml-0.5">원</span>
+              <span className="ml-0.5 text-sm font-normal text-gray-400">원</span>
             </p>
             <button
               onClick={handleAddToCart}
               disabled={product.soldOut}
               className={`rounded-xl px-5 py-2 text-sm font-semibold text-white transition-colors ${
                 product.soldOut
-                  ? "bg-gray-300 cursor-not-allowed"
+                  ? "cursor-not-allowed bg-gray-300"
                   : "bg-rose-500 hover:bg-rose-600 active:bg-rose-700"
               }`}
             >
@@ -168,14 +168,14 @@ export default function RecommendedSection({ products, isLoading, isError }: Pro
           <button
             onClick={() => goTo((currentRef.current - 1 + total) % total)}
             aria-label="이전 추천 상품"
-            className="absolute left-2.5 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center rounded-full bg-white/80 backdrop-blur-sm border border-gray-200 text-gray-500 text-lg hover:bg-amber-50 hover:border-amber-300 hover:text-amber-600 shadow-sm transition-all"
+            className="absolute top-1/2 left-2.5 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full border border-gray-200 bg-white/80 text-lg text-gray-500 shadow-sm backdrop-blur-sm transition-all hover:border-amber-300 hover:bg-amber-50 hover:text-amber-600"
           >
             ‹
           </button>
           <button
             onClick={() => goTo((currentRef.current + 1) % total)}
             aria-label="다음 추천 상품"
-            className="absolute right-2.5 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center rounded-full bg-white/80 backdrop-blur-sm border border-gray-200 text-gray-500 text-lg hover:bg-amber-50 hover:border-amber-300 hover:text-amber-600 shadow-sm transition-all"
+            className="absolute top-1/2 right-2.5 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full border border-gray-200 bg-white/80 text-lg text-gray-500 shadow-sm backdrop-blur-sm transition-all hover:border-amber-300 hover:bg-amber-50 hover:text-amber-600"
           >
             ›
           </button>
@@ -191,15 +191,12 @@ export default function RecommendedSection({ products, isLoading, isError }: Pro
               onClick={() => goTo(i)}
               aria-label={`${i + 1}번째 추천 상품`}
               className={`rounded-full transition-all duration-300 ${
-                i === current
-                  ? "w-5 h-2 bg-amber-500"
-                  : "w-2 h-2 bg-gray-300 hover:bg-amber-300"
+                i === current ? "h-2 w-5 bg-amber-500" : "h-2 w-2 bg-gray-300 hover:bg-amber-300"
               }`}
             />
           ))}
         </div>
       )}
-
     </div>
   );
 }

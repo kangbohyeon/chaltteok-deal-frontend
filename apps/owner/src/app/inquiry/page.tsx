@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { Pagination } from "@chaltteok/shared-ui";
 import { getOwnerInquiries, answerInquiry, type OwnerInquiryResponse } from "@/api/owner";
 
 const STATUS_LABEL: Record<string, string> = {
@@ -163,35 +164,9 @@ export default function InquiryPage() {
         ))}
       </ul>
 
-      {!loading && totalPages > 0 && (
-        <div className="mt-8 flex items-center justify-center gap-1">
-          <button
-            onClick={() => setPage((p) => Math.max(0, p - 1))}
-            disabled={page === 0}
-            className="rounded-lg border border-gray-200 px-3 py-1.5 text-xs font-medium text-gray-600 transition-colors hover:bg-gray-50 disabled:opacity-40"
-          >
-            이전
-          </button>
-          {Array.from({ length: totalPages }, (_, i) => (
-            <button
-              key={i}
-              onClick={() => setPage(i)}
-              className={`h-8 w-8 rounded-lg text-xs font-medium transition-colors ${
-                page === i
-                  ? "bg-rose-500 text-white"
-                  : "border border-gray-200 text-gray-600 hover:bg-gray-50"
-              }`}
-            >
-              {i + 1}
-            </button>
-          ))}
-          <button
-            onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
-            disabled={page === totalPages - 1}
-            className="rounded-lg border border-gray-200 px-3 py-1.5 text-xs font-medium text-gray-600 transition-colors hover:bg-gray-50 disabled:opacity-40"
-          >
-            다음
-          </button>
+      {!loading && (
+        <div className="mt-8">
+          <Pagination page={page} totalPages={totalPages} onPageChange={setPage} size="sm" />
         </div>
       )}
     </div>

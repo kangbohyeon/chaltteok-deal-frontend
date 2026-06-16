@@ -28,11 +28,14 @@ export interface LoginRequest {
   password: string;
 }
 
+export type PasswordChangeReason = "TEMP_PASSWORD" | "EXPIRED";
+
 export interface LoginResponse {
   accessToken: string;
   refreshToken: string;
   userUuid: string;
   requirePasswordChange: boolean;
+  passwordChangeReason: PasswordChangeReason | null;
 }
 
 export interface RegisterRequest {

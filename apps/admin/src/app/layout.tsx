@@ -20,7 +20,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="ko" className={`${geistSans.variable} h-full antialiased`}>
       <body className="min-h-full bg-gray-50">
-        <div className="flex flex-col min-h-screen">
+        <div className="flex min-h-screen flex-col">
           <header className="sticky top-0 z-50 border-b border-gray-200 bg-white">
             <nav className="mx-auto flex max-w-5xl items-center justify-between px-4 py-3">
               <Link href="/" className="text-xl font-bold text-gray-800">
@@ -28,14 +28,14 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               </Link>
               <ul className="flex items-center gap-6 text-sm font-medium text-gray-600">
                 <li>
-                  <Link href="/" className="hover:text-gray-900 transition-colors">
+                  <Link href="/" className="transition-colors hover:text-gray-900">
                     관리자 홈
                   </Link>
                 </li>
                 <li>
                   <button
                     onClick={handleLogout}
-                    className="text-gray-400 hover:text-gray-600 transition-colors"
+                    className="text-gray-400 transition-colors hover:text-gray-600"
                   >
                     로그아웃
                   </button>
