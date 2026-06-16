@@ -3,30 +3,29 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
-import { getOwnerOrders, type OwnerOrderSummaryResponse } from "@/api/owner";
+import { getOwnerOrders, type OwnerOrderStatus, type OwnerOrderSummaryResponse } from "@/api/owner";
 
-const STATUS_TABS = [
+const STATUS_TABS: { label: string; value: OwnerOrderStatus | undefined }[] = [
   { label: "전체", value: undefined },
   { label: "완료", value: "COMPLETED" },
   { label: "대기", value: "PENDING" },
   { label: "취소", value: "CANCELLED" },
-] as const;
+];
 
-const ORDER_STATUS_LABEL: Record<string, string> = {
+const STATUS_COLOR: Record<OwnerOrderStatus, string> = {
+  COMPLETED: "bg-green-100 text-green-700",
+  PENDING: "bg-yellow-100 text-yellow-700",
+  CANCELLED: "bg-red-100 text-red-700",
+};
+
+const ORDER_STATUS_LABEL: Record<OwnerOrderStatus, string> = {
   COMPLETED: "완료",
   PENDING: "대기",
   CANCELLED: "취소",
 };
 
-function OrderStatusBadge({ status }: { status: string }) {
-  const colorClass =
-    status === "COMPLETED"
-      ? "bg-green-100 text-green-700"
-      : status === "PENDING"
-        ? "bg-yellow-100 text-yellow-700"
-        : status === "CANCELLED"
-          ? "bg-red-100 text-red-700"
-          : "bg-gray-100 text-gray-600";
+function OrderStatusBadge({ status }: { status: OwnerOrderStatus }) {
+  const colorClass = STATUS_COLOR[status] ?? "bg-gray-100 text-gray-600";
   return (
     <span
       className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${colorClass}`}
@@ -52,7 +51,7 @@ function formatDateTime(isoString: string): string {
 
 export default function OwnerOrderListPage() {
   const router = useRouter();
-  const [activeStatus, setActiveStatus] = useState<string | undefined>(undefined);
+  const [activeStatus, setActiveStatus] = useState<OwnerOrderStatus | undefined>(undefined);
   const [page, setPage] = useState(0);
 
   const { data, isLoading, isError } = useQuery({
@@ -60,7 +59,7 @@ export default function OwnerOrderListPage() {
     queryFn: () => getOwnerOrders(activeStatus, page, 20),
   });
 
-  const handleTabChange = (value: string | undefined) => {
+  const handleTabChange = (value: OwnerOrderStatus | undefined) => {
     setActiveStatus(value);
     setPage(0);
   };
@@ -105,7 +104,7 @@ export default function OwnerOrderListPage() {
             <p className="py-12 text-center text-sm text-gray-400">주문이 없습니다.</p>
           ) : (
             <div className="space-y-3">
-              {data.content.map((order: OwnerOrderSummaryResponse) => (
+              {data.content.map((order) => (
                 <div
                   key={order.orderNumber}
                   onClick={() => router.push(`/orders/${order.orderNumber}`)}

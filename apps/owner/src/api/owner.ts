@@ -390,11 +390,13 @@ export async function answerInquiry(uuid: string, answer: string): Promise<void>
 
 // ── Order List ────────────────────────────────────────────────────────────────
 
+export type OwnerOrderStatus = "COMPLETED" | "PENDING" | "CANCELLED";
+
 export interface OwnerOrderSummaryResponse {
   orderNumber: string;
   productName: string;
   totalPrice: number;
-  status: string;
+  status: OwnerOrderStatus;
   orderedAt: string;
   itemCount: number;
 }
@@ -408,7 +410,7 @@ export interface OwnerOrderListResponse {
 }
 
 export async function getOwnerOrders(
-  status?: string,
+  status?: OwnerOrderStatus,
   page = 0,
   size = 20
 ): Promise<OwnerOrderListResponse> {
