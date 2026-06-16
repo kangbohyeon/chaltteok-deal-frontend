@@ -388,6 +388,38 @@ export async function answerInquiry(uuid: string, answer: string): Promise<void>
   await api.put(`/api/v1/owner/inquiries/${uuid}/answer`, { answer });
 }
 
+// ── Order List ────────────────────────────────────────────────────────────────
+
+export type OwnerOrderStatus = "COMPLETED" | "PENDING" | "CANCELLED";
+
+export interface OwnerOrderSummaryResponse {
+  orderNumber: string;
+  productName: string;
+  totalPrice: number;
+  status: OwnerOrderStatus;
+  orderedAt: string;
+  itemCount: number;
+}
+
+export interface OwnerOrderListResponse {
+  content: OwnerOrderSummaryResponse[];
+  totalElements: number;
+  totalPages: number;
+  currentPage: number;
+  pageSize: number;
+}
+
+export async function getOwnerOrders(
+  status?: OwnerOrderStatus,
+  page = 0,
+  size = 20
+): Promise<OwnerOrderListResponse> {
+  const res = await api.get<{ data: OwnerOrderListResponse }>("/api/v1/owner/orders", {
+    params: { status, page, size },
+  });
+  return res.data.data;
+}
+
 // ── Notification ──────────────────────────────────────────────────────────────
 
 export interface NotificationItem {
