@@ -7,15 +7,11 @@ const api = axios.create({
   timeout: 10000,
 });
 
-// ── Request: JWT + role 헤더 자동 주입 ────────────────────────────
+// ── Request: JWT 헤더 자동 주입 (userId는 서버에서 JWT로 추출) ───
 api.interceptors.request.use((config) => {
-  const { accessToken, role, userId } = useAuthStore.getState();
+  const { accessToken } = useAuthStore.getState();
   if (accessToken) {
     config.headers["Authorization"] = `Bearer ${accessToken}`;
-  }
-  if (userId) {
-    if (role === "ROLE_OWNER") config.headers["X-Owner-Id"] = String(userId);
-    if (role === "ROLE_USER") config.headers["X-User-Id"] = String(userId);
   }
   return config;
 });
@@ -35,6 +31,18 @@ api.interceptors.response.use(
     const originalRequest = error.config;
 
     if (error.response?.status !== 401 || originalRequest._retry) {
+      return Promise.reject(error);
+    }
+
+    // 로그인 엔드포인트의 401은 재발급 없이 그대로 전파 (로그인 실패 메시지 표시용)
+    if (originalRequest.url?.includes("/auth/login")) {
+      return Promise.reject(error);
+    }
+
+    // 비로그인 상태(refreshToken 없음)의 401은 리다이렉트 없이 조용히 거부
+    // refreshToken이 있으면(새로고침 후 accessToken 소실 시나리오) 재발급 진행
+    const { refreshToken: existingRefresh } = useAuthStore.getState();
+    if (!originalRequest.headers?.["Authorization"] && !existingRefresh) {
       return Promise.reject(error);
     }
 
@@ -60,9 +68,7 @@ api.interceptors.response.use(
     }
 
     const reissueUrl =
-      role === "ROLE_OWNER"
-        ? "/api/v1/owner/auth/reissue"
-        : "/api/v1/user/auth/reissue";
+      role === "ROLE_OWNER" ? "/api/v1/owner/auth/reissue" : "/api/v1/user/auth/reissue";
 
     try {
       const res = await axios.post<{ data: { accessToken: string; refreshToken: string } }>(

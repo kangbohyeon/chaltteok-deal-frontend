@@ -9,12 +9,12 @@ export default function CartPage() {
   if (items.length === 0) {
     return (
       <div className="mx-auto max-w-2xl px-4 py-20 text-center">
-        <p className="text-4xl mb-4">🛒</p>
-        <h2 className="text-xl font-bold text-gray-900 mb-2">장바구니가 비어있습니다</h2>
-        <p className="text-sm text-gray-500 mb-8">마음에 드는 상품을 담아보세요.</p>
+        <p className="mb-4 text-4xl">🛒</p>
+        <h2 className="mb-2 text-xl font-bold text-gray-900">장바구니가 비어있습니다</h2>
+        <p className="mb-8 text-sm text-gray-500">마음에 드는 상품을 담아보세요.</p>
         <Link
           href="/"
-          className="inline-block rounded-lg bg-rose-500 px-6 py-2.5 text-sm font-semibold text-white hover:bg-rose-600 transition-colors"
+          className="inline-block rounded-lg bg-rose-500 px-6 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-rose-600"
         >
           쇼핑 계속하기
         </Link>
@@ -24,41 +24,41 @@ export default function CartPage() {
 
   return (
     <div className="mx-auto max-w-2xl px-4 py-12">
-      <div className="flex items-center justify-between mb-8">
+      <div className="mb-8 flex items-center justify-between">
         <h1 className="text-2xl font-bold text-gray-900">장바구니</h1>
         <button
           onClick={clearCart}
-          className="text-sm text-gray-400 hover:text-red-500 transition-colors"
+          className="text-sm text-gray-400 transition-colors hover:text-red-500"
         >
           전체 삭제
         </button>
       </div>
 
-      <ul className="space-y-4 mb-8">
+      <ul className="mb-8 space-y-4">
         {items.map((item) => (
           <li
-            key={item.productId}
+            key={item.productUuid}
             className="flex items-center gap-4 rounded-2xl border border-gray-200 bg-white p-4 shadow-sm"
           >
             {item.thumbnailUrl ? (
               <img
                 src={item.thumbnailUrl}
                 alt={item.name}
-                className="w-16 h-16 rounded-xl object-cover bg-gray-100 shrink-0"
+                className="h-16 w-16 shrink-0 rounded-xl bg-gray-100 object-cover"
               />
             ) : (
-              <div className="w-16 h-16 rounded-xl bg-gray-100 shrink-0" />
+              <div className="h-16 w-16 shrink-0 rounded-xl bg-gray-100" />
             )}
 
-            <div className="flex-1 min-w-0">
-              <p className="font-semibold text-gray-900 truncate">{item.name}</p>
+            <div className="min-w-0 flex-1">
+              <p className="truncate font-semibold text-gray-900">{item.name}</p>
               <p className="text-sm text-gray-500">{item.price.toLocaleString()}원</p>
             </div>
 
-            <div className="flex items-center gap-2 shrink-0">
+            <div className="flex shrink-0 items-center gap-2">
               <button
-                onClick={() => updateQuantity(item.productId, item.quantity - 1)}
-                className="w-7 h-7 rounded-full border border-gray-300 text-gray-600 hover:border-rose-400 hover:text-rose-500 flex items-center justify-center text-sm font-bold transition-colors"
+                onClick={() => updateQuantity(item.productUuid, item.quantity - 1)}
+                className="flex h-7 w-7 items-center justify-center rounded-full border border-gray-300 text-sm font-bold text-gray-600 transition-colors hover:border-rose-400 hover:text-rose-500"
               >
                 −
               </button>
@@ -66,20 +66,20 @@ export default function CartPage() {
                 {item.quantity}
               </span>
               <button
-                onClick={() => updateQuantity(item.productId, item.quantity + 1)}
-                className="w-7 h-7 rounded-full border border-gray-300 text-gray-600 hover:border-rose-400 hover:text-rose-500 flex items-center justify-center text-sm font-bold transition-colors"
+                onClick={() => updateQuantity(item.productUuid, item.quantity + 1)}
+                className="flex h-7 w-7 items-center justify-center rounded-full border border-gray-300 text-sm font-bold text-gray-600 transition-colors hover:border-rose-400 hover:text-rose-500"
               >
                 +
               </button>
             </div>
 
-            <p className="w-24 text-right text-sm font-bold text-gray-900 shrink-0">
+            <p className="w-24 shrink-0 text-right text-sm font-bold text-gray-900">
               {(item.price * item.quantity).toLocaleString()}원
             </p>
 
             <button
-              onClick={() => removeItem(item.productId)}
-              className="text-gray-300 hover:text-red-400 transition-colors text-lg shrink-0"
+              onClick={() => removeItem(item.productUuid)}
+              className="shrink-0 text-lg text-gray-300 transition-colors hover:text-red-400"
             >
               ✕
             </button>
@@ -87,18 +87,18 @@ export default function CartPage() {
         ))}
       </ul>
 
-      <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm space-y-4">
-        <div className="flex justify-between items-center text-sm text-gray-600">
+      <div className="space-y-4 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+        <div className="flex items-center justify-between text-sm text-gray-600">
           <span>상품 합계</span>
           <span>{totalPrice().toLocaleString()}원</span>
         </div>
-        <div className="border-t border-gray-100 pt-4 flex justify-between items-center font-bold text-gray-900">
+        <div className="flex items-center justify-between border-t border-gray-100 pt-4 font-bold text-gray-900">
           <span>총 결제 금액</span>
           <span className="text-xl text-rose-500">{totalPrice().toLocaleString()}원</span>
         </div>
         <Link
           href="/checkout"
-          className="block w-full rounded-lg bg-rose-500 py-3 text-center text-sm font-semibold text-white hover:bg-rose-600 transition-colors"
+          className="block w-full rounded-lg bg-rose-500 py-3 text-center text-sm font-semibold text-white transition-colors hover:bg-rose-600"
         >
           결제하기
         </Link>

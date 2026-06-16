@@ -2,7 +2,6 @@ import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 
 export interface CartItem {
-  productId: number;
   productUuid: string;
   name: string;
   price: number;
@@ -13,8 +12,8 @@ export interface CartItem {
 interface CartState {
   items: CartItem[];
   addItem: (item: Omit<CartItem, "quantity">) => void;
-  removeItem: (productId: number) => void;
-  updateQuantity: (productId: number, quantity: number) => void;
+  removeItem: (productUuid: string) => void;
+  updateQuantity: (productUuid: string, quantity: number) => void;
   clearCart: () => void;
   totalCount: () => number;
   totalPrice: () => number;
@@ -26,28 +25,24 @@ export const useCartStore = create<CartState>()(
       items: [],
       addItem: (item) =>
         set((state) => {
-          const existing = state.items.find((i) => i.productId === item.productId);
+          const existing = state.items.find((i) => i.productUuid === item.productUuid);
           if (existing) {
             return {
               items: state.items.map((i) =>
-                i.productId === item.productId
-                  ? { ...i, quantity: i.quantity + 1 }
-                  : i
+                i.productUuid === item.productUuid ? { ...i, quantity: i.quantity + 1 } : i
               ),
             };
           }
           return { items: [...state.items, { ...item, quantity: 1 }] };
         }),
-      removeItem: (productId) =>
-        set((state) => ({ items: state.items.filter((i) => i.productId !== productId) })),
-      updateQuantity: (productId, quantity) =>
+      removeItem: (productUuid) =>
+        set((state) => ({ items: state.items.filter((i) => i.productUuid !== productUuid) })),
+      updateQuantity: (productUuid, quantity) =>
         set((state) => ({
           items:
             quantity <= 0
-              ? state.items.filter((i) => i.productId !== productId)
-              : state.items.map((i) =>
-                  i.productId === productId ? { ...i, quantity } : i
-                ),
+              ? state.items.filter((i) => i.productUuid !== productUuid)
+              : state.items.map((i) => (i.productUuid === productUuid ? { ...i, quantity } : i)),
         })),
       clearCart: () => set({ items: [] }),
       totalCount: () => get().items.reduce((sum, i) => sum + i.quantity, 0),
@@ -55,10 +50,7 @@ export const useCartStore = create<CartState>()(
     }),
     {
       name: "chaltteok-cart",
-      storage:
-        typeof window !== "undefined"
-          ? createJSONStorage(() => localStorage)
-          : undefined,
+      storage: typeof window !== "undefined" ? createJSONStorage(() => localStorage) : undefined,
     }
   )
 );

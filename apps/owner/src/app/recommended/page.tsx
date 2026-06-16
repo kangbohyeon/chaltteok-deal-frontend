@@ -1,11 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import {
-  getProducts,
-  toggleRecommend,
-  type ProductListResponse,
-} from "@/api/owner";
+import { getProducts, toggleRecommend, type ProductListResponse } from "@/api/owner";
 
 // ── 추천 등록 모달 ─────────────────────────────────────────────────────────────
 
@@ -22,25 +18,27 @@ function AddRecommendModal({
 }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-      <div className="w-full max-w-md rounded-2xl bg-white shadow-xl p-8 mx-4">
-        <div className="flex items-center justify-between mb-6">
+      <div className="mx-4 w-full max-w-md rounded-2xl bg-white p-8 shadow-xl">
+        <div className="mb-6 flex items-center justify-between">
           <h2 className="text-lg font-bold text-gray-900">추천 상품 등록</h2>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-xl font-bold">×</button>
+          <button onClick={onClose} className="text-xl font-bold text-gray-400 hover:text-gray-600">
+            ×
+          </button>
         </div>
 
         {candidates.length === 0 ? (
-          <p className="text-sm text-gray-400 py-4 text-center">추천 가능한 상품이 없습니다.</p>
+          <p className="py-4 text-center text-sm text-gray-400">추천 가능한 상품이 없습니다.</p>
         ) : (
-          <ul className="space-y-2 max-h-80 overflow-y-auto">
+          <ul className="max-h-80 space-y-2 overflow-y-auto">
             {candidates.map((p) => (
               <li key={p.id}>
                 <button
                   onClick={() => onSelect(p)}
                   disabled={loading}
-                  className="w-full flex items-center justify-between rounded-xl border border-gray-200 px-4 py-3 text-left hover:border-rose-300 hover:bg-rose-50 disabled:opacity-50 transition-colors"
+                  className="flex w-full items-center justify-between rounded-xl border border-gray-200 px-4 py-3 text-left transition-colors hover:border-rose-300 hover:bg-rose-50 disabled:opacity-50"
                 >
                   <div>
-                    <p className="font-medium text-gray-900 text-sm">{p.name}</p>
+                    <p className="text-sm font-medium text-gray-900">{p.name}</p>
                     <p className="text-xs text-gray-500">{p.price.toLocaleString()}원</p>
                   </div>
                   <span className="text-xs font-semibold text-rose-500">추천 등록 →</span>
@@ -53,7 +51,9 @@ function AddRecommendModal({
         <button
           onClick={onClose}
           className="mt-4 w-full rounded-lg border border-gray-300 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50"
-        >닫기</button>
+        >
+          닫기
+        </button>
       </div>
     </div>
   );
@@ -61,20 +61,32 @@ function AddRecommendModal({
 
 // ── 삭제(해제) 확인 모달 ───────────────────────────────────────────────────────
 
-function ConfirmModal({ message, onConfirm, onCancel }: {
-  message: string; onConfirm: () => void; onCancel: () => void;
+function ConfirmModal({
+  message,
+  onConfirm,
+  onCancel,
+}: {
+  message: string;
+  onConfirm: () => void;
+  onCancel: () => void;
 }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-      <div className="w-full max-w-sm rounded-2xl bg-white shadow-xl p-6 mx-4">
-        <p className="text-sm text-gray-700 mb-6">{message}</p>
+      <div className="mx-4 w-full max-w-sm rounded-2xl bg-white p-6 shadow-xl">
+        <p className="mb-6 text-sm text-gray-700">{message}</p>
         <div className="flex gap-3">
-          <button onClick={onCancel}
+          <button
+            onClick={onCancel}
             className="flex-1 rounded-lg border border-gray-300 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50"
-          >취소</button>
-          <button onClick={onConfirm}
+          >
+            취소
+          </button>
+          <button
+            onClick={onConfirm}
             className="flex-1 rounded-lg bg-red-500 py-2 text-sm font-semibold text-white hover:bg-red-600"
-          >해제</button>
+          >
+            해제
+          </button>
         </div>
       </div>
     </div>
@@ -99,17 +111,19 @@ export default function RecommendedManagePage() {
       .finally(() => setPageLoading(false));
   };
 
-  useEffect(() => { load(); }, []);
+  useEffect(() => {
+    load();
+  }, []);
 
-  const recommended = products.filter((p) => p.isRecommended);
-  const candidates = products.filter((p) => !p.isRecommended);
+  const recommended = products.filter((p) => p.recommended);
+  const candidates = products.filter((p) => !p.recommended);
 
   const handleToggle = async (product: ProductListResponse) => {
     setToggling(product.id);
     try {
       await toggleRecommend(product.uuid);
       setProducts((prev) =>
-        prev.map((p) => p.id === product.id ? { ...p, isRecommended: !p.isRecommended } : p)
+        prev.map((p) => (p.id === product.id ? { ...p, isRecommended: !p.recommended } : p))
       );
     } catch {
       alert("추천 상태 변경에 실패했습니다.");
@@ -123,7 +137,7 @@ export default function RecommendedManagePage() {
     try {
       await toggleRecommend(product.uuid);
       setProducts((prev) =>
-        prev.map((p) => p.id === product.id ? { ...p, isRecommended: true } : p)
+        prev.map((p) => (p.id === product.id ? { ...p, isRecommended: true } : p))
       );
       setShowAddModal(false);
     } catch {
@@ -141,21 +155,23 @@ export default function RecommendedManagePage() {
 
   return (
     <div className="mx-auto max-w-2xl px-4 py-12">
-      <div className="flex items-center justify-between mb-8">
+      <div className="mb-8 flex items-center justify-between">
         <h1 className="text-2xl font-bold text-gray-900">추천 상품 관리</h1>
         <button
           onClick={() => setShowAddModal(true)}
           disabled={candidates.length === 0 || pageLoading}
-          className="rounded-lg bg-rose-500 px-4 py-2 text-sm font-semibold text-white hover:bg-rose-600 disabled:opacity-50 transition-colors"
-        >+ 추천 등록</button>
+          className="rounded-lg bg-rose-500 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-rose-600 disabled:opacity-50"
+        >
+          + 추천 등록
+        </button>
       </div>
 
-      {pageError && <p className="text-sm text-red-500 mb-4">{pageError}</p>}
+      {pageError && <p className="mb-4 text-sm text-red-500">{pageError}</p>}
 
       {pageLoading ? (
         <div className="space-y-3">
           {[...Array(3)].map((_, i) => (
-            <div key={i} className="h-16 rounded-xl bg-gray-100 animate-pulse" />
+            <div key={i} className="h-16 animate-pulse rounded-xl bg-gray-100" />
           ))}
         </div>
       ) : recommended.length === 0 ? (
@@ -163,7 +179,8 @@ export default function RecommendedManagePage() {
       ) : (
         <ul className="space-y-3">
           {recommended.map((p) => (
-            <li key={p.id}
+            <li
+              key={p.id}
               className="flex items-center justify-between rounded-xl border border-amber-200 bg-amber-50 px-5 py-4 shadow-sm"
             >
               <div>
@@ -173,7 +190,7 @@ export default function RecommendedManagePage() {
               <button
                 onClick={() => setRemoveTarget(p)}
                 disabled={toggling === p.id}
-                className="rounded-lg border border-red-200 px-3 py-1 text-xs font-medium text-red-500 hover:bg-red-50 disabled:opacity-50 transition-colors"
+                className="rounded-lg border border-red-200 px-3 py-1 text-xs font-medium text-red-500 transition-colors hover:bg-red-50 disabled:opacity-50"
               >
                 {toggling === p.id ? "처리 중..." : "추천 해제"}
               </button>

@@ -46,9 +46,13 @@ export interface HourlySalesResponse {
   hourlySales: HourlySalesItem[];
 }
 
-export async function getDashboardOverview(period: DashboardPeriod): Promise<DashboardOverview> {
+export async function getDashboardOverview(
+  period: DashboardPeriod,
+  from?: string,
+  to?: string
+): Promise<DashboardOverview> {
   const res = await api.get<{ data: DashboardOverview }>("/api/v1/owner/dashboard/overview", {
-    params: { period },
+    params: { period, ...(from && to ? { from, to } : {}) },
   });
   return res.data.data;
 }
@@ -63,19 +67,17 @@ export async function getSalesTrend(from: string, to: string): Promise<SalesTren
 export async function getTopProducts(
   from: string,
   to: string,
-  limit = 10,
+  limit = 10
 ): Promise<TopProductsResponse> {
-  const res = await api.get<{ data: TopProductsResponse }>(
-    "/api/v1/owner/dashboard/top-products",
-    { params: { from, to, limit } },
-  );
+  const res = await api.get<{ data: TopProductsResponse }>("/api/v1/owner/dashboard/top-products", {
+    params: { from, to, limit },
+  });
   return res.data.data;
 }
 
 export async function getHourlySales(date: string): Promise<HourlySalesResponse> {
-  const res = await api.get<{ data: HourlySalesResponse }>(
-    "/api/v1/owner/dashboard/hourly-sales",
-    { params: { date } },
-  );
+  const res = await api.get<{ data: HourlySalesResponse }>("/api/v1/owner/dashboard/hourly-sales", {
+    params: { date },
+  });
   return res.data.data;
 }
