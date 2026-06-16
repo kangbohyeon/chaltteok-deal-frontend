@@ -49,7 +49,7 @@ export function useOrderHistory({
       await cancelOrderApi(orderNumber);
       fetchOrders();
     },
-    [fetchOrders],
+    [fetchOrders]
   );
 
   return {

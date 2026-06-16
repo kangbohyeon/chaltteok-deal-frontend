@@ -68,9 +68,7 @@ api.interceptors.response.use(
     }
 
     const reissueUrl =
-      role === "ROLE_OWNER"
-        ? "/api/v1/owner/auth/reissue"
-        : "/api/v1/user/auth/reissue";
+      role === "ROLE_OWNER" ? "/api/v1/owner/auth/reissue" : "/api/v1/user/auth/reissue";
 
     try {
       const res = await axios.post<{ data: { accessToken: string; refreshToken: string } }>(

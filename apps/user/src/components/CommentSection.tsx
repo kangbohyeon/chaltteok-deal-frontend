@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useAuthStore } from "@chaltteok/shared-store";
+import { Pagination } from "@chaltteok/shared-ui";
 import {
   getComments,
   createComment,
@@ -421,19 +422,15 @@ export default function CommentSection({ productUuid, commentCount, defaultOpen 
               />
             ))}
 
-          {!loading && totalPages > 1 && (
-            <div className="flex items-center justify-center gap-1 pt-1">
-              {Array.from({ length: totalPages }, (_, i) => (
-                <button
-                  key={i}
-                  onClick={() => setPage(i)}
-                  className={`h-6 w-6 rounded text-xs font-medium transition-colors ${
-                    page === i ? "bg-rose-500 text-white" : "text-gray-500 hover:bg-gray-100"
-                  }`}
-                >
-                  {i + 1}
-                </button>
-              ))}
+          {!loading && (
+            <div className="pt-1">
+              <Pagination
+                page={page}
+                totalPages={totalPages}
+                onPageChange={setPage}
+                size="xs"
+                showPrevNext={false}
+              />
             </div>
           )}
 

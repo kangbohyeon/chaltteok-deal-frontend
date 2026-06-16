@@ -20,7 +20,10 @@ export default function OwnerLoginPage() {
     setError(null);
     setLoading(true);
     try {
-      const { accessToken, refreshToken, userUuid, requirePasswordChange } = await loginOwner({ username, password });
+      const { accessToken, refreshToken, userUuid, requirePasswordChange } = await loginOwner({
+        username,
+        password,
+      });
       setAuth(accessToken, refreshToken, "ROLE_OWNER", userUuid);
       if (requirePasswordChange) {
         setShowPasswordChangePopup(true);
@@ -54,26 +57,26 @@ export default function OwnerLoginPage() {
         className="space-y-5 rounded-2xl border border-gray-200 bg-white p-8 shadow-sm"
       >
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">아이디</label>
+          <label className="mb-1 block text-sm font-medium text-gray-700">아이디</label>
           <input
             type="text"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
             required
             placeholder="아이디를 입력하세요"
-            className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-black focus:outline-none focus:ring-2 focus:ring-rose-400"
+            className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-black focus:ring-2 focus:ring-rose-400 focus:outline-none"
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">비밀번호</label>
+          <label className="mb-1 block text-sm font-medium text-gray-700">비밀번호</label>
           <input
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
             placeholder="비밀번호를 입력하세요"
-            className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-black focus:outline-none focus:ring-2 focus:ring-rose-400"
+            className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-black focus:ring-2 focus:ring-rose-400 focus:outline-none"
           />
         </div>
 
@@ -82,7 +85,7 @@ export default function OwnerLoginPage() {
         <button
           type="submit"
           disabled={loading || !username || !password}
-          className="w-full rounded-lg bg-rose-500 py-2.5 text-sm font-semibold text-white hover:bg-rose-600 disabled:opacity-50 transition-colors"
+          className="w-full rounded-lg bg-rose-500 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-rose-600 disabled:opacity-50"
         >
           {loading ? "로그인 중..." : "로그인"}
         </button>

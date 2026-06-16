@@ -29,9 +29,7 @@ export const useCartStore = create<CartState>()(
           if (existing) {
             return {
               items: state.items.map((i) =>
-                i.productUuid === item.productUuid
-                  ? { ...i, quantity: i.quantity + 1 }
-                  : i
+                i.productUuid === item.productUuid ? { ...i, quantity: i.quantity + 1 } : i
               ),
             };
           }
@@ -44,9 +42,7 @@ export const useCartStore = create<CartState>()(
           items:
             quantity <= 0
               ? state.items.filter((i) => i.productUuid !== productUuid)
-              : state.items.map((i) =>
-                  i.productUuid === productUuid ? { ...i, quantity } : i
-                ),
+              : state.items.map((i) => (i.productUuid === productUuid ? { ...i, quantity } : i)),
         })),
       clearCart: () => set({ items: [] }),
       totalCount: () => get().items.reduce((sum, i) => sum + i.quantity, 0),
@@ -54,10 +50,7 @@ export const useCartStore = create<CartState>()(
     }),
     {
       name: "chaltteok-cart",
-      storage:
-        typeof window !== "undefined"
-          ? createJSONStorage(() => localStorage)
-          : undefined,
+      storage: typeof window !== "undefined" ? createJSONStorage(() => localStorage) : undefined,
     }
   )
 );

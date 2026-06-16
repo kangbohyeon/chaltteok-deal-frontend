@@ -17,7 +17,6 @@ export function useMyProfile() {
   const [success, setSuccess] = useState(false);
   const [passwordSaving, setPasswordSaving] = useState(false);
   const [passwordError, setPasswordError] = useState<string | null>(null);
-  const [passwordSuccess, setPasswordSuccess] = useState(false);
 
   useEffect(() => {
     getMyProfile()
@@ -43,22 +42,29 @@ export function useMyProfile() {
     }
   };
 
-  const changePassword = async (req: ChangePasswordRequest) => {
+  const changePassword = async (req: ChangePasswordRequest): Promise<boolean> => {
     setPasswordSaving(true);
-    setPasswordSuccess(false);
     setPasswordError(null);
     try {
       await changePasswordApi(req);
-      setPasswordSuccess(true);
+      return true;
     } catch {
       setPasswordError("비밀번호 변경에 실패했습니다. 현재 비밀번호를 확인해 주세요.");
+      return false;
     } finally {
       setPasswordSaving(false);
     }
   };
 
   return {
-    profile, loading, saving, error, success, updateNickname,
-    passwordSaving, passwordError, passwordSuccess, changePassword,
+    profile,
+    loading,
+    saving,
+    error,
+    success,
+    updateNickname,
+    passwordSaving,
+    passwordError,
+    changePassword,
   };
 }

@@ -4,7 +4,7 @@ const API_ORIGIN = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:800
 const OWNER_API_ORIGIN = process.env.NEXT_PUBLIC_OWNER_API_BASE_URL ?? "http://localhost:8081";
 
 const nextConfig: NextConfig = {
-  transpilePackages: ["@chaltteok/shared-api", "@chaltteok/shared-store"],
+  transpilePackages: ["@chaltteok/shared-api", "@chaltteok/shared-store", "@chaltteok/shared-ui"],
   async rewrites() {
     return [
       {

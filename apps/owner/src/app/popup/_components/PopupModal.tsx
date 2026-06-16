@@ -51,40 +51,38 @@ export default function PopupModal({ initial, onSave, onClose }: Props) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-      <div className="w-full max-w-lg mx-4 rounded-2xl bg-white shadow-xl overflow-hidden">
+      <div className="mx-4 w-full max-w-lg overflow-hidden rounded-2xl bg-white shadow-xl">
         <div className="bg-rose-500 px-6 py-4">
-          <h2 className="text-lg font-bold text-white">
-            {initial ? "팝업 수정" : "팝업 등록"}
-          </h2>
+          <h2 className="text-lg font-bold text-white">{initial ? "팝업 수정" : "팝업 등록"}</h2>
         </div>
-        <form onSubmit={handleSubmit} className="px-6 py-5 space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4 px-6 py-5">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">제목</label>
+            <label className="mb-1 block text-sm font-medium text-gray-700">제목</label>
             <input
               type="text"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               required
-              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-black focus:outline-none focus:ring-2 focus:ring-rose-400"
+              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-black focus:ring-2 focus:ring-rose-400 focus:outline-none"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">내용</label>
+            <label className="mb-1 block text-sm font-medium text-gray-700">내용</label>
             <textarea
               value={content}
               onChange={(e) => setContent(e.target.value)}
               required
               rows={5}
-              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-black focus:outline-none focus:ring-2 focus:ring-rose-400 resize-none"
+              className="w-full resize-none rounded-lg border border-gray-300 px-3 py-2 text-sm text-black focus:ring-2 focus:ring-rose-400 focus:outline-none"
             />
           </div>
-          <div className="flex gap-4 items-center">
+          <div className="flex items-center gap-4">
             <div className="flex-1">
-              <label className="block text-sm font-medium text-gray-700 mb-1">노출 위치</label>
+              <label className="mb-1 block text-sm font-medium text-gray-700">노출 위치</label>
               <select
                 value={location ?? "POPUP"}
                 onChange={(e) => setLocation(e.target.value)}
-                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-700 bg-white focus:outline-none focus:ring-2 focus:ring-rose-400"
+                className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700 focus:ring-2 focus:ring-rose-400 focus:outline-none"
               >
                 {LOCATION_OPTIONS.map((opt) => (
                   <option key={opt.value} value={opt.value}>
@@ -93,7 +91,7 @@ export default function PopupModal({ initial, onSave, onClose }: Props) {
                 ))}
               </select>
             </div>
-            <div className="flex items-center gap-2 mt-5">
+            <div className="mt-5 flex items-center gap-2">
               <input
                 type="checkbox"
                 id="isVisible"
@@ -106,61 +104,61 @@ export default function PopupModal({ initial, onSave, onClose }: Props) {
               </label>
             </div>
           </div>
-          <div className="flex gap-3 items-center">
+          <div className="flex items-center gap-3">
             <div className="flex-1">
-              <label className="block text-sm font-medium text-gray-700 mb-1">노출 시작일</label>
+              <label className="mb-1 block text-sm font-medium text-gray-700">노출 시작일</label>
               <input
                 type="date"
                 value={startDate ?? ""}
                 onChange={(e) => setStartDate(e.target.value)}
-                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-700 bg-white focus:outline-none focus:ring-2 focus:ring-rose-400"
+                className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700 focus:ring-2 focus:ring-rose-400 focus:outline-none"
               />
             </div>
-            <span className="flex items-center text-sm text-gray-400 mt-5">~</span>
+            <span className="mt-5 flex items-center text-sm text-gray-400">~</span>
             <div className="flex-1">
-              <label className="block text-sm font-medium text-gray-700 mb-1">노출 종료일</label>
+              <label className="mb-1 block text-sm font-medium text-gray-700">노출 종료일</label>
               <input
                 type="date"
                 value={endDate ?? ""}
                 onChange={(e) => setEndDate(e.target.value)}
-                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-700 bg-white focus:outline-none focus:ring-2 focus:ring-rose-400"
+                className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700 focus:ring-2 focus:ring-rose-400 focus:outline-none"
               />
             </div>
           </div>
-          <div className="flex gap-3 items-center">
+          <div className="flex items-center gap-3">
             <div className="flex-1">
-              <label className="block text-sm font-medium text-gray-700 mb-1">노출 시작시간</label>
+              <label className="mb-1 block text-sm font-medium text-gray-700">노출 시작시간</label>
               <input
                 type="time"
                 value={startTime ?? ""}
                 onChange={(e) => setStartTime(e.target.value)}
-                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-700 bg-white focus:outline-none focus:ring-2 focus:ring-rose-400"
+                className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700 focus:ring-2 focus:ring-rose-400 focus:outline-none"
               />
             </div>
-            <span className="flex items-center text-sm text-gray-400 mt-5">~</span>
+            <span className="mt-5 flex items-center text-sm text-gray-400">~</span>
             <div className="flex-1">
-              <label className="block text-sm font-medium text-gray-700 mb-1">노출 종료시간</label>
+              <label className="mb-1 block text-sm font-medium text-gray-700">노출 종료시간</label>
               <input
                 type="time"
                 value={endTime ?? ""}
                 onChange={(e) => setEndTime(e.target.value)}
-                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-700 bg-white focus:outline-none focus:ring-2 focus:ring-rose-400"
+                className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700 focus:ring-2 focus:ring-rose-400 focus:outline-none"
               />
             </div>
           </div>
           {error && <p className="text-sm text-red-500">{error}</p>}
-          <div className="flex gap-2 justify-end pt-2">
+          <div className="flex justify-end gap-2 pt-2">
             <button
               type="button"
               onClick={onClose}
-              className="rounded-lg border border-gray-200 px-4 py-2 text-sm text-gray-600 hover:bg-gray-50 transition-colors"
+              className="rounded-lg border border-gray-200 px-4 py-2 text-sm text-gray-600 transition-colors hover:bg-gray-50"
             >
               취소
             </button>
             <button
               type="submit"
               disabled={loading}
-              className="rounded-lg bg-rose-500 px-4 py-2 text-sm font-semibold text-white hover:bg-rose-600 disabled:opacity-50 transition-colors"
+              className="rounded-lg bg-rose-500 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-rose-600 disabled:opacity-50"
             >
               {loading ? "저장 중..." : "저장"}
             </button>

@@ -31,8 +31,7 @@ export const useUserStore = create<UserState>()(
                 const item = localStorage.getItem(key);
                 return item ? JSON.parse(item) : null;
               },
-              setItem: (key, value) =>
-                localStorage.setItem(key, JSON.stringify(value)),
+              setItem: (key, value) => localStorage.setItem(key, JSON.stringify(value)),
               removeItem: (key) => localStorage.removeItem(key),
             }
           : undefined,
