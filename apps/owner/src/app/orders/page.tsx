@@ -50,8 +50,17 @@ function formatDateTime(isoString: string): string {
   });
 }
 
+const PRESET_LABEL: Record<"today" | "week" | "month", string> = {
+  today: "오늘",
+  week: "1주일",
+  month: "1개월",
+};
+
 function toDateString(date: Date): string {
-  return date.toISOString().split("T")[0];
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, "0");
+  const d = String(date.getDate()).padStart(2, "0");
+  return `${y}-${m}-${d}`;
 }
 
 export default function OwnerOrderListPage() {
@@ -76,11 +85,9 @@ export default function OwnerOrderListPage() {
   const handlePreset = (preset: "today" | "week" | "month") => {
     const today = new Date();
     const from = new Date();
-    if (preset === "today") {
-      // from = today (no change)
-    } else if (preset === "week") {
+    if (preset === "week") {
       from.setDate(today.getDate() - 6);
-    } else {
+    } else if (preset === "month") {
       from.setMonth(today.getMonth() - 1);
     }
     setStartDate(toDateString(from));
@@ -90,8 +97,13 @@ export default function OwnerOrderListPage() {
   };
 
   const handleDateChange = (type: "start" | "end", value: string) => {
-    if (type === "start") setStartDate(value);
-    else setEndDate(value);
+    if (type === "start") {
+      setStartDate(value);
+      if (endDate && value > endDate) setEndDate(value);
+    } else {
+      setEndDate(value);
+      if (startDate && value < startDate) setStartDate(value);
+    }
     setActivePreset("custom");
     setPage(0);
   };
@@ -126,26 +138,24 @@ export default function OwnerOrderListPage() {
 
       {/* 기간 필터 */}
       <div className="mb-6 flex flex-wrap items-center gap-2">
-        {(["today", "week", "month"] as const).map((preset) => {
-          const PRESET_LABEL = { today: "오늘", week: "1주일", month: "1개월" };
-          return (
-            <button
-              key={preset}
-              onClick={() => handlePreset(preset)}
-              className={`rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
-                activePreset === preset
-                  ? "bg-rose-500 text-white"
-                  : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-              }`}
-            >
-              {PRESET_LABEL[preset]}
-            </button>
-          );
-        })}
+        {(["today", "week", "month"] as const).map((preset) => (
+          <button
+            key={preset}
+            onClick={() => handlePreset(preset)}
+            className={`rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
+              activePreset === preset
+                ? "bg-rose-500 text-white"
+                : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+            }`}
+          >
+            {PRESET_LABEL[preset]}
+          </button>
+        ))}
         <div className="flex items-center gap-1.5">
           <input
             type="date"
             value={startDate}
+            max={endDate || undefined}
             onChange={(e) => handleDateChange("start", e.target.value)}
             className="rounded-lg border border-gray-300 px-2 py-1 text-sm text-gray-700 focus:ring-2 focus:ring-rose-400 focus:outline-none"
           />
@@ -153,6 +163,7 @@ export default function OwnerOrderListPage() {
           <input
             type="date"
             value={endDate}
+            min={startDate || undefined}
             onChange={(e) => handleDateChange("end", e.target.value)}
             className="rounded-lg border border-gray-300 px-2 py-1 text-sm text-gray-700 focus:ring-2 focus:ring-rose-400 focus:outline-none"
           />
