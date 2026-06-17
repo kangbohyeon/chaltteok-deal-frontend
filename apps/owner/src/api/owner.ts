@@ -412,10 +412,12 @@ export interface OwnerOrderListResponse {
 export async function getOwnerOrders(
   status?: OwnerOrderStatus,
   page = 0,
-  size = 20
+  size = 20,
+  startDate?: string,
+  endDate?: string
 ): Promise<OwnerOrderListResponse> {
   const res = await api.get<{ data: OwnerOrderListResponse }>("/api/v1/owner/orders", {
-    params: { status, page, size },
+    params: { status, page, size, startDate, endDate },
   });
   return res.data.data;
 }
