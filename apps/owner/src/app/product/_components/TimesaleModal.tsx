@@ -2,10 +2,10 @@
 
 import { useState } from "react";
 import {
-  registerDailyStock,
-  updateDailyStock,
-  type DailyStockListResponse,
-  type DailyStockRegisterRequest,
+  registerTimeSaleStock,
+  updateTimeSaleStock,
+  type TimeSaleStockListResponse,
+  type TimeSaleStockRegisterRequest,
   type ProductListResponse,
 } from "@/api/owner";
 
@@ -35,7 +35,7 @@ const EMPTY: Omit<TimesaleForm, "saleDate"> = {
 
 interface TimesaleModalProps {
   product: ProductListResponse;
-  editStock?: DailyStockListResponse;
+  editStock?: TimeSaleStockListResponse;
   onSuccess: () => void;
   onClose: () => void;
 }
@@ -82,7 +82,7 @@ export function TimesaleModal({ product, editStock, onSuccess, onClose }: Timesa
     }
     setError(null);
     setLoading(true);
-    const body: DailyStockRegisterRequest = {
+    const body: TimeSaleStockRegisterRequest = {
       optionId: product.optionUuid,
       saleDate: form.saleDate,
       stockType: "TIMESALE",
@@ -94,9 +94,9 @@ export function TimesaleModal({ product, editStock, onSuccess, onClose }: Timesa
     };
     try {
       if (editStock) {
-        await updateDailyStock(editStock.uuid, body);
+        await updateTimeSaleStock(editStock.uuid, body);
       } else {
-        await registerDailyStock(body);
+        await registerTimeSaleStock(body);
       }
       onSuccess();
     } catch {

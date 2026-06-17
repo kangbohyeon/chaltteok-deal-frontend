@@ -2,13 +2,13 @@
 
 import { useEffect, useState } from "react";
 import {
-  deleteDailyStock,
-  getDailyStocks,
+  deleteTimeSaleStock,
+  getTimeSaleStocks,
   getProducts,
-  registerDailyStock,
-  updateDailyStock,
-  type DailyStockListResponse,
-  type DailyStockRegisterRequest,
+  registerTimeSaleStock,
+  updateTimeSaleStock,
+  type TimeSaleStockListResponse,
+  type TimeSaleStockRegisterRequest,
   type ProductListResponse,
 } from "@/api/owner";
 
@@ -27,7 +27,7 @@ function formatDatetimeRange(startAt: string | null, endAt: string | null): stri
   return `${fmt(startAt)} ~ ${fmt(endAt)}`;
 }
 
-function makeInitial(products: ProductListResponse[]): DailyStockRegisterRequest {
+function makeInitial(products: ProductListResponse[]): TimeSaleStockRegisterRequest {
   return {
     optionId: products[0]?.optionUuid ?? "",
     saleDate: today(),
@@ -37,9 +37,9 @@ function makeInitial(products: ProductListResponse[]): DailyStockRegisterRequest
 }
 
 function stockFromExisting(
-  stock: DailyStockListResponse,
+  stock: TimeSaleStockListResponse,
   products: ProductListResponse[]
-): DailyStockRegisterRequest {
+): TimeSaleStockRegisterRequest {
   const product = products.find((p) => p.uuid === stock.productUuid);
   return {
     optionId: product?.optionUuid ?? stock.optionUuid,
@@ -65,7 +65,7 @@ const STATUS_LABEL: Record<string, string> = {
 
 interface StockModalProps {
   title: string;
-  form: DailyStockRegisterRequest;
+  form: TimeSaleStockRegisterRequest;
   products: ProductListResponse[];
   loading: boolean;
   error: string | null;
@@ -289,16 +289,16 @@ function ConfirmModal({
 
 // ── 메인 페이지 ────────────────────────────────────────────────────────────────
 
-type ModalMode = { type: "create" } | { type: "edit"; stock: DailyStockListResponse };
+type ModalMode = { type: "create" } | { type: "edit"; stock: TimeSaleStockListResponse };
 
 export default function StockListPage() {
-  const [stocks, setStocks] = useState<DailyStockListResponse[]>([]);
+  const [stocks, setStocks] = useState<TimeSaleStockListResponse[]>([]);
   const [products, setProducts] = useState<ProductListResponse[]>([]);
   const [pageLoading, setPageLoading] = useState(true);
   const [pageError, setPageError] = useState<string | null>(null);
 
   const [modal, setModal] = useState<ModalMode | null>(null);
-  const [form, setForm] = useState<DailyStockRegisterRequest>({
+  const [form, setForm] = useState<TimeSaleStockRegisterRequest>({
     optionId: "",
     saleDate: today(),
     totalQty: 1,
@@ -306,10 +306,10 @@ export default function StockListPage() {
   const [modalLoading, setModalLoading] = useState(false);
   const [modalError, setModalError] = useState<string | null>(null);
 
-  const [deleteTarget, setDeleteTarget] = useState<DailyStockListResponse | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<TimeSaleStockListResponse | null>(null);
 
   const load = () => {
-    Promise.all([getDailyStocks(), getProducts()])
+    Promise.all([getTimeSaleStocks(), getProducts()])
       .then(([s, p]) => {
         setStocks(s);
         setProducts(p);
@@ -328,7 +328,7 @@ export default function StockListPage() {
     setModal({ type: "create" });
   };
 
-  const openEdit = (stock: DailyStockListResponse) => {
+  const openEdit = (stock: TimeSaleStockListResponse) => {
     setForm(stockFromExisting(stock, products));
     setModalError(null);
     setModal({ type: "edit", stock });
@@ -367,9 +367,9 @@ export default function StockListPage() {
     setModalLoading(true);
     try {
       if (modal?.type === "create") {
-        await registerDailyStock(form);
+        await registerTimeSaleStock(form);
       } else if (modal?.type === "edit") {
-        await updateDailyStock(modal.stock.uuid, form);
+        await updateTimeSaleStock(modal.stock.uuid, form);
       }
       setModal(null);
       load();
@@ -383,7 +383,7 @@ export default function StockListPage() {
   const handleDelete = async () => {
     if (!deleteTarget) return;
     try {
-      await deleteDailyStock(deleteTarget.uuid);
+      await deleteTimeSaleStock(deleteTarget.uuid);
       setDeleteTarget(null);
       load();
     } catch {
@@ -394,7 +394,7 @@ export default function StockListPage() {
   return (
     <div className="mx-auto max-w-3xl px-4 py-12">
       <div className="mb-8 flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-gray-900">일일 재고 관리</h1>
+        <h1 className="text-2xl font-bold text-gray-900">타임세일 재고 관리</h1>
         <button
           onClick={openCreate}
           disabled={products.length === 0}

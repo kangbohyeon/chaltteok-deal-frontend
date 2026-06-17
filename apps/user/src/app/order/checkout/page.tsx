@@ -4,9 +4,9 @@ import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import {
-  getOpenDailyStocks,
+  getOpenTimeSaleStocks,
   placeOrder,
-  type OpenDailyStockResponse,
+  type OpenTimeSaleStockResponse,
   type PaymentMethod,
 } from "@/api/user";
 import { PAYMENT_METHODS } from "@/constants/payment";
@@ -32,7 +32,7 @@ function OrderCheckoutContent() {
   const stockId = searchParams.get("stockId") ?? "";
   const rawQty = Number(searchParams.get("qty") ?? "1");
 
-  const [stock, setStock] = useState<OpenDailyStockResponse | null>(null);
+  const [stock, setStock] = useState<OpenTimeSaleStockResponse | null>(null);
   const [fetchError, setFetchError] = useState<string | null>(null);
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>(PAYMENT_METHODS[0].value);
   const [loading, setLoading] = useState(false);
@@ -40,7 +40,7 @@ function OrderCheckoutContent() {
 
   useEffect(() => {
     if (!stockId) return;
-    getOpenDailyStocks()
+    getOpenTimeSaleStocks()
       .then((data) => {
         const found = data.find((s) => s.uuid === stockId);
         if (!found) {

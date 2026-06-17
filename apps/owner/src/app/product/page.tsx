@@ -4,15 +4,15 @@ import Image from "next/image";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   deleteProduct,
-  deleteDailyStock,
-  getDailyStocks,
+  deleteTimeSaleStock,
+  getTimeSaleStocks,
   getProducts,
   registerProduct,
   toggleActive,
   toggleRecommend,
   toggleSoldOut,
   updateProduct,
-  type DailyStockListResponse,
+  type TimeSaleStockListResponse,
   type ProductListResponse,
   type ProductRegisterRequest,
 } from "@/api/owner";
@@ -47,10 +47,10 @@ export default function ProductListPage() {
   const [deleteTarget, setDeleteTarget] = useState<ProductListResponse | null>(null);
   const [timesaleModal, setTimesaleModal] = useState<ProductListResponse | null>(null);
   const [editTimesale, setEditTimesale] = useState<{
-    stock: DailyStockListResponse;
+    stock: TimeSaleStockListResponse;
     product: ProductListResponse;
   } | null>(null);
-  const [timesaleStocks, setTimesaleStocks] = useState<DailyStockListResponse[]>([]);
+  const [timesaleStocks, setTimesaleStocks] = useState<TimeSaleStockListResponse[]>([]);
   const [ownerSort, setOwnerSort] = useState<"name" | "stock">("name");
   const [ownerSortDir, setOwnerSortDir] = useState<"asc" | "desc">("asc");
 
@@ -64,7 +64,7 @@ export default function ProductListPage() {
   };
 
   const load = useCallback(() => {
-    Promise.all([getProducts(), getDailyStocks()])
+    Promise.all([getProducts(), getTimeSaleStocks()])
       .then(([p, stocks]) => {
         setProducts(p);
         setTimesaleStocks(stocks.filter((stock) => stock.stockType === "TIMESALE"));
@@ -75,7 +75,7 @@ export default function ProductListPage() {
 
   const handleTimesaleDelete = async (uuid: string) => {
     try {
-      await deleteDailyStock(uuid);
+      await deleteTimeSaleStock(uuid);
       load();
     } catch {
       alert("삭제에 실패했습니다.");
@@ -196,7 +196,7 @@ export default function ProductListPage() {
   }, [products, ownerSort, ownerSortDir]);
 
   const timesaleByProduct = useMemo(() => {
-    const map = new Map<string, DailyStockListResponse[]>();
+    const map = new Map<string, TimeSaleStockListResponse[]>();
     for (const s of timesaleStocks) {
       const list = map.get(s.productUuid) ?? [];
       list.push(s);
