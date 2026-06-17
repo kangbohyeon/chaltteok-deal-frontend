@@ -274,9 +274,9 @@ export async function replyOwnerComment(
   return res.data.data;
 }
 
-// ── Daily Stock ───────────────────────────────────────────────────────────────
+// ── Time Sale Stock ───────────────────────────────────────────────────────────
 
-export interface DailyStockRegisterRequest {
+export interface TimeSaleStockRegisterRequest {
   optionId: string;
   saleDate: string;
   stockType?: "NORMAL" | "EVENT" | "TIMESALE";
@@ -287,7 +287,7 @@ export interface DailyStockRegisterRequest {
   maxPurchaseCount?: number | null;
 }
 
-export interface DailyStockListResponse {
+export interface TimeSaleStockListResponse {
   uuid: string;
   productUuid: string;
   productName: string;
@@ -303,24 +303,26 @@ export interface DailyStockListResponse {
   maxPurchaseCount: number | null;
 }
 
-export async function getDailyStocks(): Promise<DailyStockListResponse[]> {
-  const res = await api.get<{ data: DailyStockListResponse[] }>("/api/v1/owner/daily-stocks");
+export async function getTimeSaleStocks(): Promise<TimeSaleStockListResponse[]> {
+  const res = await api.get<{ data: TimeSaleStockListResponse[] }>(
+    "/api/v1/owner/time-sale-stocks"
+  );
   return res.data.data;
 }
 
-export async function registerDailyStock(body: DailyStockRegisterRequest): Promise<void> {
-  await api.post("/api/v1/owner/daily-stocks", body);
+export async function registerTimeSaleStock(body: TimeSaleStockRegisterRequest): Promise<void> {
+  await api.post("/api/v1/owner/time-sale-stocks", body);
 }
 
-export async function updateDailyStock(
+export async function updateTimeSaleStock(
   stockUuid: string,
-  body: DailyStockRegisterRequest
+  body: TimeSaleStockRegisterRequest
 ): Promise<void> {
-  await api.put(`/api/v1/owner/daily-stocks/${stockUuid}`, body);
+  await api.put(`/api/v1/owner/time-sale-stocks/${stockUuid}`, body);
 }
 
-export async function deleteDailyStock(stockUuid: string): Promise<void> {
-  await api.delete(`/api/v1/owner/daily-stocks/${stockUuid}`);
+export async function deleteTimeSaleStock(stockUuid: string): Promise<void> {
+  await api.delete(`/api/v1/owner/time-sale-stocks/${stockUuid}`);
 }
 
 // ── Notice ────────────────────────────────────────────────────────────────────

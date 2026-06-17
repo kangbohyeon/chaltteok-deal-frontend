@@ -1,8 +1,8 @@
-import { type OpenDailyStockResponse } from "@/api/user";
+import { type OpenTimeSaleStockResponse } from "@/api/user";
 import StockCard from "./StockCard";
 
 interface EventStockSectionProps {
-  stocks: OpenDailyStockResponse[] | undefined;
+  stocks: OpenTimeSaleStockResponse[] | undefined;
   isLoading: boolean;
   isError: boolean;
   participationCounts?: Record<string, number>;

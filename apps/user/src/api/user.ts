@@ -62,7 +62,7 @@ export interface OrderRequest {
   paymentMethod: PaymentMethod;
 }
 
-export interface OpenDailyStockResponse {
+export interface OpenTimeSaleStockResponse {
   uuid: string;
   productUuid: string;
   productName: string;
@@ -87,8 +87,10 @@ export async function placeOrder(body: OrderRequest): Promise<PlaceOrderResponse
   return res.data.data;
 }
 
-export async function getOpenDailyStocks(): Promise<OpenDailyStockResponse[]> {
-  const res = await api.get<{ data: OpenDailyStockResponse[] }>("/api/v1/user/daily-stocks/open");
+export async function getOpenTimeSaleStocks(): Promise<OpenTimeSaleStockResponse[]> {
+  const res = await api.get<{ data: OpenTimeSaleStockResponse[] }>(
+    "/api/v1/user/time-sale-stocks/open"
+  );
   return res.data.data;
 }
 
@@ -145,7 +147,7 @@ export async function checkout(body: CheckoutRequest): Promise<CheckoutResponse>
 
 export async function getParticipationCounts(): Promise<Record<string, number>> {
   const res = await api.get<{ data: Record<string, number> }>(
-    "/api/v1/user/daily-stocks/participated"
+    "/api/v1/user/time-sale-stocks/participated"
   );
   return res.data.data;
 }

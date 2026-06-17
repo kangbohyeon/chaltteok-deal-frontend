@@ -1,9 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
-import { getOpenDailyStocks, type OpenDailyStockResponse } from "@/api/user";
+import { getOpenTimeSaleStocks, type OpenTimeSaleStockResponse } from "@/api/user";
 
 export function useOpenStocks() {
-  return useQuery<OpenDailyStockResponse[], Error>({
+  return useQuery<OpenTimeSaleStockResponse[], Error>({
     queryKey: ["openStocks"],
-    queryFn: getOpenDailyStocks,
+    queryFn: getOpenTimeSaleStocks,
   });
 }
