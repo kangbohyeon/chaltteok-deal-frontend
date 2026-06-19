@@ -1,5 +1,6 @@
 "use client";
 import { useCallback, useEffect, useState } from "react";
+import { useAuthStore } from "@chaltteok/shared-store";
 import { getNotifications, markNotificationsRead, type NotificationItem } from "@/api/owner";
 
 export function useNotifications() {
@@ -16,26 +17,27 @@ export function useNotifications() {
     }
   }, []);
 
+  // 초기 로드 + SSE 실시간 구독
   useEffect(() => {
-    let cancelled = false;
-    const load = async () => {
-      try {
-        const data = await getNotifications();
-        if (!cancelled) {
-          setNotifications(data.notifications);
-          setUnreadCount(data.unreadCount);
-        }
-      } catch {
-        /* silent */
-      }
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- 외부 REST API 동기화: 마운트 1회 fetch이므로 cascading render 없음
+    void refresh();
+
+    const token = useAuthStore.getState().accessToken;
+    if (!token) return;
+
+    const es = new EventSource(
+      `/api/v1/owner/notifications/sse?token=${encodeURIComponent(token)}`
+    );
+    es.addEventListener("order-confirmed", () => {
+      void refresh();
+    });
+    es.onerror = () => {
+      es.close();
     };
-    load();
-    const interval = setInterval(load, 30_000);
     return () => {
-      cancelled = true;
-      clearInterval(interval);
+      es.close();
     };
-  }, []);
+  }, [refresh]);
 
   const markRead = useCallback(async () => {
     await markNotificationsRead();
