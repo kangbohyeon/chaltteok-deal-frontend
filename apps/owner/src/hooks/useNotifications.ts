@@ -32,7 +32,11 @@ export function useNotifications() {
       void refresh();
     });
     es.onerror = () => {
-      es.close();
+      // CLOSED(2): 서버가 명시적으로 연결 종료 → 재연결 차단
+      // CONNECTING(0): 브라우저가 자동 재연결 시도 중 → close 하지 않음
+      if (es.readyState === EventSource.CLOSED) {
+        es.close();
+      }
     };
     return () => {
       es.close();
