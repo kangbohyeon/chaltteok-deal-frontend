@@ -6,6 +6,8 @@ import { getNotifications, markNotificationsRead, type NotificationItem } from "
 export function useNotifications() {
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
+  // reactive 구독 — 토큰 갱신(reissue) 시 SSE effect 재실행
+  const accessToken = useAuthStore((state) => state.accessToken);
 
   const refresh = useCallback(async () => {
     try {
@@ -17,16 +19,18 @@ export function useNotifications() {
     }
   }, []);
 
-  // 초기 로드 + SSE 실시간 구독
+  // 초기 로드
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect -- 외부 REST API 동기화: 마운트 1회 fetch이므로 cascading render 없음
     void refresh();
+  }, [refresh]);
 
-    const token = useAuthStore.getState().accessToken;
-    if (!token) return;
+  // SSE 실시간 구독 — accessToken 변경(갱신) 시 재연결
+  useEffect(() => {
+    if (!accessToken) return;
 
     const es = new EventSource(
-      `/api/v1/owner/notifications/sse?token=${encodeURIComponent(token)}`
+      `/api/v1/owner/notifications/sse?token=${encodeURIComponent(accessToken)}`
     );
     es.addEventListener("order-confirmed", () => {
       void refresh();
@@ -41,7 +45,7 @@ export function useNotifications() {
     return () => {
       es.close();
     };
-  }, [refresh]);
+  }, [accessToken, refresh]);
 
   const markRead = useCallback(async () => {
     await markNotificationsRead();
