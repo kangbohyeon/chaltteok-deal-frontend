@@ -481,3 +481,60 @@ export async function getOwnerOrderDetail(orderNumber: string): Promise<OwnerOrd
   );
   return res.data.data;
 }
+
+// ── Coupon ────────────────────────────────────────────────────────────────────
+
+export type DiscountType = "RATE" | "AMOUNT";
+
+export interface CouponRequest {
+  code: string;
+  name: string;
+  discountType: DiscountType;
+  discountValue: number;
+  minOrderAmount: number | null;
+  maxDiscountAmount: number | null;
+  totalQuantity: number | null;
+  startDate: string; // YYYY-MM-DD
+  endDate: string; // YYYY-MM-DD
+  isActive: boolean;
+}
+
+export interface CouponResponse {
+  couponUuid: string;
+  code: string;
+  name: string;
+  discountType: DiscountType;
+  discountValue: number;
+  minOrderAmount: number | null;
+  maxDiscountAmount: number | null;
+  totalQuantity: number | null;
+  usedQuantity: number;
+  startDate: string;
+  endDate: string;
+  isActive: boolean;
+  createdAt: string;
+}
+
+export async function getCoupons(): Promise<CouponResponse[]> {
+  const res = await api.get<{ data: CouponResponse[] }>("/api/v1/owner/coupons");
+  return res.data.data;
+}
+
+export async function createCoupon(body: CouponRequest): Promise<CouponResponse> {
+  const res = await api.post<{ data: CouponResponse }>("/api/v1/owner/coupons", body);
+  return res.data.data;
+}
+
+export async function updateCoupon(uuid: string, body: CouponRequest): Promise<CouponResponse> {
+  const res = await api.put<{ data: CouponResponse }>(`/api/v1/owner/coupons/${uuid}`, body);
+  return res.data.data;
+}
+
+export async function deleteCoupon(uuid: string): Promise<void> {
+  await api.delete(`/api/v1/owner/coupons/${uuid}`);
+}
+
+export async function toggleCouponActive(uuid: string): Promise<CouponResponse> {
+  const res = await api.patch<{ data: CouponResponse }>(`/api/v1/owner/coupons/${uuid}/toggle`);
+  return res.data.data;
+}
