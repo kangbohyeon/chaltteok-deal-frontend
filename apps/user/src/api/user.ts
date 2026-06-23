@@ -442,9 +442,11 @@ export async function resetPassword(body: ResetPasswordRequest): Promise<void> {
 
 // ── Coupon ────────────────────────────────────────────────────────────────────
 
+export type DiscountType = "RATE" | "AMOUNT";
+
 export interface CouponValidateResponse {
   couponName: string;
-  discountType: string;
+  discountType: DiscountType;
   discountValue: number;
   discountAmount: number;
   finalAmount: number;
