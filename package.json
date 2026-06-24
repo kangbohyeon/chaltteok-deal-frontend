@@ -10,7 +10,6 @@
     "dev": "turbo dev",
     "dev:user": "turbo dev --filter=@chaltteok/user",
     "dev:owner": "turbo dev --filter=@chaltteok/owner",
-    "dev:admin": "turbo dev --filter=@chaltteok/admin",
     "build": "turbo build",
     "lint": "turbo lint"
   },
