@@ -7,13 +7,17 @@ import { useCartStore } from "@chaltteok/shared-store";
 import { checkout } from "@/api/user";
 import { PAYMENT_METHODS } from "@/constants/payment";
 import { getApiErrorMessage } from "@/lib/error";
+import { useRequireAuth } from "@/hooks/useRequireAuth";
 
 export default function CheckoutPage() {
   const router = useRouter();
+  const isAuthenticated = useRequireAuth();
   const { items, totalPrice, clearCart } = useCartStore();
   const [paymentMethod, setPaymentMethod] = useState("CARD");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  if (!isAuthenticated) return null;
 
   if (items.length === 0) {
     return (

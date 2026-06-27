@@ -13,6 +13,7 @@ import {
 } from "@/api/user";
 import { PAYMENT_METHODS } from "@/constants/payment";
 import { getApiErrorMessage } from "@/lib/error";
+import { useRequireAuth } from "@/hooks/useRequireAuth";
 
 function ErrorFallback({ message }: { message: string }) {
   return (
@@ -30,6 +31,7 @@ function ErrorFallback({ message }: { message: string }) {
 
 function OrderCheckoutContent() {
   const router = useRouter();
+  const isAuthenticated = useRequireAuth();
   const searchParams = useSearchParams();
   const stockId = searchParams.get("stockId") ?? "";
   const rawQty = Number(searchParams.get("qty") ?? "1");
@@ -58,6 +60,8 @@ function OrderCheckoutContent() {
       })
       .catch(() => setFetchError("상품 정보를 불러오지 못했습니다."));
   }, [stockId]);
+
+  if (!isAuthenticated) return null;
 
   if (!stockId) {
     return <ErrorFallback message="잘못된 접근입니다." />;
