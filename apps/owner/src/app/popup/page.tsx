@@ -10,6 +10,7 @@ import {
   type PopupRequest,
 } from "@/api/owner";
 import PopupModal from "./_components/PopupModal";
+import { ConfirmModal } from "../product/_components/ConfirmModal";
 
 const LOCATION_LABEL: Record<string, string> = {
   POPUP: "팝업",
@@ -23,6 +24,8 @@ export default function PopupPage() {
   const [showModal, setShowModal] = useState(false);
   const [editTarget, setEditTarget] = useState<PopupResponse | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
+  const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
+  const [actionError, setActionError] = useState<string | null>(null);
 
   const refresh = () => {
     setLoading(true);
@@ -48,13 +51,20 @@ export default function PopupPage() {
     refresh();
   };
 
-  const handleDelete = async (uuid: string) => {
-    if (!confirm("팝업을 삭제하시겠습니까?")) return;
+  const handleDelete = (uuid: string) => {
+    setActionError(null);
+    setDeleteTarget(uuid);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!deleteTarget) return;
     try {
-      await deletePopup(uuid);
+      await deletePopup(deleteTarget);
+      setDeleteTarget(null);
       refresh();
     } catch {
-      alert("삭제에 실패했습니다.");
+      setActionError("삭제에 실패했습니다.");
+      setDeleteTarget(null);
     }
   };
 
@@ -163,6 +173,17 @@ export default function PopupPage() {
           }
           onSave={editTarget ? handleUpdate : handleCreate}
           onClose={closeModal}
+        />
+      )}
+      {actionError && <p className="mt-3 text-sm text-red-500">{actionError}</p>}
+      {deleteTarget && (
+        <ConfirmModal
+          title="팝업 삭제"
+          message="팝업을 삭제하시겠습니까?"
+          variant="danger"
+          confirmLabel="삭제"
+          onConfirm={handleConfirmDelete}
+          onCancel={() => setDeleteTarget(null)}
         />
       )}
     </div>

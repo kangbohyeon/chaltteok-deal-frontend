@@ -10,6 +10,7 @@ import {
   type BannerRequest,
 } from "@/api/owner";
 import BannerModal from "./_components/BannerModal";
+import { ConfirmModal } from "../product/_components/ConfirmModal";
 
 export default function BannerPage() {
   const [banners, setBanners] = useState<BannerResponse[]>([]);
@@ -18,6 +19,8 @@ export default function BannerPage() {
   const [showModal, setShowModal] = useState(false);
   const [editTarget, setEditTarget] = useState<BannerResponse | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
+  const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
+  const [actionError, setActionError] = useState<string | null>(null);
 
   const refresh = () => {
     setLoading(true);
@@ -43,13 +46,20 @@ export default function BannerPage() {
     refresh();
   };
 
-  const handleDelete = async (uuid: string) => {
-    if (!confirm("배너를 삭제하시겠습니까?")) return;
+  const handleDelete = (uuid: string) => {
+    setActionError(null);
+    setDeleteTarget(uuid);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!deleteTarget) return;
     try {
-      await deleteBanner(uuid);
+      await deleteBanner(deleteTarget);
+      setDeleteTarget(null);
       refresh();
     } catch {
-      alert("삭제에 실패했습니다.");
+      setActionError("삭제에 실패했습니다.");
+      setDeleteTarget(null);
     }
   };
 
@@ -167,6 +177,17 @@ export default function BannerPage() {
           }
           onSave={editTarget ? handleUpdate : handleCreate}
           onClose={closeModal}
+        />
+      )}
+      {actionError && <p className="mt-3 text-sm text-red-500">{actionError}</p>}
+      {deleteTarget && (
+        <ConfirmModal
+          title="배너 삭제"
+          message="배너를 삭제하시겠습니까?"
+          variant="danger"
+          confirmLabel="삭제"
+          onConfirm={handleConfirmDelete}
+          onCancel={() => setDeleteTarget(null)}
         />
       )}
     </div>

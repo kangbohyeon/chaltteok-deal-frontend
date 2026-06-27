@@ -8,6 +8,7 @@ import {
   replyOwnerComment,
   type OwnerCommentResponse,
 } from "@/api/owner";
+import { ConfirmModal } from "../product/_components/ConfirmModal";
 
 const PAGE_SIZE = 10;
 
@@ -18,6 +19,8 @@ export default function CommentPage() {
   const [replyTarget, setReplyTarget] = useState<string | null>(null);
   const [replyContent, setReplyContent] = useState("");
   const [replyLoading, setReplyLoading] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
+  const [actionError, setActionError] = useState<string | null>(null);
   const [page, setPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
   const [totalElements, setTotalElements] = useState(0);
@@ -40,13 +43,20 @@ export default function CommentPage() {
       .finally(() => setLoading(false));
   }, [page, refreshKey]);
 
-  const handleDelete = async (uuid: string) => {
-    if (!confirm("댓글을 삭제하시겠습니까?")) return;
+  const handleDelete = (uuid: string) => {
+    setActionError(null);
+    setDeleteTarget(uuid);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!deleteTarget) return;
     try {
-      await deleteOwnerComment(uuid);
+      await deleteOwnerComment(deleteTarget);
+      setDeleteTarget(null);
       refresh();
     } catch {
-      alert("삭제에 실패했습니다.");
+      setActionError("삭제에 실패했습니다.");
+      setDeleteTarget(null);
     }
   };
 
@@ -59,7 +69,7 @@ export default function CommentPage() {
       setReplyContent("");
       refresh();
     } catch {
-      alert("답글 등록에 실패했습니다.");
+      setActionError("답글 등록에 실패했습니다.");
     } finally {
       setReplyLoading(false);
     }
@@ -193,6 +203,17 @@ export default function CommentPage() {
         <div className="mt-8">
           <Pagination page={page} totalPages={totalPages} onPageChange={setPage} size="sm" />
         </div>
+      )}
+      {actionError && <p className="mt-3 text-sm text-red-500">{actionError}</p>}
+      {deleteTarget && (
+        <ConfirmModal
+          title="댓글 삭제"
+          message="댓글을 삭제하시겠습니까?"
+          variant="danger"
+          confirmLabel="삭제"
+          onConfirm={handleConfirmDelete}
+          onCancel={() => setDeleteTarget(null)}
+        />
       )}
     </div>
   );

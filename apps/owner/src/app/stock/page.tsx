@@ -387,7 +387,8 @@ export default function StockListPage() {
       setDeleteTarget(null);
       load();
     } catch {
-      alert("삭제에 실패했습니다.");
+      setPageError("삭제에 실패했습니다.");
+      setDeleteTarget(null);
     }
   };
 

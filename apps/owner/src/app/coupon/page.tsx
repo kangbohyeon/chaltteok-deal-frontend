@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { getCoupons, deleteCoupon, toggleCouponActive, type CouponResponse } from "@/api/owner";
 import CouponModal from "./_components/CouponModal";
+import { ConfirmModal } from "../product/_components/ConfirmModal";
 
 export default function CouponPage() {
   const [coupons, setCoupons] = useState<CouponResponse[]>([]);
@@ -11,6 +12,8 @@ export default function CouponPage() {
   const [showModal, setShowModal] = useState(false);
   const [editTarget, setEditTarget] = useState<CouponResponse | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
+  const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
+  const [actionError, setActionError] = useState<string | null>(null);
 
   const refresh = () => {
     setLoading(true);
@@ -25,13 +28,20 @@ export default function CouponPage() {
       .finally(() => setLoading(false));
   }, [refreshKey]);
 
-  const handleDelete = async (uuid: string) => {
-    if (!confirm("쿠폰을 삭제하시겠습니까?")) return;
+  const handleDelete = (uuid: string) => {
+    setActionError(null);
+    setDeleteTarget(uuid);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!deleteTarget) return;
     try {
-      await deleteCoupon(uuid);
+      await deleteCoupon(deleteTarget);
+      setDeleteTarget(null);
       refresh();
     } catch {
-      alert("삭제에 실패했습니다.");
+      setActionError("삭제에 실패했습니다.");
+      setDeleteTarget(null);
     }
   };
 
@@ -40,7 +50,7 @@ export default function CouponPage() {
       await toggleCouponActive(uuid);
       refresh();
     } catch {
-      alert("상태 변경에 실패했습니다.");
+      setActionError("상태 변경에 실패했습니다.");
     }
   };
 
@@ -168,6 +178,17 @@ export default function CouponPage() {
           coupon={editTarget ?? undefined}
           onClose={closeModal}
           onSaved={refresh}
+        />
+      )}
+      {actionError && <p className="mt-3 text-sm text-red-500">{actionError}</p>}
+      {deleteTarget && (
+        <ConfirmModal
+          title="쿠폰 삭제"
+          message="쿠폰을 삭제하시겠습니까?"
+          variant="danger"
+          confirmLabel="삭제"
+          onConfirm={handleConfirmDelete}
+          onCancel={() => setDeleteTarget(null)}
         />
       )}
     </div>

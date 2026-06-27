@@ -78,7 +78,7 @@ export default function ProductListPage() {
       await deleteTimeSaleStock(uuid);
       load();
     } catch {
-      alert("삭제에 실패했습니다.");
+      setPageError("삭제에 실패했습니다.");
     }
   };
 
@@ -92,7 +92,7 @@ export default function ProductListPage() {
         setProducts((prev) =>
           prev.map((p) => (p.uuid === uuid ? { ...p, [field]: !p[field] } : p))
         );
-        alert("상태 변경에 실패했습니다. 다시 시도해주세요.");
+        setPageError("상태 변경에 실패했습니다. 다시 시도해주세요.");
       }
     };
 
@@ -212,7 +212,7 @@ export default function ProductListPage() {
       setDeleteTarget(null);
       load();
     } catch (err) {
-      alert(err instanceof Error ? err.message : "삭제에 실패했습니다.");
+      setPageError(err instanceof Error ? err.message : "삭제에 실패했습니다.");
     }
   };
 
