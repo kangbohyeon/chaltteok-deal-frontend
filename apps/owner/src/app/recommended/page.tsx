@@ -126,7 +126,7 @@ export default function RecommendedManagePage() {
         prev.map((p) => (p.id === product.id ? { ...p, isRecommended: !p.recommended } : p))
       );
     } catch {
-      alert("추천 상태 변경에 실패했습니다.");
+      setPageError("추천 상태 변경에 실패했습니다.");
     } finally {
       setToggling(null);
     }
@@ -141,7 +141,7 @@ export default function RecommendedManagePage() {
       );
       setShowAddModal(false);
     } catch {
-      alert("추천 등록에 실패했습니다.");
+      setPageError("추천 등록에 실패했습니다.");
     } finally {
       setToggling(null);
     }
