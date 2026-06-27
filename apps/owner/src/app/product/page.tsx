@@ -205,14 +205,6 @@ export default function ProductListPage() {
     return map;
   }, [timesaleStocks]);
 
-  const occupiedProductUuids = useMemo(() => {
-    const set = new Set<string>();
-    for (const s of timesaleStocks) {
-      if (s.status === "OPEN") set.add(s.productUuid);
-    }
-    return set;
-  }, [timesaleStocks]);
-
   const handleDelete = async () => {
     if (!deleteTarget) return;
     try {
@@ -270,7 +262,6 @@ export default function ProductListPage() {
         <ul className="space-y-3">
           {sortedProducts.map((product) => {
             const productTimesales = timesaleByProduct.get(product.uuid) ?? [];
-            const isOccupied = occupiedProductUuids.has(product.uuid);
             return (
               <li key={product.id} className="rounded-xl border border-gray-200 bg-white shadow-sm">
                 <div className="flex items-center gap-4 px-5 py-4">
@@ -340,13 +331,7 @@ export default function ProductListPage() {
                     </button>
                     <button
                       onClick={() => openEdit(product)}
-                      disabled={isOccupied}
-                      title={isOccupied ? "타임세일 판매 중에는 수정할 수 없습니다" : undefined}
-                      className={`rounded-lg border px-3 py-1 text-xs font-medium ${
-                        isOccupied
-                          ? "cursor-not-allowed border-gray-200 text-gray-300"
-                          : "border-gray-300 text-gray-600 hover:bg-gray-50"
-                      }`}
+                      className="rounded-lg border border-gray-300 px-3 py-1 text-xs font-medium text-gray-600 hover:bg-gray-50"
                     >
                       수정
                     </button>
@@ -362,7 +347,6 @@ export default function ProductListPage() {
                 {productTimesales.length > 0 && (
                   <ul className="space-y-1.5 border-t border-gray-100 px-5 py-2">
                     {productTimesales.map((ts) => {
-                      const tsOpen = ts.status === "OPEN";
                       return (
                         <li
                           key={ts.uuid}
@@ -384,25 +368,13 @@ export default function ProductListPage() {
                           </span>
                           <button
                             onClick={() => setEditTimesale({ stock: ts, product })}
-                            disabled={tsOpen}
-                            title={tsOpen ? "판매 중에는 수정할 수 없습니다" : undefined}
-                            className={`ml-3 shrink-0 text-xs ${
-                              tsOpen
-                                ? "cursor-not-allowed text-gray-300"
-                                : "text-blue-400 hover:text-blue-600"
-                            }`}
+                            className="ml-3 shrink-0 text-xs text-blue-400 hover:text-blue-600"
                           >
                             수정
                           </button>
                           <button
                             onClick={() => handleTimesaleDelete(ts.uuid)}
-                            disabled={tsOpen}
-                            title={tsOpen ? "판매 중에는 삭제할 수 없습니다" : undefined}
-                            className={`ml-3 shrink-0 ${
-                              tsOpen
-                                ? "cursor-not-allowed text-gray-300"
-                                : "text-red-400 hover:text-red-600"
-                            }`}
+                            className="ml-3 shrink-0 text-red-400 hover:text-red-600"
                           >
                             삭제
                           </button>

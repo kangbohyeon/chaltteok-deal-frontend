@@ -1,6 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server";
 
-const OWNER_API_BASE = process.env.NEXT_PUBLIC_OWNER_API_BASE_URL ?? "http://localhost:8081";
+const GATEWAY_BASE = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8000";
 
 export const dynamic = "force-dynamic";
 
@@ -11,7 +11,7 @@ export async function GET(request: NextRequest) {
   }
 
   const backendRes = await fetch(
-    `${OWNER_API_BASE}/api/v1/owner/notifications/sse?token=${encodeURIComponent(token)}`,
+    `${GATEWAY_BASE}/api/v1/owner/notifications/sse?token=${encodeURIComponent(token)}`,
     {
       headers: { Accept: "text/event-stream", "Cache-Control": "no-cache" },
       // @ts-expect-error -- Node.js 18 fetch requires duplex for streaming
