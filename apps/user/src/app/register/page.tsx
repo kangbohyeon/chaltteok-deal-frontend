@@ -22,7 +22,32 @@ export default function UserRegisterPage() {
   const [serverError, setServerError] = useState<string | null>(null);
   const [emailChecked, setEmailChecked] = useState(false);
   const [emailCheckLoading, setEmailCheckLoading] = useState(false);
+  const [consents, setConsents] = useState({
+    termsAgreed: false,
+    privacyAgreed: false,
+    ageAgreed: false,
+    marketingAgreed: false,
+    pushAgreed: false,
+  });
   const router = useRouter();
+
+  const allRequiredConsented = consents.termsAgreed && consents.privacyAgreed && consents.ageAgreed;
+  const allConsented = allRequiredConsented && consents.marketingAgreed && consents.pushAgreed;
+
+  const handleConsentChange = (key: keyof typeof consents) => {
+    setConsents((prev) => ({ ...prev, [key]: !prev[key] }));
+  };
+
+  const handleAllConsent = () => {
+    const next = !allConsented;
+    setConsents({
+      termsAgreed: next,
+      privacyAgreed: next,
+      ageAgreed: next,
+      marketingAgreed: next,
+      pushAgreed: next,
+    });
+  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -85,6 +110,11 @@ export default function UserRegisterPage() {
         password: form.password,
         name: form.name,
         phone: form.phone,
+        termsAgreed: consents.termsAgreed,
+        privacyAgreed: consents.privacyAgreed,
+        ageAgreed: consents.ageAgreed,
+        marketingAgreed: consents.marketingAgreed,
+        pushAgreed: consents.pushAgreed,
       });
       router.push("/login");
     } catch (err: unknown) {
@@ -100,7 +130,8 @@ export default function UserRegisterPage() {
     !form.password ||
     !form.passwordConfirm ||
     !form.name ||
-    !form.phone;
+    !form.phone ||
+    !allRequiredConsented;
 
   return (
     <div className="mx-auto max-w-sm px-4 py-20">
@@ -199,6 +230,60 @@ export default function UserRegisterPage() {
             placeholder="010-0000-0000"
             className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-black focus:ring-2 focus:ring-rose-400 focus:outline-none"
           />
+        </div>
+
+        {/* 동의 항목 */}
+        <div className="space-y-3 rounded-lg border border-gray-100 bg-gray-50 p-4">
+          {/* 전체 동의 */}
+          <label className="flex cursor-pointer items-center gap-2">
+            <input
+              type="checkbox"
+              checked={allConsented}
+              onChange={handleAllConsent}
+              className="h-4 w-4 rounded border-gray-300 text-rose-500 focus:ring-rose-400"
+            />
+            <span className="text-sm font-semibold text-gray-800">전체 동의</span>
+          </label>
+          <hr className="border-gray-200" />
+
+          {/* 필수 항목 */}
+          <p className="text-xs font-medium text-gray-500">필수 동의</p>
+          {[
+            { key: "termsAgreed" as const, label: "서비스 이용약관 동의" },
+            { key: "privacyAgreed" as const, label: "개인정보 처리방침 동의" },
+            { key: "ageAgreed" as const, label: "만 14세 이상 확인" },
+          ].map(({ key, label }) => (
+            <label key={key} className="flex cursor-pointer items-center gap-2">
+              <input
+                type="checkbox"
+                checked={consents[key]}
+                onChange={() => handleConsentChange(key)}
+                className="h-4 w-4 rounded border-gray-300 text-rose-500 focus:ring-rose-400"
+              />
+              <span className="text-sm text-gray-700">
+                {label} <span className="text-rose-500">(필수)</span>
+              </span>
+            </label>
+          ))}
+
+          {/* 선택 항목 */}
+          <p className="text-xs font-medium text-gray-500">선택 동의</p>
+          {[
+            { key: "marketingAgreed" as const, label: "마케팅/이벤트 알림 수신 동의" },
+            { key: "pushAgreed" as const, label: "푸시 알림 수신 동의" },
+          ].map(({ key, label }) => (
+            <label key={key} className="flex cursor-pointer items-center gap-2">
+              <input
+                type="checkbox"
+                checked={consents[key]}
+                onChange={() => handleConsentChange(key)}
+                className="h-4 w-4 rounded border-gray-300 text-rose-500 focus:ring-rose-400"
+              />
+              <span className="text-sm text-gray-700">
+                {label} <span className="text-gray-400">(선택)</span>
+              </span>
+            </label>
+          ))}
         </div>
 
         {serverError && <p className="text-sm text-red-500">{serverError}</p>}

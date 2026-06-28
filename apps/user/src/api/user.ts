@@ -43,6 +43,11 @@ export interface RegisterRequest {
   password: string;
   name: string;
   phone: string;
+  termsAgreed: boolean;
+  privacyAgreed: boolean;
+  ageAgreed: boolean;
+  marketingAgreed: boolean;
+  pushAgreed: boolean;
 }
 
 export async function loginUser(body: LoginRequest): Promise<LoginResponse> {
