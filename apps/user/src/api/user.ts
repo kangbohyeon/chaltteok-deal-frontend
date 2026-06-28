@@ -60,7 +60,6 @@ export interface OrderRequest {
   stockUuid: string;
   quantity: number;
   paymentMethod: PaymentMethod;
-  couponCode?: string;
 }
 
 export interface OpenTimeSaleStockResponse {
@@ -438,26 +437,4 @@ export async function findAccount(body: FindAccountRequest): Promise<FindAccount
 
 export async function resetPassword(body: ResetPasswordRequest): Promise<void> {
   await api.post("/api/v1/user/auth/reset-password", body);
-}
-
-// ── Coupon ────────────────────────────────────────────────────────────────────
-
-export type DiscountType = "RATE" | "AMOUNT";
-
-export interface CouponValidateResponse {
-  couponName: string;
-  discountType: DiscountType;
-  discountValue: number;
-  discountAmount: number;
-  finalAmount: number;
-}
-
-export async function validateCoupon(
-  code: string,
-  amount: number
-): Promise<CouponValidateResponse> {
-  const res = await api.get<{ data: CouponValidateResponse }>("/api/v1/user/coupons/validate", {
-    params: { code, amount },
-  });
-  return res.data.data;
 }

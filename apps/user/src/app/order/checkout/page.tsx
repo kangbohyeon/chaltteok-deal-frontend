@@ -6,10 +6,8 @@ import Link from "next/link";
 import {
   getOpenTimeSaleStocks,
   placeOrder,
-  validateCoupon,
   type OpenTimeSaleStockResponse,
   type PaymentMethod,
-  type CouponValidateResponse,
 } from "@/api/user";
 import { PAYMENT_METHODS } from "@/constants/payment";
 import { getApiErrorMessage } from "@/lib/error";
@@ -41,11 +39,6 @@ function OrderCheckoutContent() {
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>(PAYMENT_METHODS[0].value);
   const [loading, setLoading] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
-
-  const [couponCode, setCouponCode] = useState("");
-  const [appliedCoupon, setAppliedCoupon] = useState<CouponValidateResponse | null>(null);
-  const [couponError, setCouponError] = useState<string | null>(null);
-  const [couponLoading, setCouponLoading] = useState(false);
 
   useEffect(() => {
     if (!stockId) return;
@@ -81,34 +74,7 @@ function OrderCheckoutContent() {
       : stock.remainStock;
   const quantity = Number.isFinite(rawQty) ? Math.max(1, Math.min(maxQty, rawQty)) : 1;
   const totalPrice = stock.price * quantity;
-  const discountAmount = appliedCoupon?.discountAmount ?? 0;
-  const finalPrice = totalPrice - discountAmount;
   const formattedTotal = totalPrice.toLocaleString();
-  const formattedFinal = finalPrice.toLocaleString();
-
-  const handleApplyCoupon = async () => {
-    if (!couponCode.trim()) {
-      setCouponError("쿠폰 코드를 입력해주세요.");
-      return;
-    }
-    setCouponLoading(true);
-    setCouponError(null);
-    try {
-      const result = await validateCoupon(couponCode.trim(), totalPrice);
-      setAppliedCoupon(result);
-    } catch (err: unknown) {
-      setCouponError(getApiErrorMessage(err) ?? "유효하지 않은 쿠폰 코드입니다.");
-      setAppliedCoupon(null);
-    } finally {
-      setCouponLoading(false);
-    }
-  };
-
-  const handleCancelCoupon = () => {
-    setAppliedCoupon(null);
-    setCouponCode("");
-    setCouponError(null);
-  };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -119,9 +85,8 @@ function OrderCheckoutContent() {
         stockUuid: stockId,
         quantity,
         paymentMethod,
-        couponCode: appliedCoupon ? couponCode.trim() : undefined,
       });
-      router.push(`/checkout/complete?type=event&amount=${finalPrice}`);
+      router.push(`/checkout/complete?type=event&amount=${totalPrice}`);
     } catch (err: unknown) {
       setSubmitError(getApiErrorMessage(err) ?? "주문 요청에 실패했습니다. 다시 시도해주세요.");
     } finally {
@@ -184,49 +149,6 @@ function OrderCheckoutContent() {
           </div>
         </div>
 
-        {/* 쿠폰 코드 입력 */}
-        <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
-          <h2 className="mb-4 text-base font-semibold text-gray-900">쿠폰 코드</h2>
-          {appliedCoupon ? (
-            <div className="space-y-3">
-              <div className="rounded-lg border border-green-200 bg-green-50 px-4 py-3">
-                <p className="text-sm font-semibold text-green-800">{appliedCoupon.couponName}</p>
-                <p className="mt-1 text-sm text-green-700">
-                  할인 금액: {appliedCoupon.discountAmount.toLocaleString()}원
-                </p>
-              </div>
-              <button
-                type="button"
-                onClick={handleCancelCoupon}
-                className="text-sm text-gray-400 transition-colors hover:text-red-500"
-              >
-                적용된 쿠폰 취소
-              </button>
-            </div>
-          ) : (
-            <div className="space-y-2">
-              <div className="flex gap-2">
-                <input
-                  type="text"
-                  value={couponCode}
-                  onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
-                  placeholder="쿠폰 코드 입력"
-                  className="flex-1 rounded-lg border border-gray-300 px-3 py-2 text-sm text-black uppercase focus:ring-2 focus:ring-rose-400 focus:outline-none"
-                />
-                <button
-                  type="button"
-                  onClick={handleApplyCoupon}
-                  disabled={couponLoading}
-                  className="rounded-lg bg-rose-500 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-rose-600 disabled:opacity-50"
-                >
-                  {couponLoading ? "확인 중..." : "적용"}
-                </button>
-              </div>
-              {couponError && <p className="text-xs text-red-500">{couponError}</p>}
-            </div>
-          )}
-        </div>
-
         {/* 결제 금액 */}
         <div className="space-y-3 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
           <h2 className="text-base font-semibold text-gray-900">결제 금액</h2>
@@ -234,19 +156,13 @@ function OrderCheckoutContent() {
             <span>상품 합계</span>
             <span>{formattedTotal}원</span>
           </div>
-          {appliedCoupon && (
-            <div className="flex justify-between text-sm text-green-600">
-              <span>쿠폰 할인</span>
-              <span>-{appliedCoupon.discountAmount.toLocaleString()}원</span>
-            </div>
-          )}
           <div className="flex justify-between text-sm text-gray-600">
             <span>배송비</span>
             <span className="text-rose-500">무료</span>
           </div>
           <div className="flex justify-between border-t border-gray-100 pt-3 font-bold text-gray-900">
             <span>총 결제 금액</span>
-            <span className="text-xl text-rose-500">{formattedFinal}원</span>
+            <span className="text-xl text-rose-500">{formattedTotal}원</span>
           </div>
         </div>
 
@@ -261,7 +177,7 @@ function OrderCheckoutContent() {
           disabled={loading || stock.remainStock === 0}
           className="w-full rounded-lg bg-rose-500 py-3.5 text-sm font-semibold text-white transition-colors hover:bg-rose-600 disabled:opacity-50"
         >
-          {loading ? "결제 처리 중..." : `${formattedFinal}원 결제하기`}
+          {loading ? "결제 처리 중..." : `${formattedTotal}원 결제하기`}
         </button>
 
         <Link
