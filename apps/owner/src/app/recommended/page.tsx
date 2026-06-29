@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { getProducts, toggleRecommend, type ProductListResponse } from "@/api/owner";
+import { ConfirmModal } from "../product/_components/ConfirmModal";
 
 // ── 추천 등록 모달 ─────────────────────────────────────────────────────────────
 
@@ -54,40 +55,6 @@ function AddRecommendModal({
         >
           닫기
         </button>
-      </div>
-    </div>
-  );
-}
-
-// ── 삭제(해제) 확인 모달 ───────────────────────────────────────────────────────
-
-function ConfirmModal({
-  message,
-  onConfirm,
-  onCancel,
-}: {
-  message: string;
-  onConfirm: () => void;
-  onCancel: () => void;
-}) {
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-      <div className="mx-4 w-full max-w-sm rounded-2xl bg-white p-6 shadow-xl">
-        <p className="mb-6 text-sm text-gray-700">{message}</p>
-        <div className="flex gap-3">
-          <button
-            onClick={onCancel}
-            className="flex-1 rounded-lg border border-gray-300 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50"
-          >
-            취소
-          </button>
-          <button
-            onClick={onConfirm}
-            className="flex-1 rounded-lg bg-red-500 py-2 text-sm font-semibold text-white hover:bg-red-600"
-          >
-            해제
-          </button>
-        </div>
       </div>
     </div>
   );
@@ -210,7 +177,10 @@ export default function RecommendedManagePage() {
 
       {removeTarget && (
         <ConfirmModal
+          title="추천 해제"
           message={`"${removeTarget.name}" 상품의 추천을 해제하시겠습니까?`}
+          variant="danger"
+          confirmLabel="해제"
           onConfirm={handleRemove}
           onCancel={() => setRemoveTarget(null)}
         />
