@@ -23,10 +23,16 @@ import { TimesaleModal } from "./_components/TimesaleModal";
 
 type ModalMode = { type: "create" } | { type: "edit"; product: ProductListResponse };
 
+const TIMESALE_STATUS = {
+  OPEN: "OPEN",
+  SCHEDULED: "SCHEDULED",
+  SOLD_OUT: "SOLD_OUT",
+} as const;
+
 const TIMESALE_STATUS_MAP: Record<string, { label: string; className: string }> = {
-  OPEN: { label: "판매 중", className: "text-green-600" },
-  SCHEDULED: { label: "예약됨", className: "text-blue-500" },
-  SOLD_OUT: { label: "품절", className: "text-gray-400" },
+  [TIMESALE_STATUS.OPEN]: { label: "판매 중", className: "text-green-600" },
+  [TIMESALE_STATUS.SCHEDULED]: { label: "예약됨", className: "text-blue-500" },
+  [TIMESALE_STATUS.SOLD_OUT]: { label: "품절", className: "text-gray-400" },
 };
 const getTimesaleStatus = (status: string) =>
   TIMESALE_STATUS_MAP[status] ?? { label: "마감", className: "text-gray-400" };
@@ -262,6 +268,9 @@ export default function ProductListPage() {
         <ul className="space-y-3">
           {sortedProducts.map((product) => {
             const productTimesales = timesaleByProduct.get(product.uuid) ?? [];
+            const hasOpenTimesale = productTimesales.some(
+              (ts) => ts.status === TIMESALE_STATUS.OPEN
+            );
             return (
               <li key={product.id} className="rounded-xl border border-gray-200 bg-white shadow-sm">
                 <div className="flex items-center gap-4 px-5 py-4">
@@ -331,7 +340,15 @@ export default function ProductListPage() {
                     </button>
                     <button
                       onClick={() => openEdit(product)}
-                      className="rounded-lg border border-gray-300 px-3 py-1 text-xs font-medium text-gray-600 hover:bg-gray-50"
+                      disabled={hasOpenTimesale}
+                      title={
+                        hasOpenTimesale ? "판매 중인 타임세일이 있어 수정할 수 없습니다" : undefined
+                      }
+                      className={`rounded-lg border px-3 py-1 text-xs font-medium transition-colors ${
+                        hasOpenTimesale
+                          ? "cursor-not-allowed border-gray-200 text-gray-300"
+                          : "border-gray-300 text-gray-600 hover:bg-gray-50"
+                      }`}
                     >
                       수정
                     </button>
@@ -368,13 +385,33 @@ export default function ProductListPage() {
                           </span>
                           <button
                             onClick={() => setEditTimesale({ stock: ts, product })}
-                            className="ml-3 shrink-0 text-xs text-blue-400 hover:text-blue-600"
+                            disabled={ts.status === TIMESALE_STATUS.OPEN}
+                            title={
+                              ts.status === TIMESALE_STATUS.OPEN
+                                ? "판매 중인 타임세일은 수정할 수 없습니다"
+                                : undefined
+                            }
+                            className={`ml-3 shrink-0 text-xs transition-colors ${
+                              ts.status === TIMESALE_STATUS.OPEN
+                                ? "cursor-not-allowed text-gray-300"
+                                : "text-blue-400 hover:text-blue-600"
+                            }`}
                           >
                             수정
                           </button>
                           <button
                             onClick={() => handleTimesaleDelete(ts.uuid)}
-                            className="ml-3 shrink-0 text-red-400 hover:text-red-600"
+                            disabled={ts.status === TIMESALE_STATUS.OPEN}
+                            title={
+                              ts.status === TIMESALE_STATUS.OPEN
+                                ? "판매 중인 타임세일은 삭제할 수 없습니다"
+                                : undefined
+                            }
+                            className={`ml-3 shrink-0 transition-colors ${
+                              ts.status === TIMESALE_STATUS.OPEN
+                                ? "cursor-not-allowed text-gray-300"
+                                : "text-red-400 hover:text-red-600"
+                            }`}
                           >
                             삭제
                           </button>
