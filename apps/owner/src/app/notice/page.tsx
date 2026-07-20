@@ -10,6 +10,7 @@ import {
   type NoticeRequest,
 } from "@/api/owner";
 import NoticeModal from "./_components/NoticeModal";
+import { ConfirmModal } from "../product/_components/ConfirmModal";
 
 export default function NoticePage() {
   const [notices, setNotices] = useState<OwnerNoticeResponse[]>([]);
@@ -18,6 +19,8 @@ export default function NoticePage() {
   const [showModal, setShowModal] = useState(false);
   const [editTarget, setEditTarget] = useState<OwnerNoticeResponse | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
+  const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
+  const [actionError, setActionError] = useState<string | null>(null);
 
   const refresh = () => {
     setLoading(true);
@@ -43,13 +46,20 @@ export default function NoticePage() {
     refresh();
   };
 
-  const handleDelete = async (uuid: string) => {
-    if (!confirm("공지사항을 삭제하시겠습니까?")) return;
+  const handleDelete = (uuid: string) => {
+    setActionError(null);
+    setDeleteTarget(uuid);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!deleteTarget) return;
     try {
-      await deleteNotice(uuid);
+      await deleteNotice(deleteTarget);
+      setDeleteTarget(null);
       refresh();
     } catch {
-      alert("삭제에 실패했습니다.");
+      setActionError("삭제에 실패했습니다.");
+      setDeleteTarget(null);
     }
   };
 
@@ -138,6 +148,17 @@ export default function NoticePage() {
           initial={editTarget ?? undefined}
           onSave={editTarget ? handleUpdate : handleCreate}
           onClose={closeModal}
+        />
+      )}
+      {actionError && <p className="mt-3 text-sm text-red-500">{actionError}</p>}
+      {deleteTarget && (
+        <ConfirmModal
+          title="공지사항 삭제"
+          message="공지사항을 삭제하시겠습니까?"
+          variant="danger"
+          confirmLabel="삭제"
+          onConfirm={handleConfirmDelete}
+          onCancel={() => setDeleteTarget(null)}
         />
       )}
     </div>

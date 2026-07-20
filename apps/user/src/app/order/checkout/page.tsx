@@ -4,13 +4,14 @@ import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import {
-  getOpenDailyStocks,
+  getOpenTimeSaleStocks,
   placeOrder,
-  type OpenDailyStockResponse,
+  type OpenTimeSaleStockResponse,
   type PaymentMethod,
 } from "@/api/user";
 import { PAYMENT_METHODS } from "@/constants/payment";
 import { getApiErrorMessage } from "@/lib/error";
+import { useRequireAuth } from "@/hooks/useRequireAuth";
 
 function ErrorFallback({ message }: { message: string }) {
   return (
@@ -28,11 +29,12 @@ function ErrorFallback({ message }: { message: string }) {
 
 function OrderCheckoutContent() {
   const router = useRouter();
+  const isAuthenticated = useRequireAuth();
   const searchParams = useSearchParams();
   const stockId = searchParams.get("stockId") ?? "";
   const rawQty = Number(searchParams.get("qty") ?? "1");
 
-  const [stock, setStock] = useState<OpenDailyStockResponse | null>(null);
+  const [stock, setStock] = useState<OpenTimeSaleStockResponse | null>(null);
   const [fetchError, setFetchError] = useState<string | null>(null);
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>(PAYMENT_METHODS[0].value);
   const [loading, setLoading] = useState(false);
@@ -40,7 +42,7 @@ function OrderCheckoutContent() {
 
   useEffect(() => {
     if (!stockId) return;
-    getOpenDailyStocks()
+    getOpenTimeSaleStocks()
       .then((data) => {
         const found = data.find((s) => s.uuid === stockId);
         if (!found) {
@@ -51,6 +53,8 @@ function OrderCheckoutContent() {
       })
       .catch(() => setFetchError("상품 정보를 불러오지 못했습니다."));
   }, [stockId]);
+
+  if (!isAuthenticated) return null;
 
   if (!stockId) {
     return <ErrorFallback message="잘못된 접근입니다." />;
@@ -77,7 +81,11 @@ function OrderCheckoutContent() {
     setSubmitError(null);
     setLoading(true);
     try {
-      await placeOrder({ stockUuid: stockId, quantity, paymentMethod });
+      await placeOrder({
+        stockUuid: stockId,
+        quantity,
+        paymentMethod,
+      });
       router.push(`/checkout/complete?type=event&amount=${totalPrice}`);
     } catch (err: unknown) {
       setSubmitError(getApiErrorMessage(err) ?? "주문 요청에 실패했습니다. 다시 시도해주세요.");

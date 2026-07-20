@@ -2,15 +2,16 @@
 
 import { useEffect, useState } from "react";
 import {
-  deleteDailyStock,
-  getDailyStocks,
+  deleteTimeSaleStock,
+  getTimeSaleStocks,
   getProducts,
-  registerDailyStock,
-  updateDailyStock,
-  type DailyStockListResponse,
-  type DailyStockRegisterRequest,
+  registerTimeSaleStock,
+  updateTimeSaleStock,
+  type TimeSaleStockListResponse,
+  type TimeSaleStockRegisterRequest,
   type ProductListResponse,
 } from "@/api/owner";
+import { ConfirmModal } from "../product/_components/ConfirmModal";
 
 // ── 유틸 ──────────────────────────────────────────────────────────────────────
 
@@ -27,7 +28,7 @@ function formatDatetimeRange(startAt: string | null, endAt: string | null): stri
   return `${fmt(startAt)} ~ ${fmt(endAt)}`;
 }
 
-function makeInitial(products: ProductListResponse[]): DailyStockRegisterRequest {
+function makeInitial(products: ProductListResponse[]): TimeSaleStockRegisterRequest {
   return {
     optionId: products[0]?.optionUuid ?? "",
     saleDate: today(),
@@ -37,9 +38,9 @@ function makeInitial(products: ProductListResponse[]): DailyStockRegisterRequest
 }
 
 function stockFromExisting(
-  stock: DailyStockListResponse,
+  stock: TimeSaleStockListResponse,
   products: ProductListResponse[]
-): DailyStockRegisterRequest {
+): TimeSaleStockRegisterRequest {
   const product = products.find((p) => p.uuid === stock.productUuid);
   return {
     optionId: product?.optionUuid ?? stock.optionUuid,
@@ -65,7 +66,7 @@ const STATUS_LABEL: Record<string, string> = {
 
 interface StockModalProps {
   title: string;
-  form: DailyStockRegisterRequest;
+  form: TimeSaleStockRegisterRequest;
   products: ProductListResponse[];
   loading: boolean;
   error: string | null;
@@ -253,52 +254,18 @@ function StockModal({
   );
 }
 
-// ── 삭제 확인 모달 ─────────────────────────────────────────────────────────────
-
-function ConfirmModal({
-  message,
-  onConfirm,
-  onCancel,
-}: {
-  message: string;
-  onConfirm: () => void;
-  onCancel: () => void;
-}) {
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-      <div className="mx-4 w-full max-w-sm rounded-2xl bg-white p-6 shadow-xl">
-        <p className="mb-6 text-sm text-gray-700">{message}</p>
-        <div className="flex gap-3">
-          <button
-            onClick={onCancel}
-            className="flex-1 rounded-lg border border-gray-300 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50"
-          >
-            취소
-          </button>
-          <button
-            onClick={onConfirm}
-            className="flex-1 rounded-lg bg-red-500 py-2 text-sm font-semibold text-white hover:bg-red-600"
-          >
-            삭제
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
 // ── 메인 페이지 ────────────────────────────────────────────────────────────────
 
-type ModalMode = { type: "create" } | { type: "edit"; stock: DailyStockListResponse };
+type ModalMode = { type: "create" } | { type: "edit"; stock: TimeSaleStockListResponse };
 
 export default function StockListPage() {
-  const [stocks, setStocks] = useState<DailyStockListResponse[]>([]);
+  const [stocks, setStocks] = useState<TimeSaleStockListResponse[]>([]);
   const [products, setProducts] = useState<ProductListResponse[]>([]);
   const [pageLoading, setPageLoading] = useState(true);
   const [pageError, setPageError] = useState<string | null>(null);
 
   const [modal, setModal] = useState<ModalMode | null>(null);
-  const [form, setForm] = useState<DailyStockRegisterRequest>({
+  const [form, setForm] = useState<TimeSaleStockRegisterRequest>({
     optionId: "",
     saleDate: today(),
     totalQty: 1,
@@ -306,10 +273,10 @@ export default function StockListPage() {
   const [modalLoading, setModalLoading] = useState(false);
   const [modalError, setModalError] = useState<string | null>(null);
 
-  const [deleteTarget, setDeleteTarget] = useState<DailyStockListResponse | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<TimeSaleStockListResponse | null>(null);
 
   const load = () => {
-    Promise.all([getDailyStocks(), getProducts()])
+    Promise.all([getTimeSaleStocks(), getProducts()])
       .then(([s, p]) => {
         setStocks(s);
         setProducts(p);
@@ -328,7 +295,7 @@ export default function StockListPage() {
     setModal({ type: "create" });
   };
 
-  const openEdit = (stock: DailyStockListResponse) => {
+  const openEdit = (stock: TimeSaleStockListResponse) => {
     setForm(stockFromExisting(stock, products));
     setModalError(null);
     setModal({ type: "edit", stock });
@@ -367,9 +334,9 @@ export default function StockListPage() {
     setModalLoading(true);
     try {
       if (modal?.type === "create") {
-        await registerDailyStock(form);
+        await registerTimeSaleStock(form);
       } else if (modal?.type === "edit") {
-        await updateDailyStock(modal.stock.uuid, form);
+        await updateTimeSaleStock(modal.stock.uuid, form);
       }
       setModal(null);
       load();
@@ -383,18 +350,19 @@ export default function StockListPage() {
   const handleDelete = async () => {
     if (!deleteTarget) return;
     try {
-      await deleteDailyStock(deleteTarget.uuid);
+      await deleteTimeSaleStock(deleteTarget.uuid);
       setDeleteTarget(null);
       load();
     } catch {
-      alert("삭제에 실패했습니다.");
+      setPageError("삭제에 실패했습니다.");
+      setDeleteTarget(null);
     }
   };
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-12">
       <div className="mb-8 flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-gray-900">일일 재고 관리</h1>
+        <h1 className="text-2xl font-bold text-gray-900">타임세일 재고 관리</h1>
         <button
           onClick={openCreate}
           disabled={products.length === 0}
@@ -489,7 +457,10 @@ export default function StockListPage() {
 
       {deleteTarget && (
         <ConfirmModal
+          title="재고 삭제"
           message={`"${deleteTarget.productName}" (${deleteTarget.saleDate}) 재고를 삭제하시겠습니까?`}
+          variant="danger"
+          confirmLabel="삭제"
           onConfirm={handleDelete}
           onCancel={() => setDeleteTarget(null)}
         />

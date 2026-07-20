@@ -2,19 +2,19 @@
 
 import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { getOpenDailyStocks, type OpenDailyStockResponse } from "@/api/user";
+import { getOpenTimeSaleStocks, type OpenTimeSaleStockResponse } from "@/api/user";
 
 function OrderPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const stockIdParam = searchParams.get("stockId");
-  const [stocks, setStocks] = useState<OpenDailyStockResponse[]>([]);
+  const [stocks, setStocks] = useState<OpenTimeSaleStockResponse[]>([]);
   const [selectedId, setSelectedId] = useState<string>("");
   const [quantity, setQuantity] = useState(1);
   const [fetchError, setFetchError] = useState<string | null>(null);
 
   useEffect(() => {
-    getOpenDailyStocks()
+    getOpenTimeSaleStocks()
       .then((data) => {
         setStocks(data);
         const target = stockIdParam ? data.find((s) => s.uuid === stockIdParam) : data[0];

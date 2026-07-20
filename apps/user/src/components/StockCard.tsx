@@ -2,10 +2,10 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { type OpenDailyStockResponse } from "@/api/user";
+import { type OpenTimeSaleStockResponse } from "@/api/user";
 
 interface StockCardProps {
-  stock: OpenDailyStockResponse;
+  stock: OpenTimeSaleStockResponse;
   participationCount?: number;
 }
 

@@ -23,6 +23,7 @@ export default function InquiryPage() {
   const [expanded, setExpanded] = useState<string | null>(null);
   const [answerForms, setAnswerForms] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState<string | null>(null);
+  const [answerError, setAnswerError] = useState<string | null>(null);
   const [page, setPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
   const [totalElements, setTotalElements] = useState(0);
@@ -43,12 +44,13 @@ export default function InquiryPage() {
     const answer = answerForms[uuid]?.trim();
     if (!answer) return;
     setSubmitting(uuid);
+    setAnswerError(null);
     try {
       await answerInquiry(uuid, answer);
       setAnswerForms((prev) => ({ ...prev, [uuid]: "" }));
       setRefreshKey((k) => k + 1);
     } catch {
-      alert("답변 등록에 실패했습니다.");
+      setAnswerError("답변 등록에 실패했습니다.");
     } finally {
       setSubmitting(null);
     }
@@ -65,6 +67,11 @@ export default function InquiryPage() {
       {error && (
         <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
           {error}
+        </div>
+      )}
+      {answerError && (
+        <div className="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
+          {answerError}
         </div>
       )}
 

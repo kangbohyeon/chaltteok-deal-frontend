@@ -1,7 +1,6 @@
 import type { NextConfig } from "next";
 
 const API_ORIGIN = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8000";
-const OWNER_API_ORIGIN = process.env.NEXT_PUBLIC_OWNER_API_BASE_URL ?? "http://localhost:8081";
 
 const nextConfig: NextConfig = {
   transpilePackages: ["@chaltteok/shared-api", "@chaltteok/shared-store", "@chaltteok/shared-ui"],
@@ -13,7 +12,7 @@ const nextConfig: NextConfig = {
       },
       {
         source: "/images/:path*",
-        destination: `${OWNER_API_ORIGIN}/images/:path*`,
+        destination: `${API_ORIGIN}/images/:path*`,
       },
     ];
   },
